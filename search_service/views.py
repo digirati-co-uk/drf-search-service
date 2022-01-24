@@ -20,8 +20,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from .filters import IIIFSearchFilter, FacetListFilter, AutoCompleteFilter
-from .indexable_utils import gen_indexables
 
 # Local imports
 from .models import Indexables, IIIFResource, Context
@@ -39,6 +37,13 @@ from .serializers import (
     AutocompleteSerializer,
     IIIFCreateUpdateSerializer,
 )
+
+from .filters import (
+        IIIFSearchFilter,
+        FacetListFilter,
+        AutoCompleteFilter
+        )
+from .indexable_utils import gen_indexables
 from .madoc_jwt import (
     request_madoc_site_urn,
 )

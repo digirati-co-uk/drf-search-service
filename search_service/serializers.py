@@ -2,20 +2,24 @@ import logging
 import pytz
 import json
 import itertools
-from django.contrib.auth.models import User
-from django.conf import settings
-from rest_framework import serializers
+
 from copy import deepcopy
-from .iiif_utils import get_first_canvas, get_iiif_resource_thumbnail_json, format_thumbnail_url
-from .indexable_utils import clean_values
-from .models import Indexables, IIIFResource, Context
+from datetime import datetime
+
+from django.contrib.auth.models import User
+from django.utils.translation import get_language
+from django.conf import settings
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
-from datetime import datetime
+
+from rest_framework import serializers
+
+from .iiif_utils import get_first_canvas, get_iiif_resource_thumbnail_json, format_thumbnail_url
+from .indexable_utils import clean_values
+from .models import Indexables, IIIFResource, Context
 from .serializer_utils import calc_offsets, flatten_iiif_descriptive
 from .langbase import LANGBASE
-from django.utils.translation import get_language
 
 
 default_lang = get_language()

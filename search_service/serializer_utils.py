@@ -1,14 +1,16 @@
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-from django.utils.text import slugify
+import logging
 import json
+import itertools
+import bleach
+
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from ordered_set import OrderedSet
 from dateutil import parser
-import bleach
-import logging
-import itertools
+
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 
 logger = logging.getLogger(__name__)
 

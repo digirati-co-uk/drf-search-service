@@ -62,12 +62,12 @@ logger = logging.getLogger(__name__)
 def api_root(request, format=None):
     return Response(
         {
-            "iiif": reverse("search_service.api.iiifresource_list", request=request, format=format),
+            "iiif": reverse("api:search_service:iiifresource_list", request=request, format=format),
             "indexable": reverse(
-                "search_service.api.indexables_list", request=request, format=format
+                "api:search_service:indexables_list", request=request, format=format
             ),
-            "contexts": reverse("search_service.api.context_list", request=request, format=format),
-            "search": reverse("search_service.api.search", request=request, format=format),
+            "contexts": reverse("api:search_service:context_list", request=request, format=format),
+            "search": reverse("api:search_service:search", request=request, format=format),
         }
     )
 

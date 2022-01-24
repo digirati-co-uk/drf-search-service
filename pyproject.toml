@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "drf-search-service"
+version = "0.1.0"
+description = "Django REST Framework Search Service"
+authors = ["Finlay McCourt <finlaymccourt@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "search_service" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -85,7 +85,7 @@ def facet_operator(q_key, field_lookup):
     """
     sorted_facet_query.get('field_lookup', 'iexact')
     """
-    if q_key in ["type", "subtype"]:
+    if q_key in ["type", "subtype", "group_id"]:
         return "iexact"
     elif q_key in ["value"]:
         if field_lookup in [
@@ -165,6 +165,7 @@ def parse_facets(facet_queries):
                                 in [
                                     "type",
                                     "subtype",
+                                    "group_id",
                                     "indexable",
                                     "value",
                                     "indexable_int",

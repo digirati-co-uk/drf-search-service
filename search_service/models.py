@@ -106,6 +106,12 @@ class Indexables(TimeStampedModel):
     iiif = models.ForeignKey(
         IIIFResource, related_name="indexables", blank=True, on_delete=models.CASCADE
     )
+    group_id = models.CharField(
+        max_length=512,
+        verbose_name=_("Identifier for grouping indexables, e.g. by vocab identifier"),
+        blank=True,
+        null=True,
+    )
     indexable = models.TextField()
     indexable_date_range_start = models.DateTimeField(blank=True, null=True)
     indexable_date_range_end = models.DateTimeField(blank=True, null=True)

@@ -84,8 +84,57 @@ def test_stripdown(http_service):
     madoc_id = f"urn:florentinecodex:manifest:{identifier}"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     result = requests.delete(
-            url=f"{http_service}/{app_endpoint}/{test_endpoint}/{madoc_id}",
-            headers=headers,
-        )
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}/{madoc_id}",
+        headers=headers,
+    )
     assert result.status_code == 204
 
+
+def test_iiif_delete(http_service):
+    """
+    Confirm that the iiif endpoint is empty
+    """
+    test_endpoint = "iiif"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    assert result.status_code == requests.codes.ok
+    assert resp_data == {
+        "pagination": {
+            "next": None,
+            "page": 1,
+            "pageSize": 25,
+            "previous": None,
+            "totalPages": 1,
+            "totalResults": 0,
+        },
+        "results": [],
+    }
+
+
+def test_indexables_cascaded_delete(http_service):
+    """
+    confirm that the indexables endpoint is empty
+    """
+    test_endpoint = "indexables"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    assert result.status_code == requests.codes.ok
+    assert resp_data == {
+        "pagination": {
+            "next": None,
+            "page": 1,
+            "pageSize": 25,
+            "previous": None,
+            "totalPages": 1,
+            "totalResults": 0,
+        },
+        "results": [],
+    }

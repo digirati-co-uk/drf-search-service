@@ -78,7 +78,7 @@ def test_simple_metadata_query_status(http_service):
     assert result.status_code == requests.codes.ok
 
 
-def test_stripdown(http_service):
+def test_stripdown_manifests_only(http_service):
     test_endpoint = "iiif"
     identifier = "d8a35385-d097-4306-89c0-1a15aa74e6da"
     madoc_id = f"urn:florentinecodex:manifest:{identifier}"
@@ -138,3 +138,57 @@ def test_indexables_cascaded_delete(http_service):
         },
         "results": [],
     }
+
+
+def test_iiif_instance_cascade(http_service, floco_manifest):
+    """
+    Create a single iiif item that can be used for various tests.
+
+    :return: requests response
+    """
+    test_endpoint = "iiif"
+    identifier = "d8a35385-d097-4306-89c0-1a15aa74e6da"
+    image_service = floco_manifest["sequences"][0]["canvases"][0]["images"][0][
+        "resource"
+    ]["service"]["@id"]
+    post_json = {
+        "contexts": [  # List of contexts with their id and type
+            {"id": "urn:florentinecodex:site:1", "type": "Site"},
+            {"id": "FLorentine Codex", "type": "Collection"},
+        ],
+        "resource": floco_manifest,  # this is the JSON for the IIIF resource
+        "id": f"urn:florentinecodex:manifest:{identifier}",  # Madoc ID for the subject/object
+        "thumbnail": f"{image_service}/full/400,/0/default.jpg",  # Thumbnail URL
+        "cascade": True,
+        "cascade_canvases": True
+    }
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    j = result.json()
+    assert result.status_code == 201
+    assert j.get("madoc_id") == f"urn:florentinecodex:manifest:{identifier}"
+    assert (
+        j.get("madoc_thumbnail")
+        == "https://media.getty.edu/iiif/image/124afceb-1051-404a-91fb-df289963b74c/full/400,/0/default.jpg"
+    )
+    assert j.get("first_canvas_id") is not None
+    assert j.get("first_canvas_json") is not None
+
+
+def test_iiif_count_cascade(http_service):
+    """
+    Confirm that the iiif endpoint is empty
+    """
+    test_endpoint = "iiif"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    assert result.status_code == requests.codes.ok
+    assert resp_data["pagination"]["totalResults"] == 1012

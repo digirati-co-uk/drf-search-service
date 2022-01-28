@@ -151,6 +151,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     "DEFAULT_PAGINATION_CLASS": "search_service.pagination.MadocPagination",
+    "PAGE_SIZE": 25
 }
 
 #Search service settings. 

@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  search_service_test:
+  test_container:
     build:
       context: ../
       dockerfile: ./example_project/Dockerfile

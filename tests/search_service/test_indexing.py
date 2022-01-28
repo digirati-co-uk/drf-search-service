@@ -179,10 +179,13 @@ def test_iiif_instance_cascade(http_service, floco_manifest):
     assert j.get("first_canvas_json") is not None
 
 
-def test_iiif_count_cascade(http_service):
+def test_iiif_count_cascade(http_service, floco_manifest):
     """
     Count should include the manifest, the canvases, and any ranges.
     """
+    canvases = len(floco_manifest["sequences"][0]["canvases"])
+    ranges = len(floco_manifest["structures"])
+    total = canvases + ranges + 1
     test_endpoint = "iiif"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     result = requests.get(
@@ -191,4 +194,4 @@ def test_iiif_count_cascade(http_service):
     )
     resp_data = result.json()
     assert result.status_code == requests.codes.ok
-    assert resp_data["pagination"]["totalResults"] == 1012
+    assert resp_data["pagination"]["totalResults"] == total  # 1012

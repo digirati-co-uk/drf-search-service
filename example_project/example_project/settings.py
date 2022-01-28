@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'rest_framework',
+    "django_filters",
     'search_service', 
 ]
 
@@ -144,7 +145,13 @@ STATIC_ROOT = BASE_DIR.parent / "app_static"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    "DEFAULT_PAGINATION_CLASS": "search_service.pagination.MadocPagination",
+}
 
 #Search service settings. 
 

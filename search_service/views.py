@@ -326,18 +326,20 @@ class IIIFSearch(SearchBaseClass):
 
     def list(self, request, *args, **kwargs):
         resp = super().list(request, *args, **kwargs)
-        resp.data.update({"facets": self.get_facets(request=request)})
-        reverse_sort = False
-        if request.data.get("sort_order", None):
-            if (direction := request.data["sort_order"].get("direction")) is not None:
-                if direction == "descending":
-                    logger.debug("Descending")
-                    reverse_sort = True
-        resp.data["results"] = sorted(
-            resp.data["results"],
-            key=lambda k: (k.get("sortk"),),
-            reverse=reverse_sort,
-        )
+        logger.info(f"Pagination class {self.pagination_class}")
+        logger.info(type(resp.data))
+        # resp.data.update({"facets": self.get_facets(request=request)})
+        # reverse_sort = False
+        # if request.data.get("sort_order", None):
+        #     if (direction := request.data["sort_order"].get("direction")) is not None:
+        #         if direction == "descending":
+        #             logger.debug("Descending")
+        #             reverse_sort = True
+        # resp.data["results"] = sorted(
+        #     resp.data["results"],
+        #     key=lambda k: (k.get("sortk"),),
+        #     reverse=reverse_sort,
+        # )
         return resp
 
 

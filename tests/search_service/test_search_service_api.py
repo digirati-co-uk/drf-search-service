@@ -105,3 +105,16 @@ def test_iiif_instance(http_service, floco_manifest):
     )
     assert j.get("first_canvas_id") is not None
     assert j.get("first_canvas_json") is not None
+
+
+def test_simple_metadata_query_status(http_service):
+    test_endpoint = "search"
+    query = {
+        "fulltext": "testo manoscritto",
+        "contexts": ["urn:florentinecodex:site:1"],
+    }
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}", json=query, headers=headers
+    )
+    assert result.status_code == requests.codes.ok

@@ -181,7 +181,7 @@ def test_iiif_instance_cascade(http_service, floco_manifest):
 
 def test_iiif_count_cascade(http_service):
     """
-    Confirm that the iiif endpoint is empty
+    Count should include the manifest, the canvases, and any ranges.
     """
     test_endpoint = "iiif"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}

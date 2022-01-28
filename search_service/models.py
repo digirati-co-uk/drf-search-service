@@ -1,15 +1,14 @@
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.indexes import GinIndex, HashIndex
 from django.contrib.postgres.search import SearchVectorField, SearchVector
-from django.db import models
 from django.db.models.functions import Upper
 
 # from .langbase import INTERNET_LANGUAGES
 from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
 from model_utils.models import TimeStampedModel
-
-
-# Add Models
 
 
 class Context(TimeStampedModel):
@@ -92,6 +91,9 @@ class Indexables(TimeStampedModel):
 
     https://www.loc.gov/standards/iso639-2/php/code_list.php
     """
+    resource_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    resource_id = models.PositiveIntegerField()
+    resource = GenericForeignKey('resource_content_type', 'resource_id')
 
     # objects = IndexableManager()
     resource_id = models.CharField(

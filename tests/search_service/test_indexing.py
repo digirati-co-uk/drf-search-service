@@ -115,31 +115,6 @@ def test_iiif_delete(http_service):
     }
 
 
-def test_indexables_cascaded_delete(http_service):
-    """
-    confirm that the indexables endpoint is empty
-    """
-    test_endpoint = "indexables"
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    result = requests.get(
-        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
-        headers=headers,
-    )
-    resp_data = result.json()
-    assert result.status_code == requests.codes.ok
-    assert resp_data == {
-        "pagination": {
-            "next": None,
-            "page": 1,
-            "pageSize": 25,
-            "previous": None,
-            "totalPages": 1,
-            "totalResults": 0,
-        },
-        "results": [],
-    }
-
-
 def test_iiif_instance_cascade(http_service, floco_manifest):
     """
     Create a single iiif item that can be used for various tests.
@@ -160,7 +135,7 @@ def test_iiif_instance_cascade(http_service, floco_manifest):
         "id": f"urn:florentinecodex:manifest:{identifier}",  # Madoc ID for the subject/object
         "thumbnail": f"{image_service}/full/400,/0/default.jpg",  # Thumbnail URL
         "cascade": True,
-        "cascade_canvases": True
+        "cascade_canvases": True,
     }
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     result = requests.post(
@@ -195,3 +170,84 @@ def test_iiif_count_cascade(http_service, floco_manifest):
     resp_data = result.json()
     assert result.status_code == requests.codes.ok
     assert resp_data["pagination"]["totalResults"] == total  # 1012
+
+
+def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):
+    """
+    Delete all of the canvases
+    """
+    test_endpoint = "iiif"
+    identifier = "d8a35385-d097-4306-89c0-1a15aa74e6da"
+    canvases = len(floco_manifest["sequences"][0]["canvases"])
+    canvas_list = [
+        f"urn:florentinecodex:manifest:{identifier}:canvas:{n}"
+        for n in range(canvases)
+    ]
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    statuses = []
+    manifest_madoc_id = f"urn:florentinecodex:manifest:{identifier}"
+    result = requests.delete(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}/{manifest_madoc_id}",
+        headers=headers,
+    )
+    statuses.append(result.status_code)
+    for canvas_id in canvas_list:
+        result = requests.delete(
+            url=f"{http_service}/{app_endpoint}/{test_endpoint}/{canvas_id}",
+            headers=headers,
+        )
+        statuses.append(result.status_code)
+    assert all([x == 204 for x in statuses])
+
+
+def test_iiif_count_after_delete(http_service, floco_manifest):
+    """
+    Check that the results after the canvas and manifest delete is just the ranges
+    """
+    ranges = len(floco_manifest["structures"])
+    test_endpoint = "iiif"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    assert result.status_code == requests.codes.ok
+    assert resp_data["pagination"]["totalResults"] == ranges
+
+
+def test_iiif_fetch_and_delete_remaining(http_service):
+    """
+
+    """
+    test_endpoint = "iiif"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    identifiers = [x.get("madoc_id") for x in resp_data["results"]]
+    statuses = []
+    for identifier in identifiers:
+        result = requests.delete(
+            url=f"{http_service}/{app_endpoint}/{test_endpoint}/{identifier}",
+            headers=headers,
+        )
+        statuses.append(result.status_code)
+    assert all([x == 204 for x in statuses])
+
+
+def test_iiif_zero(http_service, floco_manifest):
+    """
+    Check that  there are no IIIF resources
+    """
+    test_endpoint = "iiif"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    result = requests.get(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=headers,
+    )
+    resp_data = result.json()
+    assert result.status_code == requests.codes.ok
+    assert resp_data["pagination"]["totalResults"] == 0

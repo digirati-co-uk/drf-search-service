@@ -280,6 +280,7 @@ class IIIFSearchParser(JSONParser):
                 "language_iso639_1",
                 "language_display",
                 "language_pg",
+                "group_id"
             ]:
                 if request_data.get(p, None):
                     filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]

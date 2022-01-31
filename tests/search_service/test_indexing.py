@@ -322,6 +322,101 @@ def test_nahuatl_partialmatch(http_service):
     assert resp_json["pagination"]["totalResults"] == 1
 
 
+def test_filter_by_language(http_service):
+    """
+    Should return results when filtering to English but no results when filtering to Nahuatl
+    as this is not the Nahuatl form for Moctezuma
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "Moctezuma", "language_iso639_2": "eng"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] > 0
+    post_json = {"fulltext": "Moctezuma", "language_iso639_2": "nci"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 0
+
+
+def test_filter_by_group(http_service):
+    """
+    Should return results when filtering to Anderson and Dibble's English translation
+     but no results when filtering to Nahuatl as this is not the Nahuatl form for Moctezuma
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {
+        "fulltext": "Moctezuma",
+        "group_id": "na_en|andersondibble",
+    }
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] > 0
+    post_json = {
+        "fulltext": "Moctezuma",
+        "group_id": "na|andersondibble",
+    }
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 0
+
+
+def test_filter_by_authors(http_service):
+    """
+    Should return results when filtering to Anderson and Dibble's English translation
+    AND the Nahuatl. Check that the number increases when we open it up to both via the
+    endswith
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {
+        "fulltext": "Quetzalcoatl",
+        "group_id": "na|andersondibble",
+    }
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    original = resp_json["pagination"]["totalResults"]
+    assert original == 4   # We have found some instances of Quetzalcoatl
+    post_json = {
+        "fulltext": "Quetzalcoatl",
+        "raw": {"indexables__group_id__istartswith": "na_en|"},
+    }
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    new = resp_json["pagination"]["totalResults"]
+    assert new == 2
+    assert new < original
+
+
 def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):
     """
     Delete all of the canvases and the manifests.

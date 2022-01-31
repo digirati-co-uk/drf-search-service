@@ -439,6 +439,7 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
             "language_display",
             "language_pg",
             "iiif",
+            "search_vector"
         ]
         extra_kwargs = {"url": {"view_name": "api:search_service:indexables_detail"}}
 

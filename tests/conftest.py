@@ -3,6 +3,8 @@ import os
 import pytest
 import requests
 import pathlib
+import glob
+
 
 from .utils import is_responsive_404
 
@@ -36,3 +38,13 @@ def http_service(docker_ip, docker_services):
 @pytest.fixture
 def floco_manifest(tests_dir):
     return json.load((tests_dir / "fixtures/iiif/vol3.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def lagq(tests_dir):
+    return json.load((tests_dir / "fixtures/text/lagq.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def na_en_ad(tests_dir):
+    return json.load((tests_dir / "fixtures/text/na_en_ad.json").open(encoding="utf-8"))

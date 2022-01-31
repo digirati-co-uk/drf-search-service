@@ -172,9 +172,114 @@ def test_iiif_count_cascade(http_service, floco_manifest):
     assert resp_data["pagination"]["totalResults"] == total  # 1012
 
 
+def test_indexing_lagq(http_service, lagq):
+    """
+    Index the Spanish language files into Indexables model
+    """
+    test_endpoint = "indexables"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    statuses = []
+    for post_json in lagq:
+        result = requests.post(
+            url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+            json=post_json,
+            headers=headers,
+        )
+        statuses.append(result.status_code)
+    assert all([x == 201 for x in statuses])
+
+
+def test_spanish_plaintext(http_service):
+    """
+
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "españoles"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 5
+
+
+def test_spanish_plaintext_lemma(http_service):
+    """
+
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "español"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 5
+
+
+def test_indexing_na_en_ad(http_service, na_en_ad):
+    """
+    Index English language files into Indexables model
+    """
+    test_endpoint = "indexables"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    statuses = []
+    for post_json in na_en_ad:
+        result = requests.post(
+            url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+            json=post_json,
+            headers=headers,
+        )
+        statuses.append(result.status_code)
+    assert all([x == 201 for x in statuses])
+
+
+def test_english_plaintext(http_service):
+    """
+
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "heavens"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 3
+
+
+def test_english_lemma(http_service):
+    """
+
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "heaven"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 3
+
+
 def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):
     """
-    Delete all of the canvases
+    Delete all of the canvases and the manifests.
+
+    Canvas IDs are just auto-generated from the manifest sequence size, rather than
+    fetched via a paginated query
     """
     test_endpoint = "iiif"
     identifier = "d8a35385-d097-4306-89c0-1a15aa74e6da"
@@ -218,7 +323,7 @@ def test_iiif_count_after_delete(http_service, floco_manifest):
 
 def test_iiif_fetch_and_delete_remaining(http_service):
     """
-
+    Delete the remaining IIIF resources (these will be ranges only)
     """
     test_endpoint = "iiif"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}

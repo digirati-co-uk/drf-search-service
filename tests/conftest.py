@@ -48,3 +48,8 @@ def lagq(tests_dir):
 @pytest.fixture
 def na_en_ad(tests_dir):
     return json.load((tests_dir / "fixtures/text/na_en_ad.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def na_ad(tests_dir):
+    return json.load((tests_dir / "fixtures/text/na_ad.json").open(encoding="utf-8"))

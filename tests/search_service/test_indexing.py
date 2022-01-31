@@ -190,9 +190,7 @@ def test_indexing_lagq(http_service, lagq):
 
 
 def test_spanish_plaintext(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "españoles"}
@@ -207,9 +205,7 @@ def test_spanish_plaintext(http_service):
 
 
 def test_spanish_plaintext_lemma(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "español"}
@@ -241,9 +237,7 @@ def test_indexing_na_en_ad(http_service, na_en_ad):
 
 
 def test_english_plaintext(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "heavens"}
@@ -258,9 +252,7 @@ def test_english_plaintext(http_service):
 
 
 def test_english_lemma(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "heaven"}
@@ -274,6 +266,62 @@ def test_english_lemma(http_service):
     assert resp_json["pagination"]["totalResults"] == 3
 
 
+def test_indexing_na_ad(http_service, na_ad):
+    """
+    Index Nahutal language files into Indexables model
+    """
+    test_endpoint = "indexables"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    statuses = []
+    for post_json in na_ad:
+        result = requests.post(
+            url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+            json=post_json,
+            headers=headers,
+        )
+        statuses.append(result.status_code)
+    assert all([x == 201 for x in statuses])
+
+
+def test_nahuatl_plaintext(http_service):
+    """
+    This should return 1 result because the text will be token/lemma-tized using the
+    simple parser, which will be whitespace delimmited
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "ilhujcaiollotitech"}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 1
+
+
+def test_nahuatl_partialmatch(http_service):
+    """
+    This should return 1 result because the text will be token/lemma-tized using the
+    simple parser, which will be whitespace delimmited
+
+    Then the search_multiple_fields parameter will force an `icontains` match rather than
+    a fulltext match
+    """
+    test_endpoint = "search"
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    post_json = {"fulltext": "ilhujcaiollo", "search_multiple_fields": True}
+    result = requests.post(
+        url=f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=headers,
+    )
+    resp_json = result.json()
+    assert result.status_code == 200
+    assert resp_json["pagination"]["totalResults"] == 1
+
+
 def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):
     """
     Delete all of the canvases and the manifests.
@@ -285,8 +333,7 @@ def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):
     identifier = "d8a35385-d097-4306-89c0-1a15aa74e6da"
     canvases = len(floco_manifest["sequences"][0]["canvases"])
     canvas_list = [
-        f"urn:florentinecodex:manifest:{identifier}:canvas:{n}"
-        for n in range(canvases)
+        f"urn:florentinecodex:manifest:{identifier}:canvas:{n}" for n in range(canvases)
     ]
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     statuses = []

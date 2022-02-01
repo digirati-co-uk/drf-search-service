@@ -92,13 +92,13 @@ class Indexables(TimeStampedModel):
     https://www.loc.gov/standards/iso639-2/php/code_list.php
     """
     resource_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    resource_id = models.PositiveIntegerField()
+    resource_id = models.UUIDField()
     resource = GenericForeignKey('resource_content_type', 'resource_id')
 
     # objects = IndexableManager()
-    resource_id = models.CharField(
-        max_length=512, verbose_name=_("Identifier (URL/URI/URN) for associated IIIF resource")
-    )
+    #resource_id = models.CharField(
+    #    max_length=512, verbose_name=_("Identifier (URL/URI/URN) for associated IIIF resource")
+    #)
     content_id = models.CharField(
         max_length=512,
         verbose_name=_("Identifier (URL/URI/URN) for the content, if it has one"),

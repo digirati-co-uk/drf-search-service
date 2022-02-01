@@ -1,5 +1,3 @@
-import copy
-import json
 import pytest
 import requests
 from ..utils import is_responsive_404
@@ -401,7 +399,7 @@ def test_filter_by_authors(http_service):
     )
     resp_json = result.json()
     original = resp_json["pagination"]["totalResults"]
-    assert original == 4   # We have found some instances of Quetzalcoatl
+    assert original == 4  # We have found some instances of Quetzalcoatl
     post_json = {
         "fulltext": "Quetzalcoatl",
         "raw": {"indexables__group_id__istartswith": "na_en|"},
@@ -413,7 +411,9 @@ def test_filter_by_authors(http_service):
     )
     resp_json = result.json()
     new = resp_json["pagination"]["totalResults"]
-    assert new == 2
+    assert (
+        new == 2
+    )  # Less insances of Quetzalcoatl as we are only searching the Nahuatl to English translation
     assert new < original
 
 

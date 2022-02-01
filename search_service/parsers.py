@@ -85,7 +85,7 @@ def facet_operator(q_key, field_lookup):
     """
     sorted_facet_query.get('field_lookup', 'iexact')
     """
-    if q_key in ["type", "subtype"]:
+    if q_key in ["type", "subtype", "group_id"]:
         return "iexact"
     elif q_key in ["value"]:
         if field_lookup in [
@@ -165,6 +165,7 @@ def parse_facets(facet_queries):
                                 in [
                                     "type",
                                     "subtype",
+                                    "group_id",
                                     "indexable",
                                     "value",
                                     "indexable_int",
@@ -279,6 +280,7 @@ class IIIFSearchParser(JSONParser):
                 "language_iso639_1",
                 "language_display",
                 "language_pg",
+                "group_id"
             ]:
                 if request_data.get(p, None):
                     filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]

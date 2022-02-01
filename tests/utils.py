@@ -1,6 +1,7 @@
 import requests
 from requests.exceptions import ConnectionError
 
+
 def is_responsive_404(url):
     """
     Hit a non existing url, expect a 404.  Used to check the service is up as a fixture.
@@ -13,4 +14,3 @@ def is_responsive_404(url):
             return True
     except ConnectionError:
         return False
-

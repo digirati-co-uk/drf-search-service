@@ -106,6 +106,12 @@ class Indexables(TimeStampedModel):
     iiif = models.ForeignKey(
         IIIFResource, related_name="indexables", blank=True, on_delete=models.CASCADE
     )
+    group_id = models.CharField(
+        max_length=512,
+        verbose_name=_("Identifier for grouping indexables, e.g. by vocab identifier"),
+        blank=True,
+        null=True,
+    )
     indexable = models.TextField()
     indexable_date_range_start = models.DateTimeField(blank=True, null=True)
     indexable_date_range_end = models.DateTimeField(blank=True, null=True)
@@ -140,12 +146,11 @@ class Indexables(TimeStampedModel):
             models.Index(fields=["language_iso639_2", "language_iso639_1", "language_display"]),
             models.Index(fields=["type"]),
             models.Index(fields=["subtype"]),
+            models.Index(fields=["group_id"]),
             models.Index(fields=["type", "subtype"]),
+            models.Index(fields=["type", "subtype", "group_id"]),
             models.Index(Upper("type"), name="uppercase_type"),
             models.Index(Upper("subtype"), name="uppercase_subtype"),
             models.Index(Upper("type"), Upper("subtype"), name="uppercase_type_subtype"),
-            models.Index(
-                Upper("type"), Upper("subtype"), Upper("indexable"), name="uppercase_indexables"
-            ),
             HashIndex(fields=["indexable"]),
         ]

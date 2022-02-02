@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/tests/fixtures/text/FINAL_ BOOK 12 - LAGQ/
+/tests/fixtures/text/FINAL_Book 12 na_en_jl_pr (Lockhart)/
+/tests/fixtures/text/FINAL_Book 12_na_ad_pr (ANDERSON & DIBBLE)/
+/tests/fixtures/text/FINAL_Book 12_na_en_ad (ANDERSON & DIBBLE)/
+/tests/fixtures/text/FINAL_Book 12_na_jl_pr (LOCKHART)/
+/tests/fixtures/text/FINAL_Book 12_sp_en_jl_pr (LOCKHART)/

@@ -162,7 +162,7 @@ class ContextSummarySerializer(serializers.HyperlinkedModelSerializer):
 class IndexablesSummarySerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializer that produces a summary of an individually indexed "field" or text
-    reource for return in lists of results or other similar nested views
+    resource for return in lists of results or other similar nested views
     """
 
     rank = serializers.FloatField(default=None, read_only=True)
@@ -179,6 +179,7 @@ class IndexablesSummarySerializer(serializers.HyperlinkedModelSerializer):
         fields = [
             "type",
             "subtype",
+            "group_id",
             "snippet",
             "language",
             "rank",
@@ -423,6 +424,7 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
+            "group_id",
             "indexable",
             "indexable_date_range_start",
             "indexable_date_range_end",
@@ -437,6 +439,7 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
             "language_display",
             "language_pg",
             "iiif",
+            "search_vector"
         ]
         extra_kwargs = {"url": {"view_name": "api:search_service:indexables_detail"}}
 
@@ -468,6 +471,7 @@ class CaptureModelSerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
+            "group_id",
             "indexable",
             "indexable_date_range_start",
             "indexable_date_range_end",

@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "rest_framework",
+    "django_filters",
 
     "exemplar",
     "search_service",
@@ -167,7 +168,14 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25
 }
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    "DEFAULT_PAGINATION_CLASS": "search_service.pagination.MadocPagination",
+    "PAGE_SIZE": 25
+}
 
 # Search service settings.
 

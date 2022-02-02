@@ -3,6 +3,8 @@ import os
 import pytest
 import requests
 import pathlib
+import glob
+
 
 from .utils import is_responsive_404
 
@@ -15,6 +17,7 @@ def tests_dir():
 @pytest.fixture(scope="session")
 def docker_compose_file(pytestconfig):
     return pathlib.Path(__file__).resolve().parent / "docker-compose.test.yml"
+
 
 @pytest.fixture(scope="session")
 def http_service(docker_ip, docker_services):
@@ -32,3 +35,26 @@ def http_service(docker_ip, docker_services):
     return url
 
 
+@pytest.fixture
+def floco_manifest(tests_dir):
+    return json.load((tests_dir / "fixtures/iiif/vol3.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def lagq(tests_dir):
+    return json.load((tests_dir / "fixtures/text/lagq.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def na_en_ad(tests_dir):
+    return json.load((tests_dir / "fixtures/text/na_en_ad.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def na_ad(tests_dir):
+    return json.load((tests_dir / "fixtures/text/na_ad.json").open(encoding="utf-8"))
+
+
+@pytest.fixture
+def tags(tests_dir):
+    return json.load((tests_dir / "fixtures/tags/tags_truncated.json").open(encoding="utf-8"))

@@ -1,0 +1,1736 @@
+[
+    {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:824",
+    "group_id": "10055",
+    "content_id": "Med_Palatino_220_0822_a_10052",
+    "original_content": "acatl",
+    "indexable": "acatl",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10055",
+    "content_id": "Med_Palatino_220_0822_a_10052",
+    "original_content": "Acatl",
+    "indexable": "Acatl",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10055",
+    "content_id": "Med_Palatino_220_0822_a_11717",
+    "original_content": "Reed",
+    "indexable": "Reed",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10055",
+    "content_id": "Med_Palatino_220_0822_a_12492",
+    "original_content": "Caña",
+    "indexable": "Caña",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10055",
+    "content_id": "Med_Palatino_220_0822_a_13534",
+    "original_content": "Acatl",
+    "indexable": "Acatl",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10331",
+    "content_id": "Med_Palatino_220_0822_a_10320",
+    "original_content": "acalcuachpanitl",
+    "indexable": "acalcuachpanitl",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+    {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:825",
+    "group_id": "10331",
+    "content_id": "Med_Palatino_220_0822_a_11992",
+    "original_content": "sails",
+    "indexable": "sails",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10331",
+    "content_id": "Med_Palatino_220_0822_a_11992",
+    "original_content": "sail",
+    "indexable": "sail",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10331",
+    "content_id": "Med_Palatino_220_0822_a_12768",
+    "original_content": "vela",
+    "indexable": "vela",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10331",
+    "content_id": "Med_Palatino_220_0822_a_13810",
+    "original_content": "belah",
+    "indexable": "belah",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10609",
+    "content_id": "Med_Palatino_220_0822_a_10584",
+    "original_content": "amatl",
+    "indexable": "amatl",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10609",
+    "content_id": "Med_Palatino_220_0822_a_12270",
+    "original_content": "amate paper",
+    "indexable": "amate paper",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10609",
+    "content_id": "Med_Palatino_220_0822_a_13046",
+    "original_content": "papel amate",
+    "indexable": "papel amate",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10609",
+    "content_id": "Med_Palatino_220_0822_a_14083",
+    "original_content": "amatl amate",
+    "indexable": "amatl amate",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10116",
+    "content_id": "Med_Palatino_220_0822_a_10113",
+    "original_content": "amatl",
+    "indexable": "amatl",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10116",
+    "content_id": "Med_Palatino_220_0822_a_11777",
+    "original_content": "document",
+    "indexable": "document",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10116",
+    "content_id": "Med_Palatino_220_0822_a_12553",
+    "original_content": "documento",
+    "indexable": "documento",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10116",
+    "content_id": "Med_Palatino_220_0822_a_13595",
+    "original_content": "amatl",
+    "indexable": "amatl",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10625",
+    "content_id": "Med_Palatino_220_0822_a_10600",
+    "original_content": "atentli",
+    "indexable": "atentli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10625",
+    "content_id": "Med_Palatino_220_0822_a_12286",
+    "original_content": "coastline",
+    "indexable": "coastline",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10625",
+    "content_id": "Med_Palatino_220_0822_a_13062",
+    "original_content": "costa",
+    "indexable": "costa",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10625",
+    "content_id": "Med_Palatino_220_0822_a_14099",
+    "original_content": "atentli",
+    "indexable": "atentli",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10365",
+    "content_id": "Med_Palatino_220_0822_a_10344",
+    "original_content": "axtlacuilli",
+    "indexable": "axtlacuilli",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10365",
+    "content_id": "Med_Palatino_220_0822_a_12026",
+    "original_content": "axtlacuilli",
+    "indexable": "axtlacuilli",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10365",
+    "content_id": "Med_Palatino_220_0822_a_12802",
+    "original_content": "axtlacuilli",
+    "indexable": "axtlacuilli",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10365",
+    "content_id": "Med_Palatino_220_0822_a_13843",
+    "original_content": "cuelpilli",
+    "indexable": "cuelpilli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10335",
+    "content_id": "Med_Palatino_220_0822_a_10324",
+    "original_content": "Caxtillan acalli",
+    "indexable": "Caxtillan acalli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10335",
+    "content_id": "Med_Palatino_220_0822_a_11996",
+    "original_content": "caravel",
+    "indexable": "caravel",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10335",
+    "content_id": "Med_Palatino_220_0822_a_12772",
+    "original_content": "carabela",
+    "indexable": "carabela",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10335",
+    "content_id": "Med_Palatino_220_0822_a_13814",
+    "original_content": "acalli",
+    "indexable": "acalli",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10323",
+    "content_id": "Med_Palatino_220_0822_a_11984",
+    "original_content": "crosshatching",
+    "indexable": "crosshatching",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10323",
+    "content_id": "Med_Palatino_220_0822_a_12760",
+    "original_content": "trama cruzada",
+    "indexable": "trama cruzada",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10323",
+    "content_id": "Med_Palatino_220_0822_a_13802",
+    "original_content": "iloh tlanehpanolli",
+    "indexable": "iloh tlanehpanolli",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10324",
+    "content_id": "Med_Palatino_220_0822_a_11985",
+    "original_content": "grisaille",
+    "indexable": "grisaille",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10324",
+    "content_id": "Med_Palatino_220_0822_a_12761",
+    "original_content": "grisalla",
+    "indexable": "grisalla",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10324",
+    "content_id": "Med_Palatino_220_0822_a_13803",
+    "original_content": "tlamantli ixnezcayotl tlen tenenextic",
+    "indexable": "tlamantli ixnezcayotl tlen tenenextic",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10325",
+    "content_id": "Med_Palatino_220_0822_a_11986",
+    "original_content": "horizon line",
+    "indexable": "horizon line",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10325",
+    "content_id": "Med_Palatino_220_0822_a_12762",
+    "original_content": "línea del horizonte",
+    "indexable": "línea del horizonte",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10325",
+    "content_id": "Med_Palatino_220_0822_a_13804",
+    "original_content": "tlamahuazantli orizontal",
+    "indexable": "tlamahuazantli orizontal",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10326",
+    "content_id": "Med_Palatino_220_0822_a_11987",
+    "original_content": "ink wash",
+    "indexable": "ink wash",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10326",
+    "content_id": "Med_Palatino_220_0822_a_12763",
+    "original_content": "lavado de tinta",
+    "indexable": "lavado de tinta",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10326",
+    "content_id": "Med_Palatino_220_0822_a_13805",
+    "original_content": "tinta tlen atic",
+    "indexable": "tinta tlen atic",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10327",
+    "content_id": "Med_Palatino_220_0822_a_11988",
+    "original_content": "modeling",
+    "indexable": "modeling",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10327",
+    "content_id": "Med_Palatino_220_0822_a_12764",
+    "original_content": "modelado",
+    "indexable": "modelado",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10327",
+    "content_id": "Med_Palatino_220_0822_a_13806",
+    "original_content": "modelados",
+    "indexable": "modelados",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10344",
+    "content_id": "Med_Palatino_220_0822_a_12005",
+    "original_content": "morion",
+    "indexable": "morion",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10344",
+    "content_id": "Med_Palatino_220_0822_a_12781",
+    "original_content": "morrión",
+    "indexable": "morrión",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10344",
+    "content_id": "Med_Palatino_220_0822_a_13823",
+    "original_content": "tzonecahuilli",
+    "indexable": "tzonecahuilli",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10328",
+    "content_id": "Med_Palatino_220_0822_a_11989",
+    "original_content": "shading",
+    "indexable": "shading",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10328",
+    "content_id": "Med_Palatino_220_0822_a_12765",
+    "original_content": "sombreado",
+    "indexable": "sombreado",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10328",
+    "content_id": "Med_Palatino_220_0822_a_13807",
+    "original_content": "motenpahtoc",
+    "indexable": "motenpahtoc",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10336",
+    "content_id": "Med_Palatino_220_0822_a_10325",
+    "original_content": "cehualli",
+    "indexable": "cehualli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10336",
+    "content_id": "Med_Palatino_220_0822_a_11997",
+    "original_content": "shadow",
+    "indexable": "shadow",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10336",
+    "content_id": "Med_Palatino_220_0822_a_12773",
+    "original_content": "sombra",
+    "indexable": "sombra",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10336",
+    "content_id": "Med_Palatino_220_0822_a_13815",
+    "original_content": "cuatzalamitl",
+    "indexable": "cuatzalamitl",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10126",
+    "content_id": "Med_Palatino_220_0822_a_10123",
+    "original_content": "cahuallo",
+    "indexable": "cahuallo",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10126",
+    "content_id": "Med_Palatino_220_0822_a_12563",
+    "original_content": "caballo",
+    "indexable": "caballo",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10126",
+    "content_id": "Med_Palatino_220_0822_a_13605",
+    "original_content": "cahuayoh",
+    "indexable": "cahuayoh",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10126",
+    "content_id": "Med_Palatino_220_0822_a_14464",
+    "original_content": "horse",
+    "indexable": "horse",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10078",
+    "content_id": "Med_Palatino_220_0822_a_10075",
+    "original_content": "calli",
+    "indexable": "calli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10078",
+    "content_id": "Med_Palatino_220_0822_a_11740",
+    "original_content": "house",
+    "indexable": "house",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10078",
+    "content_id": "Med_Palatino_220_0822_a_12515",
+    "original_content": "casa",
+    "indexable": "casa",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10078",
+    "content_id": "Med_Palatino_220_0822_a_13557",
+    "original_content": "calli",
+    "indexable": "calli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10607",
+    "content_id": "Med_Palatino_220_0822_a_10582",
+    "original_content": "caxtiltecatl ",
+    "indexable": "caxtiltecatl ",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10607",
+    "content_id": "Med_Palatino_220_0822_a_12268",
+    "original_content": "Spaniard",
+    "indexable": "Spaniard",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10607",
+    "content_id": "Med_Palatino_220_0822_a_13044",
+    "original_content": "español, española",
+    "indexable": "español, española",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10607",
+    "content_id": "Med_Palatino_220_0822_a_14081",
+    "original_content": "caxtiltecatl",
+    "indexable": "caxtiltecatl",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10063",
+    "content_id": "Med_Palatino_220_0822_a_10060",
+    "original_content": "ce",
+    "indexable": "ce",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10063",
+    "content_id": "Med_Palatino_220_0822_a_11725",
+    "original_content": "one",
+    "indexable": "one",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10063",
+    "content_id": "Med_Palatino_220_0822_a_12500",
+    "original_content": "uno",
+    "indexable": "uno",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10063",
+    "content_id": "Med_Palatino_220_0822_a_13542",
+    "original_content": "ce",
+    "indexable": "ce",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10085",
+    "content_id": "Med_Palatino_220_0822_a_10082",
+    "original_content": "itzcuintli",
+    "indexable": "itzcuintli",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10085",
+    "content_id": "Med_Palatino_220_0822_a_11747",
+    "original_content": "dog",
+    "indexable": "dog",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10085",
+    "content_id": "Med_Palatino_220_0822_a_12522",
+    "original_content": "perro",
+    "indexable": "perro",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10085",
+    "content_id": "Med_Palatino_220_0822_a_13564",
+    "original_content": "chichi",
+    "indexable": "chichi",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10573",
+    "content_id": "Med_Palatino_220_0822_a_10548",
+    "original_content": "Hernán Cortés",
+    "indexable": "Hernán Cortés",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10573",
+    "content_id": "Med_Palatino_220_0822_a_12234",
+    "original_content": "Hernan Cortes",
+    "indexable": "Hernan Cortes",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10573",
+    "content_id": "Med_Palatino_220_0822_a_13010",
+    "original_content": "Hernán Cortés",
+    "indexable": "Hernán Cortés",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10573",
+    "content_id": "Med_Palatino_220_0822_a_14047",
+    "original_content": "Hernán Cortés",
+    "indexable": "Hernán Cortés",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10142",
+    "content_id": "Med_Palatino_220_0822_a_10139",
+    "original_content": "cuahuitl",
+    "indexable": "cuahuitl",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10142",
+    "content_id": "Med_Palatino_220_0822_a_11803",
+    "original_content": "tree",
+    "indexable": "tree",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10142",
+    "content_id": "Med_Palatino_220_0822_a_12579",
+    "original_content": "arbol",
+    "indexable": "arbol",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10142",
+    "content_id": "Med_Palatino_220_0822_a_13621",
+    "original_content": "cuahuitl",
+    "indexable": "cuahuitl",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10141",
+    "content_id": "Med_Palatino_220_0822_a_10138",
+    "original_content": "cozamalotl",
+    "indexable": "cozamalotl",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10141",
+    "content_id": "Med_Palatino_220_0822_a_11802",
+    "original_content": "rainbow",
+    "indexable": "rainbow",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10141",
+    "content_id": "Med_Palatino_220_0822_a_12578",
+    "original_content": "arcoiris",
+    "indexable": "arcoiris",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10141",
+    "content_id": "Med_Palatino_220_0822_a_13620",
+    "original_content": "cuacemalotl",
+    "indexable": "cuacemalotl",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10352",
+    "content_id": "Med_Palatino_220_0822_a_10336",
+    "original_content": "cuahuitl nepaniuhtoc",
+    "indexable": "cuahuitl nepaniuhtoc",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10352",
+    "content_id": "Med_Palatino_220_0822_a_12013",
+    "original_content": "cross",
+    "indexable": "cross",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10352",
+    "content_id": "Med_Palatino_220_0822_a_12789",
+    "original_content": "cruz",
+    "indexable": "cruz",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10352",
+    "content_id": "Med_Palatino_220_0822_a_13831",
+    "original_content": "cruztzin",
+    "indexable": "cruztzin",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10383",
+    "content_id": "Med_Palatino_220_0822_a_10362",
+    "original_content": "cueitl",
+    "indexable": "cueitl",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10383",
+    "content_id": "Med_Palatino_220_0822_a_12044",
+    "original_content": "cueitl",
+    "indexable": "cueitl",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10383",
+    "content_id": "Med_Palatino_220_0822_a_12820",
+    "original_content": "cueitl",
+    "indexable": "cueitl",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10383",
+    "content_id": "Med_Palatino_220_0822_a_13861",
+    "original_content": "cueitl",
+    "indexable": "cueitl",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10614",
+    "content_id": "Med_Palatino_220_0822_a_10589",
+    "original_content": "huipilli",
+    "indexable": "huipilli",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10614",
+    "content_id": "Med_Palatino_220_0822_a_12275",
+    "original_content": "huipil",
+    "indexable": "huipil",
+    "type": "tag",
+    "subtype": "iconography",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10614",
+    "content_id": "Med_Palatino_220_0822_a_13051",
+    "original_content": "huipil",
+    "indexable": "huipil",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10614",
+    "content_id": "Med_Palatino_220_0822_a_14088",
+    "original_content": "cotomitl tlen zan huehueyac",
+    "indexable": "cotomitl tlen zan huehueyac",
+    "type": "tag",
+    "subtype": "cultural sites & objects",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "eastern huasteca nahuatl",
+    "language_iso639_2": "nhe",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10155",
+    "content_id": "Med_Palatino_220_0822_a_10152",
+    "original_content": "ichcatl",
+    "indexable": "ichcatl",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": null,
+    "language_display": "classical nahuatl",
+    "language_iso639_2": "nci",
+    "language_pg": null
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10155",
+    "content_id": "Med_Palatino_220_0822_a_11816",
+    "original_content": "sheep",
+    "indexable": "sheep",
+    "type": "tag",
+    "subtype": "people",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "en",
+    "language_display": "english",
+    "language_iso639_2": "eng",
+    "language_pg": "english"
+  },
+  {
+    "resource_id": "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823",
+    "group_id": "10155",
+    "content_id": "Med_Palatino_220_0822_a_12592",
+    "original_content": "oveja",
+    "indexable": "oveja",
+    "type": "tag",
+    "subtype": "places",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=0,0,750,300"
+    },
+    "language_iso639_1": "es",
+    "language_display": "spanish",
+    "language_iso639_2": "spa",
+    "language_pg": "spanish"
+  }
+]

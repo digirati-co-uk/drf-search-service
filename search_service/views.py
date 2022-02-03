@@ -5,7 +5,6 @@ import logging
 from collections import defaultdict
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import get_language
 from django_filters import rest_framework as df_filters
@@ -28,7 +27,6 @@ from .pagination import MadocPagination
 from .prezi_upgrader import Upgrader
 from .serializer_utils import MethodBasedSerializerMixin
 from .serializers import (
-    UserSerializer,
     IndexablesSerializer,
     IIIFSerializer,
     ContextSerializer,
@@ -54,7 +52,6 @@ upgrader = Upgrader(flags={"default_lang": default_lang})
 global_facet_on_manifests = settings.FACET_ON_MANIFESTS_ONLY
 global_facet_types = ["metadata"]
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -70,16 +67,6 @@ def api_root(request, format=None):
             "search": reverse("api:search_service:search", request=request, format=format),
         }
     )
-
-
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
 
 class IIIFDetail(MethodBasedSerializerMixin, generics.RetrieveUpdateDestroyAPIView):

@@ -6,16 +6,20 @@ import itertools
 from copy import deepcopy
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.utils.translation import get_language
 from django.conf import settings
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
+from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
 
-from .iiif_utils import get_first_canvas, get_iiif_resource_thumbnail_json, format_thumbnail_url
+from .iiif_utils import (
+    get_first_canvas,
+    get_iiif_resource_thumbnail_json,
+    format_thumbnail_url,
+)
 from .indexable_utils import clean_values
 from .models import Indexables, IIIFResource, Context
 from .serializer_utils import calc_offsets, flatten_iiif_descriptive
@@ -29,12 +33,6 @@ logger = logging.getLogger(__name__)
 utc = pytz.UTC
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ["url", "username", "email"]
-
-
 class ContextSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializer for Context objects, i.e. for the site, project, collection, etc
@@ -45,7 +43,10 @@ class ContextSerializer(serializers.HyperlinkedModelSerializer):
         model = Context
         fields = ["url", "id", "type", "slug"]
         extra_kwargs = {
-            "url": {"view_name": "api:search_service:context_detail", "lookup_field": "slug"}
+            "url": {
+                "view_name": "api:search_service:context_detail",
+                "lookup_field": "slug",
+            }
         }
 
 
@@ -155,7 +156,10 @@ class ContextSummarySerializer(serializers.HyperlinkedModelSerializer):
         model = Context
         fields = ["url", "id", "type"]
         extra_kwargs = {
-            "url": {"view_name": "api:search_service:context_detail", "lookup_field": "slug"}
+            "url": {
+                "view_name": "api:search_service:context_detail",
+                "lookup_field": "slug",
+            }
         }
 
 
@@ -167,7 +171,9 @@ class IndexablesSummarySerializer(serializers.HyperlinkedModelSerializer):
 
     rank = serializers.FloatField(default=None, read_only=True)
     snippet = serializers.CharField(default=None, read_only=True)
-    language = serializers.CharField(default=None, read_only=None, source="language_iso639_1")
+    language = serializers.CharField(
+        default=None, read_only=None, source="language_iso639_1"
+    )
     bounding_boxes = serializers.SerializerMethodField()
 
     @staticmethod
@@ -215,7 +221,11 @@ class IIIFSearchSummarySerializer(serializers.HyperlinkedModelSerializer):
         if not order_key:
             return self.get_rank(iiif=iiif)
         logger.debug(f"Order key {order_key}")
-        if isinstance(order_key, dict) and order_key.get("type") and order_key.get("subtype"):
+        if (
+            isinstance(order_key, dict)
+            and order_key.get("type")
+            and order_key.get("subtype")
+        ):
             val = order_key.get("value_for_sort", "indexable")
             sort_qs = (
                 Indexables.objects.filter(
@@ -298,27 +308,39 @@ class IIIFSearchSummarySerializer(serializers.HyperlinkedModelSerializer):
             if self.context["request"].data.get("hits_filter_kwargs"):
                 # We have a dictionary of queries to use, so we use that
                 search_query = (
-                    self.context["request"].data["hits_filter_kwargs"].get("search_vector", None)
+                    self.context["request"]
+                    .data["hits_filter_kwargs"]
+                    .get("search_vector", None)
                 )
             else:
                 # Otherwise, this is probably a simple GET request, so we construct the queries from params
-                search_string = self.context["request"].query_params.get("fulltext", None)
-                language = self.context["request"].query_params.get("search_language", None)
-                search_type = self.context["request"].query_params.get("search_type", "websearch")
+                search_string = self.context["request"].query_params.get(
+                    "fulltext", None
+                )
+                language = self.context["request"].query_params.get(
+                    "search_language", None
+                )
+                search_type = self.context["request"].query_params.get(
+                    "search_type", "websearch"
+                )
                 if search_string:
                     if language:
                         search_query = SearchQuery(
                             search_string, config=language, search_type=search_type
                         )
                     else:
-                        search_query = SearchQuery(search_string, search_type=search_type)
+                        search_query = SearchQuery(
+                            search_string, search_type=search_type
+                        )
                 else:
                     search_query = None
         if search_query:
             # Annotate the results in the queryset with rank, and with a snippet
             qs = (
                 qs.annotate(
-                    rank=SearchRank(F("search_vector"), search_query, cover_density=True),
+                    rank=SearchRank(
+                        F("search_vector"), search_query, cover_density=True
+                    ),
                     snippet=Concat(
                         Value("'"),
                         SearchHeadline(
@@ -368,7 +390,9 @@ class IIIFSearchSummarySerializer(serializers.HyperlinkedModelSerializer):
                     for metadata_item in iiif.metadata:
                         for lang, labels in metadata_fields.items():
                             for label in labels:
-                                if label in metadata_item.get("label", {}).get(lang, []):
+                                if label in metadata_item.get("label", {}).get(
+                                    lang, []
+                                ):
                                     filtered_metadata.append(metadata_item)
                 return filtered_metadata
         return iiif.metadata
@@ -409,6 +433,36 @@ class AutocompleteSerializer(serializers.ModelSerializer):
         ]
 
 
+class BaseModelToIndexablesSerializer(serializers.Serializer):
+    @property
+    def data(self):
+        """Bypasses the wrapping of the returned value with a ReturnDict from the serializers.Serializer data method.
+        This allows the serializer to return a list of items from an individual instance.
+        """
+        if not hasattr(self, "_data"):
+            self._data = self.to_representation(self.instance)
+        return self._data
+
+    def to_indexables(self, instance):
+        return {}
+
+    def to_representation(self, instance):
+        resource_fields = {
+            "resource_id": instance.id,
+            "resource_content_type": ContentType.objects.get_for_model(instance).pk,
+        }
+        indexables_data = []
+        for indexable in self.to_indexables(instance):
+            indexables_data.append({**resource_fields, **indexable})
+        return indexables_data
+
+
+class IndexablesCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Indexables
+        fields = "__all__"
+
+
 class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializer for the Indexables, i.e. the indexed objects that are used to
@@ -439,7 +493,7 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
             "language_display",
             "language_pg",
             "iiif",
-            "search_vector"
+            "search_vector",
         ]
         extra_kwargs = {"url": {"view_name": "api:search_service:indexables_detail"}}
 
@@ -451,8 +505,12 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
         iiif = IIIFResource.objects.get(madoc_id=resource_id)
         validated_data["iiif"] = iiif
         if content_id and resource_id:
-            print(f"Deleting any indexables for {resource_id} with content id {content_id}")
-            Indexables.objects.filter(resource_id=resource_id, content_id=content_id).delete()
+            print(
+                f"Deleting any indexables for {resource_id} with content id {content_id}"
+            )
+            Indexables.objects.filter(
+                resource_id=resource_id, content_id=content_id
+            ).delete()
         return super(IndexablesSerializer, self).create(validated_data)
 
 
@@ -497,8 +555,12 @@ class CaptureModelSerializer(serializers.HyperlinkedModelSerializer):
         iiif = IIIFResource.objects.get(madoc_id=resource_id)
         validated_data["iiif"] = iiif
         if content_id and resource_id:
-            print(f"Deleting any indexables for {resource_id} with content id {content_id}")
-            Indexables.objects.filter(resource_id=resource_id, content_id=content_id).delete()
+            print(
+                f"Deleting any indexables for {resource_id} with content id {content_id}"
+            )
+            Indexables.objects.filter(
+                resource_id=resource_id, content_id=content_id
+            ).delete()
         return super(CaptureModelSerializer, self).create(validated_data)
 
 
@@ -512,7 +574,9 @@ def contexts_create_update(instance, local_contexts):
     :return:
     """
     if local_contexts:
-        c_objs = [Context.objects.get_or_create(**context) for context in local_contexts]
+        c_objs = [
+            Context.objects.get_or_create(**context) for context in local_contexts
+        ]
         c_objs_set = [c_obj for c_obj, _ in c_objs]
         instance.contexts.set(c_objs_set)
         instance.save()
@@ -580,7 +644,9 @@ def children_create_update(instance, iiif3_resource, validated_data, local_conte
                 child_dict = dict(
                     iiif3_resource=item,
                     resource_contexts=local_contexts,
-                    madoc_id=":".join([instance.madoc_id, item["type"].lower(), str(num)]),
+                    madoc_id=":".join(
+                        [instance.madoc_id, item["type"].lower(), str(num)]
+                    ),
                     madoc_thumbnail=None,
                     child=True,
                     parent=instance.madoc_id,
@@ -596,7 +662,9 @@ def children_create_update(instance, iiif3_resource, validated_data, local_conte
                     madoc_id=child_dict["madoc_id"]
                 ).first()
                 if existing_nested:
-                    logger.debug(f"Nested item {child_dict.get('madoc_id')} already exists")
+                    logger.debug(
+                        f"Nested item {child_dict.get('madoc_id')} already exists"
+                    )
                 if not existing_nested:
                     nested = IIIFCreateUpdateSerializer(data=child_dict)
                 else:
@@ -604,10 +672,14 @@ def children_create_update(instance, iiif3_resource, validated_data, local_conte
                         existing_nested, data=child_dict, partial=True
                     )
                 if nested.is_valid(raise_exception=False):
-                    logger.debug(f"Successful nested item ID was: {child_dict.get('madoc_id')}")
+                    logger.debug(
+                        f"Successful nested item ID was: {child_dict.get('madoc_id')}"
+                    )
                     nested.save()
                 else:
-                    logger.error(f"Failed nested item ID was: {child_dict.get('madoc_id')}")
+                    logger.error(
+                        f"Failed nested item ID was: {child_dict.get('madoc_id')}"
+                    )
                     logger.error(nested.errors)
 
 
@@ -658,7 +730,9 @@ def build_iiif_resource_data(validated_data, contexts=None):
         local_dict["first_canvas_id"] = first_canvas_json.get("id")
     # Get the thumbnail
     thumbnail_json = get_iiif_resource_thumbnail_json(
-        iiif3_resource, first_canvas_json=first_canvas_json, fallback=settings.THUMBNAIL_FALLBACK
+        iiif3_resource,
+        first_canvas_json=first_canvas_json,
+        fallback=settings.THUMBNAIL_FALLBACK,
     )
     if thumbnail_json:
         if isinstance(thumbnail_json, list):
@@ -692,7 +766,9 @@ class IIIFCreateUpdateSerializer(serializers.Serializer):
         :param instance:
         :return:
         """
-        return IIIFSerializer(instance, context={"request": self.context["request"]}).data
+        return IIIFSerializer(
+            instance, context={"request": self.context["request"]}
+        ).data
 
     def create(self, validated_data):
         logger.info("Create method invoked")
@@ -701,7 +777,8 @@ class IIIFCreateUpdateSerializer(serializers.Serializer):
         #     logger.debug(f"Got madoc site urn: {madoc_site_urn}")
         #     validated_data["madoc_id"] = f"{madoc_site_urn}|{validated_data['madoc_id']}"
         local_dict, iiif3_resource, local_contexts = build_iiif_resource_data(
-            validated_data=validated_data, contexts=validated_data.get("resource_contexts")
+            validated_data=validated_data,
+            contexts=validated_data.get("resource_contexts"),
         )
         """
         If this is a Range or Canvas, ensure we have the right _parent_ IIIFResource to create the
@@ -710,8 +787,12 @@ class IIIFCreateUpdateSerializer(serializers.Serializer):
         N.B. this doesn't happen on an .update() as the resource parent does not change
         """
         parent_object = None
-        if (validated_data.get("child") is True) and (validated_data.get("parent") is not None):
-            parent_object = IIIFResource.objects.get(madoc_id=validated_data.get("parent"))
+        if (validated_data.get("child") is True) and (
+            validated_data.get("parent") is not None
+        ):
+            parent_object = IIIFResource.objects.get(
+                madoc_id=validated_data.get("parent")
+            )
         # Validate the serialized data and save the object
         serializer = IIIFCreateSerializer(data=local_dict)
         if serializer.is_valid(raise_exception=True):  # Check it's valid
@@ -733,7 +814,9 @@ class IIIFCreateUpdateSerializer(serializers.Serializer):
         if parent_object is not None:
             # If I'm, e.g. a Canvas or Range, add my parent manifest to the list of context(s)
             local_contexts += [{"id": parent_object.id, "type": parent_object.type}]
-            local_contexts += [{"id": parent_object.madoc_id, "type": parent_object.type}]
+            local_contexts += [
+                {"id": parent_object.madoc_id, "type": parent_object.type}
+            ]
         # Create contexts
         if local_contexts:
             contexts_create_update(instance=instance, local_contexts=local_contexts)
@@ -751,7 +834,9 @@ class IIIFCreateUpdateSerializer(serializers.Serializer):
         return instance
 
     def update(self, instance, validated_data):
-        existing_contexts = [{"id": c.id, "type": c.type} for c in instance.contexts.all()]
+        existing_contexts = [
+            {"id": c.id, "type": c.type} for c in instance.contexts.all()
+        ]
         # Add any contexts on the incoming request to the list if there are any
         if (updated_contexts := validated_data.get("contexts")) is not None:
             existing_contexts += updated_contexts

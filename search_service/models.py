@@ -12,7 +12,7 @@ from model_utils.models import TimeStampedModel
 
 
 class Context(TimeStampedModel):
-    """"
+    """ "
     Context, i.e. the IIIF collection, manifest, Madoc site or project
     or any associated resource that is the context for a IIIF resource being indexed and
     searched against.
@@ -23,7 +23,10 @@ class Context(TimeStampedModel):
     """
 
     id = models.CharField(
-        max_length=512, primary_key=True, editable=True, verbose_name=_("Identifier (Context)")
+        max_length=512,
+        primary_key=True,
+        editable=True,
+        verbose_name=_("Identifier (Context)"),
     )
     type = models.CharField(max_length=30)
     slug = AutoSlugField(populate_from="id", max_length=512)
@@ -51,8 +54,12 @@ class IIIFResource(TimeStampedModel):
     requiredStatement = models.JSONField(blank=True, null=True)
     provider = models.JSONField(blank=True, null=True)
     items = models.ManyToManyField("self", blank=True, related_name="ispartof")
-    contexts = models.ManyToManyField(Context, blank=True, related_name="associated_iiif")
-    first_canvas_id = models.URLField(verbose_name=_("First canvas IIIF id"), blank=True, null=True)
+    contexts = models.ManyToManyField(
+        Context, blank=True, related_name="associated_iiif"
+    )
+    first_canvas_id = models.URLField(
+        verbose_name=_("First canvas IIIF id"), blank=True, null=True
+    )
     first_canvas_json = models.JSONField(blank=True, null=True)
 
     class Meta:
@@ -61,7 +68,7 @@ class IIIFResource(TimeStampedModel):
             models.Index(fields=["type"]),
             models.Index(fields=["madoc_id"]),
             models.Index(fields=["id"]),
-            models.Index(fields=["label"])
+            models.Index(fields=["label"]),
         ]
 
 
@@ -91,14 +98,23 @@ class Indexables(TimeStampedModel):
 
     https://www.loc.gov/standards/iso639-2/php/code_list.php
     """
+
     resource_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     resource_id = models.UUIDField()
-    resource = GenericForeignKey('resource_content_type', 'resource_id')
+    resource = GenericForeignKey("resource_content_type", "resource_id")
 
+    type = models.CharField(max_length=64)
+    subtype = models.CharField(max_length=256)
+    group_id = models.CharField(
+        max_length=512,
+        verbose_name=_("Identifier for grouping indexables, e.g. by vocab identifier"),
+        blank=True,
+        null=True,
+    )
     # objects = IndexableManager()
-    #resource_id = models.CharField(
+    # resource_id = models.CharField(
     #    max_length=512, verbose_name=_("Identifier (URL/URI/URN) for associated IIIF resource")
-    #)
+    # )
     content_id = models.CharField(
         max_length=512,
         verbose_name=_("Identifier (URL/URI/URN) for the content, if it has one"),
@@ -106,14 +122,13 @@ class Indexables(TimeStampedModel):
         null=True,
     )
     iiif = models.ForeignKey(
-        IIIFResource, related_name="indexables", blank=True, on_delete=models.CASCADE
-    )
-    group_id = models.CharField(
-        max_length=512,
-        verbose_name=_("Identifier for grouping indexables, e.g. by vocab identifier"),
-        blank=True,
+        IIIFResource,
+        related_name="indexables",
         null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
+
     indexable = models.TextField()
     indexable_date_range_start = models.DateTimeField(blank=True, null=True)
     indexable_date_range_end = models.DateTimeField(blank=True, null=True)
@@ -127,14 +142,17 @@ class Indexables(TimeStampedModel):
     language_display = models.CharField(max_length=64, blank=True, null=True)
     language_pg = models.CharField(max_length=64, blank=True, null=True)
     selector = models.JSONField(blank=True, null=True)
-    type = models.CharField(max_length=64)
-    subtype = models.CharField(max_length=256)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if "update_fields" not in kwargs or "search_vector" not in kwargs["update_fields"]:
+        if (
+            "update_fields" not in kwargs
+            or "search_vector" not in kwargs["update_fields"]
+        ):
             if self.language_pg:
-                self.search_vector = SearchVector("indexable", weight="A", config=self.language_pg)
+                self.search_vector = SearchVector(
+                    "indexable", weight="A", config=self.language_pg
+                )
             else:
                 self.search_vector = SearchVector("indexable", weight="A")
             self.save(update_fields=["search_vector"])
@@ -145,7 +163,9 @@ class Indexables(TimeStampedModel):
             GinIndex(fields=["search_vector"]),
             models.Index(fields=["content_id"]),
             models.Index(fields=["resource_id"]),
-            models.Index(fields=["language_iso639_2", "language_iso639_1", "language_display"]),
+            models.Index(
+                fields=["language_iso639_2", "language_iso639_1", "language_display"]
+            ),
             models.Index(fields=["type"]),
             models.Index(fields=["subtype"]),
             models.Index(fields=["group_id"]),
@@ -153,6 +173,8 @@ class Indexables(TimeStampedModel):
             models.Index(fields=["type", "subtype", "group_id"]),
             models.Index(Upper("type"), name="uppercase_type"),
             models.Index(Upper("subtype"), name="uppercase_subtype"),
-            models.Index(Upper("type"), Upper("subtype"), name="uppercase_type_subtype"),
+            models.Index(
+                Upper("type"), Upper("subtype"), name="uppercase_type_subtype"
+            ),
             HashIndex(fields=["indexable"]),
         ]

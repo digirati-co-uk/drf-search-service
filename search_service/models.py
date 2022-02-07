@@ -8,7 +8,7 @@ from django.db.models.functions import Upper
 # from .langbase import INTERNET_LANGUAGES
 from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
-from model_utils.models import TimeStampedModel
+from model_utils.models import TimeStampedModel, UUIDModel
 
 
 class Context(TimeStampedModel):
@@ -72,7 +72,7 @@ class IIIFResource(TimeStampedModel):
         ]
 
 
-class Indexables(TimeStampedModel):
+class Indexables(UUIDModel, TimeStampedModel):
     """
     Model for storing indexable data per object
 

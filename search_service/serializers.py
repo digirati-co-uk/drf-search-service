@@ -44,7 +44,7 @@ class ContextSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["url", "id", "type", "slug"]
         extra_kwargs = {
             "url": {
-                "view_name": "api:search_service:context_detail",
+                "view_name": "api:search_service:context-detail",
                 "lookup_field": "slug",
             }
         }
@@ -111,7 +111,7 @@ class IIIFSerializer(serializers.HyperlinkedModelSerializer):
             "first_canvas_json",
             "contexts",
         ]
-        extra_kwargs = {"url": {"view_name": "api:search_service:iiifresource_detail"}}
+        extra_kwargs = {"url": {"view_name": "api:search_service:iiif-detail", "lookup_field": "id"}}
 
 
 class IIIFSummary(serializers.HyperlinkedModelSerializer):
@@ -135,7 +135,7 @@ class IIIFSummary(serializers.HyperlinkedModelSerializer):
             "first_canvas_id",
             "contexts",
         ]
-        extra_kwargs = {"url": {"view_name": "api:search_service:iiifresource_detail"}}
+        extra_kwargs = {"url": {"view_name": "api:search_service:iiif-detail", "lookup_field": "id"}}
 
 
 class ContextSummarySerializer(serializers.HyperlinkedModelSerializer):
@@ -157,7 +157,7 @@ class ContextSummarySerializer(serializers.HyperlinkedModelSerializer):
         fields = ["url", "id", "type"]
         extra_kwargs = {
             "url": {
-                "view_name": "api:search_service:context_detail",
+                "view_name": "api:search_service:context-detail",
                 "lookup_field": "slug",
             }
         }
@@ -418,7 +418,7 @@ class IIIFSearchSummarySerializer(serializers.HyperlinkedModelSerializer):
             "provider",
             "requiredStatement",
         ]
-        extra_kwargs = {"url": {"view_name": "api:search_service:iiifresource_detail"}}
+        extra_kwargs = {"url": {"view_name": "api:search_service:iiif-detail", "lookup_field": "id"}}
 
 
 class AutocompleteSerializer(serializers.ModelSerializer):
@@ -495,7 +495,7 @@ class IndexablesSerializer(serializers.HyperlinkedModelSerializer):
             "iiif",
             "search_vector",
         ]
-        extra_kwargs = {"url": {"view_name": "api:search_service:indexables_detail"}}
+        extra_kwargs = {"url": {"view_name": "api:search_service:indexables-detail", "lookup_field": "id"}}
 
     def create(self, validated_data):
         # On create, associate the resource with the relevant IIIF resource
@@ -545,7 +545,7 @@ class CaptureModelSerializer(serializers.HyperlinkedModelSerializer):
             "language_pg",
             "iiif",
         ]
-        extra_kwargs = {"url": {"view_name": "api:search_service:indexables_detail"}}
+        extra_kwargs = {"url": {"view_name": "api:search_service:indexables-detail", "lookup_field": "id"}}
 
     def create(self, validated_data):
         # On create, associate the resource with the relevant IIIF resource

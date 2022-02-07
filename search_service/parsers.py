@@ -214,21 +214,36 @@ class IIIFSearchParser(JSONParser):
             prefilter_kwargs = []
             postfilter_q = []
             filter_kwargs = {}
-            search_string = request_data.get("fulltext", None)
-            date_start = request_data.get("date_start", None)
-            date_end = request_data.get("date_end", None)
-            date_exact = request_data.get("date_exact", None)
+            search_string = request_data.get("fulltext", None)  # search box e.g. "Smith" or ("Smith" AND " Jones")
+            date_start = request_data.get("date_start", None)  # For date range filtering
+            date_end = request_data.get("date_end", None)  # For data range filtering
+            date_exact = request_data.get("date_exact", None)  # For filtering to an exact date
+            # Query integer, query float:
+            # For any queries that use numeric indexables
+            # (UAL have this use case, e.g. things of a certain size)
+            # We can't handle these via normal PG fulltext logic
             query_integer = request_data.get("integer", None)
             query_float = request_data.get("float", None)
+            # Query raw:
+            # So we can pass in any arbitrary Django ORM query, which is useful for custom applications
+            # UAL had this use case, e.g. "indexables__indexable__startswith": "Stanley"
             query_raw = request_data.get("raw", None)
+            # Restrict to just content with a specific language
             language = request_data.get("search_language", None)
+            # Search Type: This sets how the PG query parses the incoming fulltext query.
+            # See: https://docs.djangoproject.com/en/4.0/ref/contrib/postgres/search/#searchquery
             search_type = request_data.get("search_type", "websearch")
+            # Facet fields:
+            # Fields that get returned via the facet summary, i.e. provide facet counts for THESE fields and
+            # THESE fields only
             facet_fields = request_data.get("facet_fields", None)
             contexts = request_data.get("contexts", None)
             contexts_all = request_data.get("contexts_all", None)
             madoc_identifiers = request_data.get("madoc_identifiers", None)
             iiif_identifiers = request_data.get("iiif_identifiers", None)
             facet_queries = request_data.get("facets", None)
+            # Boolean, apply the facet queries to manifests (or the manifests that are the parents of a given
+            # IIIF resource like a canvas or range)
             facet_on_manifests = request_data.get("facet_on_manifests", global_facet_on_manifests)
             facet_types = request_data.get("facet_types", global_facet_types)
             facet_languages = request_data.get("facet_languages")
@@ -236,8 +251,10 @@ class IIIFSearchParser(JSONParser):
             search_multiple_fields = request_data.get(
                 "search_multiple_fields", global_search_multiple_fields
             )
-            num_facets = request_data.get("number_of_facets", 10)
+            num_facets = request_data.get("number_of_facets", 10)  # Return the top N for each facet
+            # Which metadata fields to include in the summary results
             metadata_fields = request_data.get("metadata_fields", None)
+            # Autocomplete type, subtype and query are used in autocomplete queries, to populate dropdowns, etc.
             autocomplete_type = request_data.get("autocomplete_type", None)
             autocomplete_subtype = request_data.get("autocomplete_subtype", None)
             autocomplete_query = request_data.get("autocomplete_query", None)
@@ -253,18 +270,40 @@ class IIIFSearchParser(JSONParser):
                 prefilter_kwargs.append(Q(**{f"madoc_id__in": madoc_identifiers}))
             if iiif_identifiers:
                 prefilter_kwargs.append(Q(**{f"id__in": iiif_identifiers}))
+            # Turn the incoming search string into a Django SearchQuery (which in turn is turned into a
+            # PostgreSQL `tsquery` of the appropriate type, e.g. Phrase, Websearch, etc.)
             if search_string:
                 if (non_latin_fulltext or is_latin(search_string)) and not search_multiple_fields:
-                    # Search string is good candidate for fulltext query and we are not searching across multiple fields
+                    """
+                    Check if we can use a fulltext SearchQuery for this.
+                    
+                    https://docs.djangoproject.com/en/4.0/ref/contrib/postgres/search/#searchquery
+                    
+                    Conditions:
+                    
+                    1. The text is either latin text (so whitespace tokenising or 
+                        language specific tokenising will work)
+                    2. The text is non-latin text but we have a flag telling the search service that the backend
+                        has compiled in support for fulltext search of e.g. Chinese or Arabic.
+                    3. The user has Not explicitly chosen to use an `icontains` search instead (which is set by the
+                        search_multiple_fields flag)
+                    
+                    If a language is provided, the SearchQuery will use this to tokenise the incoming
+                    search text, too, so that we gain the advantages of lemmas/tokens etc for the search
+                    """
                     if language:
                         filter_kwargs["indexables__search_vector"] = SearchQuery(
                             search_string, config=language, search_type=search_type
                         )
-                    else:
+                    else:  # Otherwise, it'll use the search vectors but will be less smart
                         filter_kwargs["indexables__search_vector"] = SearchQuery(
                             search_string, search_type=search_type
                         )
                 else:
+                    """
+                    We can't use a SearchQuery, instead we just do raw partial string matching using
+                    `icontain`
+                    """
                     [
                         postfilter_q.append(
                             Q(  # Iterate the split words/chars to make the Q objects
@@ -273,6 +312,8 @@ class IIIFSearchParser(JSONParser):
                         )
                         for split_search in search_string.split()
                     ]
+            # These fields, we just do a hard filter to things that contain this value in the relevant
+            # field in the indexable
             for p in [
                 "type",
                 "subtype",
@@ -284,16 +325,19 @@ class IIIFSearchParser(JSONParser):
             ]:
                 if request_data.get(p, None):
                     filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]
+            # Take the raw query and turn it into a dictionary with filters to apply
             if query_raw and isinstance(query_raw, dict):
                 for raw_k, raw_v in query_raw.items():
                     if raw_k.startswith(("indexables__", "type__", "madoc_id__", "id__")):
                         filter_kwargs[raw_k] = raw_v
+            # Filter floating point values
             if query_float:
                 if query_float.get("value"):
                     if query_float.get("operator", "exact") in ["exact", "gt", "lt", "gte", "lte"]:
                         filter_kwargs[
                             f"indexables__indexable_float__{query_float.get('operator', 'exact')}"
                         ] = query_float["value"]
+            # Filter integer values
             if query_integer:
                 if query_integer.get("value"):
                     if query_integer.get("operator", "exact") in [
@@ -306,6 +350,7 @@ class IIIFSearchParser(JSONParser):
                         filter_kwargs[
                             f"indexables__indexable_integer__{query_integer.get('operator', 'exact')}"
                         ] = query_integer["value"]
+            # Date filters
             if date_start:
                 date_kwargs = date_q(value=date_start, date_query_type="start")
                 if date_kwargs:
@@ -318,8 +363,14 @@ class IIIFSearchParser(JSONParser):
                 date_kwargs = date_q(value=date_exact, date_query_type="exact")
                 if date_kwargs:
                     filter_kwargs.update(date_kwargs)
+            # Facet queries.
+            # N.B. these are parsed separately as the logic is complex.
             if facet_queries:
                 postfilter_q += parse_facets(facet_queries=facet_queries)
+            # The hits filters are the filters used to populate the search highlights
+            # https://docs.djangoproject.com/en/4.0/ref/contrib/postgres/search/#searchheadline
+            # These don't include the facets, raw filters, etc. as the highlights ONLY target the
+            # content to provide the inline highlighting
             hits_filter_kwargs = {
                 k.replace("indexables__", ""): v
                 for k, v in filter_kwargs.items()
@@ -331,6 +382,7 @@ class IIIFSearchParser(JSONParser):
                 hits_filter_kwargs["language"] = language
             if search_type:
                 hits_filter_kwargs["search_type"] = search_type
+            # Set the search order
             sort_order = request_data.get("ordering", {"ordering": "descending"})
             logger.info(f"Filter kwargs: {filter_kwargs}")
             return {

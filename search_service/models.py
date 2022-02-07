@@ -111,10 +111,7 @@ class Indexables(TimeStampedModel):
         blank=True,
         null=True,
     )
-    # objects = IndexableManager()
-    # resource_id = models.CharField(
-    #    max_length=512, verbose_name=_("Identifier (URL/URI/URN) for associated IIIF resource")
-    # )
+
     content_id = models.CharField(
         max_length=512,
         verbose_name=_("Identifier (URL/URI/URN) for the content, if it has one"),

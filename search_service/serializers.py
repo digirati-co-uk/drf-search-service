@@ -444,7 +444,7 @@ class BaseModelToIndexablesSerializer(serializers.Serializer):
         return self._data
 
     def to_indexables(self, instance):
-        return {}
+        return [{}]
 
     def to_representation(self, instance):
         resource_fields = {

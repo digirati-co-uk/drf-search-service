@@ -5,7 +5,8 @@ from .views import (
     JSONResourceViewSet,
     IndexablesViewSet,
     JSONResourceSearch,
-    GenericSearchBaseClass
+    GenericSearchBaseClass,
+    GenericFacets
 )
 
 app_name = "search_service"
@@ -22,5 +23,7 @@ urlpatterns += [
     path("json_search", JSONResourceSearch.as_view({"get": "list", "post": "list"}),
          name="search_service.api.json_search"),
     path("generic_search", GenericSearchBaseClass.as_view({"get": "list", "post": "list"}),
-         name="search_service.api.generic_search")
+         name="search_service.api.generic_search"),
+    path("generic_facets", GenericFacets.as_view({"get": "list", "post": "list"}),
+         name="search_service.api.generic_facets")
 ]

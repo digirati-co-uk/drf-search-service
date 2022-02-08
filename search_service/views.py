@@ -34,7 +34,12 @@ from .serializers import (
     AutocompleteSerializer,
 )
 
-from .filters import FacetListFilter, GenericFilter, JSONResourceFilter
+from .filters import (
+    FacetListFilter,
+    GenericFilter,
+    JSONResourceFilter,
+    GenericFacetListFilter,
+)
 from .indexable_utils import gen_indexables
 
 # Globals
@@ -284,6 +289,7 @@ class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
     """
     BaseClass for Search Service APIs.
     """
+
     queryset = Indexables.objects.all().distinct()
     parser_classes = [SearchParser]
     lookup_field = "id"
@@ -293,8 +299,8 @@ class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
 
 
 class JSONResourceSearch(GenericSearchBaseClass):
-    """
-    """
+    """ """
+
     queryset = JSONResource.objects.all().distinct()
     parser_classes = [JSONSearchParser]
     lookup_field = "id"
@@ -306,3 +312,40 @@ class JSONResourceSearch(GenericSearchBaseClass):
         resp = super().list(request, *args, **kwargs)
         return resp
 
+
+class GenericFacets(GenericSearchBaseClass):
+    """
+    Simple read only view to return a list of facet fields
+    """
+
+    filter_backends = [GenericFacetListFilter]
+    serializer_class = IndexablesSerializer
+
+    def get_facet_list(self, request):
+        facet_dict = defaultdict(list)
+        # If we haven't been provided a list of facet fields via a POST
+        # just generate the list by querying the unique list of metadata subtypes
+        # Make a copy of the query so we aren't running the get_queryset logic every time
+        facetable_q = self.filter_queryset(queryset=self.get_queryset())
+        logger.info(facetable_q)
+        facet_fields = []
+        if not request.data.get("facet_types", None):
+            request.data["facet_types"] = ["metadata"]
+        for facet_type in request.data["facet_types"]:
+            for t in (
+                facetable_q.filter(type__iexact=facet_type)
+                .values("subtype")
+                .distinct()
+            ):
+                for _, v in t.items():
+                    if v and v != "":
+                        facet_fields.append((facet_type, v))
+        facet_l = sorted(list(set(facet_fields)))
+        for i in facet_l:
+            facet_dict[i[0]].append(i[1])
+        return facet_dict
+
+    def list(self, request, *args, **kwargs):
+        response = super(GenericFacets, self).list(request, args, kwargs)
+        response.data = self.get_facet_list(request=request)
+        return response

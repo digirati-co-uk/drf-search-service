@@ -29,6 +29,20 @@ class FacetListFilter(BaseFilterBackend):
         return queryset
 
 
+class GenericFacetListFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Return a filtered queryset.
+        """
+
+        if request.data.get("facet_list_filters", None):
+            # Just check if this thing is all nested Q() objects
+            if all([type(k) == Q for k in request.data["facet_list_filters"]]):
+                # This is a chaining operation
+                for f in request.data["facet_list_filters"]:
+                    queryset = queryset.filter(*(f,))
+        return queryset
+
 # class AutoCompleteFilter(BaseFilterBackend):
 #     def filter_queryset(self, request, queryset, view):
 #         contexts_queryset = IIIFResource.objects.all()

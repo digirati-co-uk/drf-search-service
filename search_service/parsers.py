@@ -396,6 +396,7 @@ class SearchParser(JSONParser):
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")
             resource_filters = request_data.get("resource_filters", None)
+            facet_types = request_data.get("facet_types", None)
             # Fulltext search
             if search_string:
                 if language:
@@ -449,7 +450,8 @@ class SearchParser(JSONParser):
             filter_q = reduce(
                 and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
             )
-            return {"filter": filter_q, "headline_query": headline_query}
+            return {"filter": filter_q, "headline_query": headline_query,
+                    "facet_types": facet_types}
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))
 
@@ -525,6 +527,7 @@ class JSONSearchParser(JSONParser):
             filter_q = reduce(
                 and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
             )
-            return {"filter": filter_q, "headline_query": headline_query}
+            return {"filter": filter_q, "headline_query": headline_query,
+                    "facet_list_filters": None}
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))

@@ -251,3 +251,50 @@ class GenericFilter(BaseFilterBackend):
                     )
                 logger.info(queryset[0].__dict__)
         return queryset
+
+
+class JSONResourceFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Return a filtered queryset. Expects a Django Q object
+        to apply the filtering and an optional headline_query
+        which is a SearchQuery object that can be used by
+        SearchRank and SearchHeadline to annotate the results with ranking
+        and with snippets.
+        """
+        if (_filter := request.data.get("filter", None)) is not None:
+            logger.info(_filter)
+            if type(_filter) == Q:
+                queryset = queryset.filter(_filter)
+                # This only applies if there is a fulltext query we can use to rank
+                # and generate snippets
+                if (search_query := request.data.get("headline_query", None)) is not None:
+                    queryset = (
+                        queryset.annotate(
+                            rank=SearchRank(
+                                F("indexables__search_vector"), search_query, cover_density=True
+                            ),
+                            snippet=Concat(
+                                Value("'"),
+                                SearchHeadline(
+                                    "indexables__original_content",
+                                    search_query,
+                                    max_words=50,
+                                    min_words=25,
+                                    max_fragments=3,
+                                ),
+                                output_field=CharField(),
+                            ),
+                            fullsnip=SearchHeadline(
+                                "indexables__indexable",
+                                search_query,
+                                start_sel="<b>",
+                                stop_sel="</b>",
+                                highlight_all=True,
+                            ),
+                        )
+                        .filter(_filter, rank__gt=0.0)
+                        .order_by("-rank")
+                    )
+                logger.info(queryset[0].__dict__)
+        return queryset

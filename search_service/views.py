@@ -23,17 +23,18 @@ from .models import (
     Indexables,
     JSONResource,
 )
-from .parsers import IIIFSearchParser, SearchParser
+from .parsers import IIIFSearchParser, SearchParser, JSONSearchParser
 from .pagination import MadocPagination
 from .serializer_utils import ActionBasedSerializerMixin
 from .serializers import (
     JSONResourceSerializer,
     IndexablesSerializer,
     IndexablesResultSerializer,
+    JSONSearchSerializer,
     AutocompleteSerializer,
 )
 
-from .filters import FacetListFilter, GenericFilter
+from .filters import FacetListFilter, GenericFilter, JSONResourceFilter
 from .indexable_utils import gen_indexables
 
 # Globals
@@ -294,6 +295,12 @@ class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
 class JSONResourceSearch(GenericSearchBaseClass):
     """
     """
+    queryset = JSONResource.objects.all().distinct()
+    parser_classes = [JSONSearchParser]
+    lookup_field = "id"
+    permission_classes = [AllowAny]
+    filter_backends = [JSONResourceFilter]
+    serializer_class = JSONSearchSerializer
 
     def list(self, request, *args, **kwargs):
         resp = super().list(request, *args, **kwargs)

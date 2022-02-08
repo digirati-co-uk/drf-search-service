@@ -446,7 +446,85 @@ class SearchParser(JSONParser):
                     }
                 )
             # Construct the Q object by 'AND'-ing everything together
-            filter_q = reduce(and_, [Q(**{key: value}) for key, value in filter_kwargs.items()])
+            filter_q = reduce(
+                and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
+            )
+            return {"filter": filter_q, "headline_query": headline_query}
+        except ValueError as exc:
+            raise ParseError("JSON parse error - %s" % str(exc))
+
+
+class JSONSearchParser(JSONParser):
+    """
+    Generic search parser that makes no assumptions about the shape of the resource
+    that is linked to the Indexables.
+    """
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        parser_context = parser_context or {}
+        encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
+        try:
+            decoded_stream = codecs.getreader(encoding)(stream)
+            request_data = json.loads(decoded_stream.read())
+            filter_kwargs = {}
+            headline_query = None
+            search_string = request_data.get("fulltext", None)
+            language = request_data.get("search_language", None)
+            search_type = request_data.get("search_type", "websearch")
+            resource_filters = request_data.get("resource_filters", None)
+            # Fulltext search
+            if search_string:
+                if language:
+                    fulltext_q = {
+                        "indexables__search_vector": SearchQuery(
+                            search_string, config=language, search_type=search_type
+                        )
+                    }
+                    headline_query = SearchQuery(
+                        search_string, config=language, search_type=search_type
+                    )
+                else:
+                    fulltext_q = {
+                        "indexables__search_vector": SearchQuery(
+                            search_string, search_type=search_type
+                        )
+                    }
+                    headline_query = SearchQuery(search_string, search_type=search_type)
+                filter_kwargs.update(fulltext_q)
+            # Add any of the main indexable fields
+            filter_kwargs.update(
+                {
+                    k: v
+                    for k, v in {
+                        f"indexables__{p}__iexact": request_data.get(p, None)
+                        for p in [
+                            "type",
+                            "subtype",
+                            "language_iso639_2",
+                            "language_iso639_1",
+                            "language_display",
+                            "language_pg",
+                            "group_id",
+                        ]
+                    }.items()
+                    if v
+                }
+            )
+            # Add any queries that apply to the associated resource(s)
+            if resource_filters and isinstance(resource_filters, list):
+                filter_kwargs.update(
+                    {
+                        f"indexables__{BaseSearchResource._meta.app_label}_{resource_filter_item['resource_class']}__"
+                        + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
+                            "value"
+                        ]
+                        for resource_filter_item in resource_filters
+                    }
+                )
+            # Construct the Q object by 'AND'-ing everything together
+            filter_q = reduce(
+                and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
+            )
             return {"filter": filter_q, "headline_query": headline_query}
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))

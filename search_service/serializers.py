@@ -466,3 +466,20 @@ class IndexablesResultSerializer(serializers.HyperlinkedModelSerializer):
                 "lookup_field": "id",
             }
         }
+
+
+class JSONSearchSerializer(serializers.ModelSerializer):
+    rank = serializers.FloatField()  # Not this isn't ranking the highest (yet)
+    snippet = serializers.CharField()
+
+    class Meta:
+        model = JSONResource
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "label",
+            "data",
+            "rank",
+            "snippet"
+        ]

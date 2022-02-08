@@ -249,7 +249,6 @@ class GenericFilter(BaseFilterBackend):
                         .filter(_filter, rank__gt=0.0)
                         .order_by("-rank")
                     )
-                logger.info(queryset[0].__dict__)
         return queryset
 
 
@@ -296,5 +295,4 @@ class JSONResourceFilter(BaseFilterBackend):
                         .filter(_filter, rank__gt=0.0)
                         .order_by("-rank")
                     )
-                logger.info(queryset[0].__dict__)
         return queryset

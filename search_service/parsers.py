@@ -342,3 +342,48 @@ class IIIFSearchParser(JSONParser):
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))
 
+
+class SearchParser(JSONParser):
+    """
+    Generic search parser that makes no assumptions about the shape of the resource
+    that is linked to the Indexables.
+    """
+    def parse(self, stream, media_type=None, parser_context=None):
+        parser_context = parser_context or {}
+        encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
+        try:
+            decoded_stream = codecs.getreader(encoding)(stream)
+            request_data = json.loads(decoded_stream.read())
+            prefilter_kwargs = []
+            filter_kwargs = {}
+            search_string = request_data.get("fulltext", None)
+            language = request_data.get("search_language", None)
+            search_type = request_data.get("search_type", "websearch")
+            # Fulltext search
+            if search_string:
+                if language:
+                    filter_kwargs["indexables__search_vector"] = SearchQuery(
+                        search_string, config=language, search_type=search_type
+                    )
+                else:
+                    filter_kwargs["indexables__search_vector"] = SearchQuery(
+                        search_string, search_type=search_type
+                    )
+            # Indexable properties
+            for p in [
+                "type",
+                "subtype",
+                "language_iso639_2",
+                "language_iso639_1",
+                "language_display",
+                "language_pg",
+                "group_id"
+            ]:
+                if request_data.get(p, None):
+                    filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]
+            return {
+                    "prefilter_kwargs": prefilter_kwargs,
+                    "filter_kwargs": filter_kwargs,
+            }
+        except ValueError as exc:
+            raise ParseError("JSON parse error - %s" % str(exc))

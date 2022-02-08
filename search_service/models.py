@@ -140,6 +140,7 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         abstract = True
         ordering = ['-modified']
 
+
 class JSONResource(BaseSearchResource): 
     """ An example resource for indexing. 
         """

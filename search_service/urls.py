@@ -3,12 +3,8 @@ from rest_framework import routers
 
 from .views import (
     JSONResourceViewSet,
-    ContextViewSet,
     IndexablesViewSet,
     JSONResourceSearch
-    # IIIFSearch,
-    # Facets,
-    # Autocomplete,
 )
 
 app_name = "search_service"
@@ -16,10 +12,12 @@ app_name = "search_service"
 router = routers.DefaultRouter(trailing_slash=False)
 router.register("json_resource", JSONResourceViewSet, basename="iiif")
 router.register("indexables", IndexablesViewSet, basename="indexables")
-router.register("context", ContextViewSet, basename="context")
-router.register("json_search", JSONResourceSearch, basename="json_search")
-# router.register("search", IIIFSearch, basename="search")
-# router.register("facets", Facets, basename="facets")
-# router.register("autocomplete", Autocomplete, basename="autocomplete")
+# router.register("json_search", JSONResourceSearch, basename="json_search")
+
 
 urlpatterns = router.urls
+
+urlpatterns += [
+    path("json_search", JSONResourceSearch.as_view({"get": "list", "post": "list"}),
+         name="search_service.api.json_search")
+]

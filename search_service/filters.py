@@ -6,8 +6,10 @@ from django.db.models import Max
 from django.db.models import OuterRef, Subquery
 from django.db.models import Q, Value, FloatField
 from rest_framework.filters import BaseFilterBackend
-
-from .models import Context, Indexables
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
+from django.db.models.functions import Concat
+from django.db.models import F, Value, CharField
+from .models import Indexables
 
 logger = logging.getLogger(__name__)
 
@@ -207,14 +209,45 @@ class FacetListFilter(BaseFilterBackend):
 class GenericFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
-        Return a filtered queryset. Expects a LIST of Django Q objects
+        Return a filtered queryset. Expects a Django Q object
+        to apply the filtering and an optional headline_query
+        which is a SearchQuery object that can be used by
+        SearchRank and SearchHeadline to annotate the results with ranking
+        and with snippets.
         """
-        if request.data.get("prefilter_kwargs", None):
-            # Just check if this thing is all nested Q() objects
-            if all([type(k) == Q for k in request.data["prefilter_kwargs"]]):
-                # This is a chaining operation
-                for f in request.data["prefilter_kwargs"]:
-                    queryset = queryset.filter(*(f,))
-        if request.data.get("filter_kwargs", None):
-            queryset = queryset.filter(**request.data.get("filter_kwargs"))
+        if (_filter := request.data.get("filter", None)) is not None:
+            logger.info(_filter)
+            if type(_filter) == Q:
+                queryset = queryset.filter(_filter)
+                # This only applies if there is a fulltext query we can use to rank
+                # and generate snippets
+                if (search_query := request.data.get("headline_query", None)) is not None:
+                    queryset = (
+                        queryset.annotate(
+                            rank=SearchRank(
+                                F("search_vector"), search_query, cover_density=True
+                            ),
+                            snippet=Concat(
+                                Value("'"),
+                                SearchHeadline(
+                                    "original_content",
+                                    search_query,
+                                    max_words=50,
+                                    min_words=25,
+                                    max_fragments=3,
+                                ),
+                                output_field=CharField(),
+                            ),
+                            fullsnip=SearchHeadline(
+                                "indexable",
+                                search_query,
+                                start_sel="<b>",
+                                stop_sel="</b>",
+                                highlight_all=True,
+                            ),
+                        )
+                        .filter(_filter, rank__gt=0.0)
+                        .order_by("-rank")
+                    )
+                logger.info(queryset[0].__dict__)
         return queryset

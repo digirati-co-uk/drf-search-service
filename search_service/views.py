@@ -29,6 +29,7 @@ from .serializer_utils import ActionBasedSerializerMixin
 from .serializers import (
     JSONResourceSerializer,
     IndexablesSerializer,
+    IndexablesResultSerializer,
     AutocompleteSerializer,
 )
 
@@ -287,6 +288,7 @@ class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
     lookup_field = "id"
     permission_classes = [AllowAny]
     filter_backends = [GenericFilter]
+    serializer_class = IndexablesResultSerializer
 
 
 class JSONResourceSearch(GenericSearchBaseClass):

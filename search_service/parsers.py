@@ -19,6 +19,10 @@ from django.utils.translation import get_language
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import JSONParser
 
+
+from .models import BaseSearchResource
+
+
 default_lang = get_language()
 
 logger = logging.getLogger(__name__)
@@ -38,7 +42,10 @@ def date_query_value(q_key, value):
     if "date" in q_key:
         try:
             parsed_date = parser.parse(value)
-            if parsed_date.tzinfo is None or parsed_date.tzinfo.utcoffset(parsed_date) is None:
+            if (
+                parsed_date.tzinfo is None
+                or parsed_date.tzinfo.utcoffset(parsed_date) is None
+            ):
                 query_date = parsed_date.replace(tzinfo=pytz.utc)
             else:
                 query_date = parsed_date
@@ -63,7 +70,10 @@ def date_q(value, date_query_type=None):
     if value and date_query_type and date_query_type in date_types.keys():
         try:
             parsed_date = parser.parse(value)
-            if parsed_date.tzinfo is None or parsed_date.tzinfo.utcoffset(parsed_date) is None:
+            if (
+                parsed_date.tzinfo is None
+                or parsed_date.tzinfo.utcoffset(parsed_date) is None
+            ):
                 query_date = parsed_date.replace(tzinfo=pytz.utc)
             else:
                 query_date = parsed_date
@@ -101,7 +111,17 @@ def facet_operator(q_key, field_lookup):
         else:
             return "exact"
     elif q_key in ["indexable_date_range_start", "indexable_date_range_year"]:
-        if field_lookup in ["day", "month", "year", "iso_year", "gt", "gte", "lt", "lte", "exact"]:
+        if field_lookup in [
+            "day",
+            "month",
+            "year",
+            "iso_year",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "exact",
+        ]:
             return field_lookup
         else:
             return "exact"
@@ -120,7 +140,8 @@ def parse_facets(facet_queries):
         # e.g.
         # {"metadata|author": []}
         sorted_facets = {
-            "|".join([f.get("type", ""), f.get("subtype", "")]): [] for f in facet_queries
+            "|".join([f.get("type", ""), f.get("subtype", "")]): []
+            for f in facet_queries
         }
         # Copy the query into that lookup so we can get queries against the same
         # type/subtype
@@ -222,10 +243,14 @@ class IIIFSearchParser(JSONParser):
             madoc_identifiers = request_data.get("madoc_identifiers", None)
             iiif_identifiers = request_data.get("iiif_identifiers", None)
             facet_queries = request_data.get("facets", None)
-            facet_on_manifests = request_data.get("facet_on_manifests", global_facet_on_manifests)
+            facet_on_manifests = request_data.get(
+                "facet_on_manifests", global_facet_on_manifests
+            )
             facet_types = request_data.get("facet_types", global_facet_types)
             facet_languages = request_data.get("facet_languages")
-            non_latin_fulltext = request_data.get("non_latin_fulltext", global_non_latin_fulltext)
+            non_latin_fulltext = request_data.get(
+                "non_latin_fulltext", global_non_latin_fulltext
+            )
             search_multiple_fields = request_data.get(
                 "search_multiple_fields", global_search_multiple_fields
             )
@@ -244,7 +269,9 @@ class IIIFSearchParser(JSONParser):
             if iiif_identifiers:
                 prefilter_kwargs.append(Q(**{f"id__in": iiif_identifiers}))
             if search_string:
-                if (non_latin_fulltext or is_latin(search_string)) and not search_multiple_fields:
+                if (
+                    non_latin_fulltext or is_latin(search_string)
+                ) and not search_multiple_fields:
                     # Search string is good candidate for fulltext query and we are not searching across multiple fields
                     if language:
                         filter_kwargs["indexables__search_vector"] = SearchQuery(
@@ -270,17 +297,25 @@ class IIIFSearchParser(JSONParser):
                 "language_iso639_1",
                 "language_display",
                 "language_pg",
-                "group_id"
+                "group_id",
             ]:
                 if request_data.get(p, None):
                     filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]
             if query_raw and isinstance(query_raw, dict):
                 for raw_k, raw_v in query_raw.items():
-                    if raw_k.startswith(("indexables__", "type__", "madoc_id__", "id__")):
+                    if raw_k.startswith(
+                        ("indexables__", "type__", "madoc_id__", "id__")
+                    ):
                         filter_kwargs[raw_k] = raw_v
             if query_float:
                 if query_float.get("value"):
-                    if query_float.get("operator", "exact") in ["exact", "gt", "lt", "gte", "lte"]:
+                    if query_float.get("operator", "exact") in [
+                        "exact",
+                        "gt",
+                        "lt",
+                        "gte",
+                        "lte",
+                    ]:
                         filter_kwargs[
                             f"indexables__indexable_float__{query_float.get('operator', 'exact')}"
                         ] = query_float["value"]
@@ -348,42 +383,70 @@ class SearchParser(JSONParser):
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexables.
     """
+
     def parse(self, stream, media_type=None, parser_context=None):
         parser_context = parser_context or {}
         encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
         try:
             decoded_stream = codecs.getreader(encoding)(stream)
             request_data = json.loads(decoded_stream.read())
-            prefilter_kwargs = []
             filter_kwargs = {}
+            headline_query = None
             search_string = request_data.get("fulltext", None)
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")
+            resource_filters = request_data.get("resource_filters", None)
             # Fulltext search
             if search_string:
                 if language:
-                    filter_kwargs["indexables__search_vector"] = SearchQuery(
+                    fulltext_q = {
+                        "search_vector": SearchQuery(
+                            search_string, config=language, search_type=search_type
+                        )
+                    }
+                    headline_query = SearchQuery(
                         search_string, config=language, search_type=search_type
                     )
                 else:
-                    filter_kwargs["indexables__search_vector"] = SearchQuery(
-                        search_string, search_type=search_type
-                    )
-            # Indexable properties
-            for p in [
-                "type",
-                "subtype",
-                "language_iso639_2",
-                "language_iso639_1",
-                "language_display",
-                "language_pg",
-                "group_id"
-            ]:
-                if request_data.get(p, None):
-                    filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]
-            return {
-                    "prefilter_kwargs": prefilter_kwargs,
-                    "filter_kwargs": filter_kwargs,
-            }
+                    fulltext_q = {
+                        "search_vector": SearchQuery(
+                            search_string, search_type=search_type
+                        )
+                    }
+                    headline_query = SearchQuery(search_string, search_type=search_type)
+                filter_kwargs.update(fulltext_q)
+            # Add any of the main indexable fields
+            filter_kwargs.update(
+                {
+                    k: v
+                    for k, v in {
+                        f"{p}__iexact": request_data.get(p, None)
+                        for p in [
+                            "type",
+                            "subtype",
+                            "language_iso639_2",
+                            "language_iso639_1",
+                            "language_display",
+                            "language_pg",
+                            "group_id",
+                        ]
+                    }.items()
+                    if v
+                }
+            )
+            # Add any queries that apply to the associated resource(s)
+            if resource_filters and isinstance(resource_filters, list):
+                filter_kwargs.update(
+                    {
+                        f"{BaseSearchResource._meta.app_label}_{resource_filter_item['resource_class']}__"
+                        + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
+                            "value"
+                        ]
+                        for resource_filter_item in resource_filters
+                    }
+                )
+            # Construct the Q object by 'AND'-ing everything together
+            filter_q = reduce(and_, [Q(**{key: value}) for key, value in filter_kwargs.items()])
+            return {"filter": filter_q, "headline_query": headline_query}
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))

@@ -21,7 +21,6 @@ from rest_framework.response import Response
 # Local imports
 from .models import (
     Indexables,
-    Context,
     JSONResource,
 )
 from .parsers import IIIFSearchParser
@@ -30,7 +29,6 @@ from .serializer_utils import ActionBasedSerializerMixin
 from .serializers import (
     JSONResourceSerializer,
     IndexablesSerializer,
-    ContextSerializer,
     AutocompleteSerializer,
 )
 
@@ -49,12 +47,6 @@ class JSONResourceViewSet(viewsets.ModelViewSet):
     queryset = JSONResource.objects.all()
     serializer_class = JSONResourceSerializer
     lookup_field = "id"
-
-
-class ContextViewSet(viewsets.ModelViewSet):
-    queryset = Context.objects.all()
-    serializer_class = ContextSerializer
-    lookup_field = "slug"
 
 
 class IndexablesViewSet(viewsets.ModelViewSet):

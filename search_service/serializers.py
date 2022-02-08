@@ -12,61 +12,15 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from .serializer_utils import calc_offsets
 
-from .models import Indexables, JSONResource, Context
+from .models import (
+    Indexables,
+    JSONResource,
+)
 
 
 logger = logging.getLogger(__name__)
 
 utc = pytz.UTC
-
-
-class ContextSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serializer for Context objects, i.e. for the site, project, collection, etc
-    that might be associated with a IIIF resource.
-    """
-
-    class Meta:
-        model = Context
-        fields = ["url", "id", "type", "slug"]
-        extra_kwargs = {
-            "url": {
-                "view_name": "api:search_service:context-detail",
-                "lookup_field": "slug",
-            }
-        }
-
-
-class MadocIDSiteURNField(serializers.Serializer):
-    """ """
-
-    def to_representation(self, value):
-        return value.split("|")[-1]
-
-
-class ContextSummarySerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serializer that produces a summary of a Context object for return in lists of
-    search results or other similar nested views
-    """
-
-    id = serializers.SerializerMethodField(source="*")
-
-    def get_id(self, obj):
-        if obj.type == "Manifest" and "|" in obj.id:
-            return obj.id.split("|")[-1]
-        else:
-            return obj.id
-
-    class Meta:
-        model = Context
-        fields = ["url", "id", "type"]
-        extra_kwargs = {
-            "url": {
-                "view_name": "api:search_service:context-detail",
-                "lookup_field": "slug",
-            }
-        }
 
 
 class IndexablesSummarySerializer(serializers.HyperlinkedModelSerializer):

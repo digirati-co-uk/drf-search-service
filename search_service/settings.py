@@ -32,4 +32,4 @@ class AppSettings(object):
         return val
 
 
-iiif_store_settings = AppSettings("IIIF_STORE", DEFAULT_SETTINGS)
+search_service_settings = AppSettings("SEARCH_SERVICE", DEFAULT_SETTINGS)

@@ -92,6 +92,7 @@ class Indexables(UUIDModel, TimeStampedModel):
 
     class Meta:
         # Add a postgres index for the search_vector
+        ordering = ["-modified"]
         indexes = [
             GinIndex(fields=["search_vector"]),
             models.Index(fields=["content_id"]),
@@ -113,43 +114,34 @@ class Indexables(UUIDModel, TimeStampedModel):
         ]
 
 
-class Context(TimeStampedModel):
-    """ "
-    Context, i.e. the IIIF collection, manifest, Madoc site or project
-    or any associated resource that is the context for a IIIF resource being indexed and
-    searched against.
+class IndexedResourceRelationship(UUIDModel, TimeStampedModel):
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources")
+    source_id = models.UUIDField()
+    source = GenericForeignKey("source_content_type", "source_id")
+    target_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(class)s_targets")
+    target_id = models.UUIDField()
+    target = GenericForeignKey("target_content_type", "target_id")
+    type = models.CharField(max_length=100)
 
-    id: Identifier (this is usually the Madoc ID but could be a IIIF @id)
-    type: e.g. Site, Manifest, Collection, Project, etc. Not constrained.
-    slug: a slugify'd version of the id for use in URL routing and URIs
-    """
-
-    id = models.CharField(
-        max_length=512,
-        primary_key=True,
-        editable=True,
-        verbose_name=_("Identifier (Context)"),
-    )
-    type = models.CharField(max_length=30)
-    slug = AutoSlugField(populate_from="id", max_length=512)
+    class Meta:
+        ordering = ["-modified"]
 
 
-class BaseSearchResource(UUIDModel, TimeStampedModel): 
-    
-    class Meta: 
-        abstract = True
-        ordering = ['-modified']
-
-class JSONResource(BaseSearchResource): 
-    """ An example resource for indexing. 
-        """
+class BaseSearchResource(UUIDModel, TimeStampedModel):
     indexables = GenericRelation(
         Indexables,
         content_type_field="resource_content_type",
         object_id_field="resource_id",
-        related_query_name="json_resources", 
+        related_query_name="%(app_label)s_%(class)s",
     )
+
+
+    class Meta:
+        abstract = True
+        ordering = ["-modified"]
+
+
+class JSONResource(BaseSearchResource):
+    """An example resource for indexing."""
     label = models.CharField(max_length=50)
     data = models.JSONField(blank=True)
-
-

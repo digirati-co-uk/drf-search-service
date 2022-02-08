@@ -1,5 +1,7 @@
+import logging
+
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.indexes import GinIndex, HashIndex
 from django.contrib.postgres.search import SearchVectorField, SearchVector
@@ -10,66 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django_extensions.db.fields import AutoSlugField
 from model_utils.models import TimeStampedModel, UUIDModel
 
-
-class Context(TimeStampedModel):
-    """ "
-    Context, i.e. the IIIF collection, manifest, Madoc site or project
-    or any associated resource that is the context for a IIIF resource being indexed and
-    searched against.
-
-    id: Identifier (this is usually the Madoc ID but could be a IIIF @id)
-    type: e.g. Site, Manifest, Collection, Project, etc. Not constrained.
-    slug: a slugify'd version of the id for use in URL routing and URIs
-    """
-
-    id = models.CharField(
-        max_length=512,
-        primary_key=True,
-        editable=True,
-        verbose_name=_("Identifier (Context)"),
-    )
-    type = models.CharField(max_length=30)
-    slug = AutoSlugField(populate_from="id", max_length=512)
-
-
-class IIIFResource(TimeStampedModel):
-    """
-    Abbreviated version of a IIIF Presentation API 3 resource. This is the master document that
-    is returned in search results.
-    """
-
-    madoc_id = models.CharField(
-        max_length=512, primary_key=True, verbose_name=_("Identifier (Madoc)")
-    )
-    madoc_thumbnail = models.URLField(blank=True, null=True)
-    id = models.URLField(verbose_name=_("IIIF id"))
-    slug = AutoSlugField(populate_from="madoc_id", max_length=512)
-    type = models.CharField(max_length=30)
-    label = models.JSONField(blank=True, null=True)
-    thumbnail = models.JSONField(blank=True, null=True)
-    summary = models.JSONField(blank=True, null=True)
-    metadata = models.JSONField(blank=True, null=True)
-    navDate = models.DateTimeField(blank=True, null=True)
-    rights = models.URLField(blank=True, null=True)
-    requiredStatement = models.JSONField(blank=True, null=True)
-    provider = models.JSONField(blank=True, null=True)
-    items = models.ManyToManyField("self", blank=True, related_name="ispartof")
-    contexts = models.ManyToManyField(
-        Context, blank=True, related_name="associated_iiif"
-    )
-    first_canvas_id = models.URLField(
-        verbose_name=_("First canvas IIIF id"), blank=True, null=True
-    )
-    first_canvas_json = models.JSONField(blank=True, null=True)
-
-    class Meta:
-        # Add a postgres index for the search_vector
-        indexes = [
-            models.Index(fields=["type"]),
-            models.Index(fields=["madoc_id"]),
-            models.Index(fields=["id"]),
-            models.Index(fields=["label"]),
-        ]
+logger = logging.getLogger(__name__)
 
 
 class Indexables(UUIDModel, TimeStampedModel):
@@ -117,13 +60,6 @@ class Indexables(UUIDModel, TimeStampedModel):
         verbose_name=_("Identifier (URL/URI/URN) for the content, if it has one"),
         blank=True,
         null=True,
-    )
-    iiif = models.ForeignKey(
-        IIIFResource,
-        related_name="indexables",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
     )
 
     indexable = models.TextField()
@@ -175,3 +111,45 @@ class Indexables(UUIDModel, TimeStampedModel):
             ),
             HashIndex(fields=["indexable"]),
         ]
+
+
+class Context(TimeStampedModel):
+    """ "
+    Context, i.e. the IIIF collection, manifest, Madoc site or project
+    or any associated resource that is the context for a IIIF resource being indexed and
+    searched against.
+
+    id: Identifier (this is usually the Madoc ID but could be a IIIF @id)
+    type: e.g. Site, Manifest, Collection, Project, etc. Not constrained.
+    slug: a slugify'd version of the id for use in URL routing and URIs
+    """
+
+    id = models.CharField(
+        max_length=512,
+        primary_key=True,
+        editable=True,
+        verbose_name=_("Identifier (Context)"),
+    )
+    type = models.CharField(max_length=30)
+    slug = AutoSlugField(populate_from="id", max_length=512)
+
+
+class BaseSearchResource(UUIDModel, TimeStampedModel): 
+    
+    class Meta: 
+        abstract = True
+        ordering = ['-modified']
+
+class JSONResource(BaseSearchResource): 
+    """ An example resource for indexing. 
+        """
+    indexables = GenericRelation(
+        Indexables,
+        content_type_field="resource_content_type",
+        object_id_field="resource_id",
+        related_query_name="json_resources", 
+    )
+    label = models.CharField(max_length=50)
+    data = models.JSONField(blank=True)
+
+

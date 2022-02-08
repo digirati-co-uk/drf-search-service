@@ -2,10 +2,9 @@ from django.urls import path, include
 from rest_framework import routers
 
 from .views import (
-    IIIFViewSet,
+    JSONResourceViewSet,
     ContextViewSet,
     IndexablesViewSet,
-    CaptureModelViewSet,
     IIIFSearch,
     Facets,
     Autocomplete,
@@ -14,8 +13,7 @@ from .views import (
 app_name = "search_service"
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register("capture_model", CaptureModelViewSet, basename="capture_model")
-router.register("iiif", IIIFViewSet, basename="iiif")
+router.register("json_resource", JSONResourceViewSet, basename="iiif")
 router.register("indexables", IndexablesViewSet, basename="indexables")
 router.register("context", ContextViewSet, basename="context")
 router.register("search", IIIFSearch, basename="search")

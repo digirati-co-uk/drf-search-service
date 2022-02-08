@@ -7,7 +7,7 @@ from django.db.models import OuterRef, Subquery
 from django.db.models import Q, Value, FloatField
 from rest_framework.filters import BaseFilterBackend
 
-from .models import IIIFResource, Context, Indexables
+from .models import Context, Indexables
 
 logger = logging.getLogger(__name__)
 

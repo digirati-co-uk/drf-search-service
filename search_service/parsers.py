@@ -19,14 +19,7 @@ from django.utils.translation import get_language
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import JSONParser
 
-from .prezi_upgrader import Upgrader
-
-from .madoc_jwt import (
-    request_madoc_site_urn,
-)
-
 default_lang = get_language()
-upgrader = Upgrader(flags={"default_lang": default_lang})
 
 logger = logging.getLogger(__name__)
 
@@ -241,9 +234,6 @@ class IIIFSearchParser(JSONParser):
             autocomplete_type = request_data.get("autocomplete_type", None)
             autocomplete_subtype = request_data.get("autocomplete_subtype", None)
             autocomplete_query = request_data.get("autocomplete_query", None)
-            if madoc_site_urn := request_madoc_site_urn(parser_context.get("request")):
-                logger.debug(f"Got madoc site urn: {madoc_site_urn}")
-                prefilter_kwargs.append(Q(**{f"madoc_id__startswith": madoc_site_urn}))
             if contexts:
                 prefilter_kwargs.append(Q(**{f"contexts__id__in": contexts}))
             if contexts_all:
@@ -352,82 +342,3 @@ class IIIFSearchParser(JSONParser):
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))
 
-
-def parse_and_configure_iiif_ingest(data, madoc_site_urn=None):
-    """
-    Will return an upgraded manifest and other properties needed by the ingest.
-
-    Expects as input a dict with:
-
-        {
-        "casacde": Boolean,
-        "cascade_canvases": Boolean,
-        "contexts": List,
-        "resource": IIIF Presentation API resource,
-        "id": Madoc ID (string),
-        "thumbnail": Thumbnail URI,
-        }
-
-    :param data:
-    :param madoc_site_urn:
-    :return:
-    """
-    _return = dict(
-        cascade=data.get("cascade", False),
-        cascade_canvases=data.get("cascade_canvases", False),
-        resource_contexts=data.get("contexts", []),
-        iiif3_resource=None,
-        manifest=None,
-        madoc_id=data.get("madoc_id", data.get("id")),
-        madoc_thumbnail=data.get("thumbnail"),
-        child=False,
-        parent=None,
-    )
-    if madoc_site_urn:
-        if not _return["madoc_id"].startswith(f"{madoc_site_urn}|"):
-            _return["madoc_id"] = f"{madoc_site_urn}|{_return['madoc_id']}"
-    if (iiif_resource := data.get("resource")) is not None:
-        if iiif_resource.get("@context") == "http://iiif.io/api/presentation/2/context.json":
-            iiif3 = upgrader.process_resource(iiif_resource, top=True)
-            iiif3["@context"] = "http://iiif.io/api/presentation/3/context.json"
-            _return["iiif3_resource"] = iiif3
-        else:
-            _return["iiif3_resource"] = iiif_resource
-    if (iiif := _return.get("iiif3_resource")) is not None:
-        _return["id"] = iiif.get("id")
-        # Add self to context, this is so that for example, if constrain context to a specific object
-        # it finds content _on_ that object, and not just on objects _within_ that object.
-        if (iiif_type := iiif.get("type")) is not None:
-            _return["resource_contexts"] += [{"id": _return["id"], "type": iiif_type}]
-            _return["type"] = iiif_type
-            if iiif_type == "Manifest":
-                _return["manifest"] = iiif
-    return _return
-
-
-class IIIFCreateUpdateParser(JSONParser):
-    def parse(self, stream, media_type=None, parser_context=None):
-        logger.debug("IIIF Ingest Parser being invoked")
-        parser_context = parser_context or {}
-        encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
-        if madoc_site_urn := request_madoc_site_urn(parser_context["request"]._request):
-            logger.info(f"Got a Madoc Site URN {madoc_site_urn}")
-        else:
-            logger.info("No Madoc Site URN")
-        try:
-            decoded_stream = codecs.getreader(encoding)(stream)
-            request_data = json.loads(decoded_stream.read())
-            logger.debug("We have JSON")
-            if (overridden := parser_context.get("kwargs").get("data_override")) is not None:
-                logger.debug("Overridden")
-                return parse_and_configure_iiif_ingest(
-                    data=overridden, madoc_site_urn=madoc_site_urn
-                )
-            else:
-                logger.debug("Not overridden")
-                parsed = parse_and_configure_iiif_ingest(
-                    data=request_data, madoc_site_urn=madoc_site_urn
-                )
-                return parsed
-        except ValueError as exc:
-            raise ParseError("JSON parse error - %s" % str(exc))

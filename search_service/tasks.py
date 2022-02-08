@@ -1,7 +1,12 @@
 import logging
 
+from .models import (
+    JSONResource,
+)
+
 from .serializers import (
     IndexablesCreateUpdateSerializer,
+    JSONResourceToIndexablesSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,3 +57,8 @@ class BaseSearchServiceIndexingTask(object):
             logger.error("Failed to create indexables")
             logger.info(indexables_serializer.errors)
             return indexables_serializer.errors
+
+
+class JSONResourceIndexingTask(BaseSearchServiceIndexingTask):
+    model = JSONResource
+    serializer_class = JSONResourceToIndexablesSerializer

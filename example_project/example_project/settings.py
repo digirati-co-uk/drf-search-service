@@ -41,11 +41,6 @@ LOGGING = {
             "propagate": True,
             "handlers": ["console"],
         },
-        "exemplar": {
-            "level": "DEBUG",
-            "propagate": True,
-            "handlers": ["console"],
-        },
     },
 }
 
@@ -74,7 +69,6 @@ INSTALLED_APPS = [
     "django_extensions",
     "rest_framework",
     "django_filters",
-    "exemplar",
     "search_service",
 ]
 

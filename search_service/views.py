@@ -19,57 +19,36 @@ from rest_framework.response import Response
 
 
 # Local imports
-from .models import Indexables, IIIFResource, Context
-from .parsers import IIIFSearchParser, IIIFCreateUpdateParser
+from .models import (
+    Indexables,
+    Context,
+    JSONResource,
+)
+from .parsers import IIIFSearchParser
 from .pagination import MadocPagination
-from .prezi_upgrader import Upgrader
 from .serializer_utils import ActionBasedSerializerMixin
 from .serializers import (
+    JSONResourceSerializer,
     IndexablesSerializer,
-    IIIFSerializer,
     ContextSerializer,
-    IIIFSearchSummarySerializer,
-    CaptureModelSerializer,
     AutocompleteSerializer,
-    IIIFCreateUpdateSerializer,
 )
 
 from .filters import IIIFSearchFilter, FacetListFilter, AutoCompleteFilter
 from .indexable_utils import gen_indexables
-from .madoc_jwt import (
-    request_madoc_site_urn,
-)
 
 # Globals
 default_lang = get_language()
-upgrader = Upgrader(flags={"default_lang": default_lang})
 global_facet_on_manifests = settings.FACET_ON_MANIFESTS_ONLY
 global_facet_types = ["metadata"]
 
 logger = logging.getLogger(__name__)
 
 
-class IIIFViewSet(ActionBasedSerializerMixin, viewsets.ModelViewSet):
-    queryset = IIIFResource.objects.all().prefetch_related("contexts")
-    serializer_class = IIIFSerializer
-    serializer_mapping = {
-        "default": IIIFSerializer,
-        "create": IIIFCreateUpdateSerializer,
-        "update": IIIFCreateUpdateSerializer,
-    }
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["madoc_id"]
-    # permission_classes = [AllowAny]
-    parser_classes = [IIIFCreateUpdateParser]
+class JSONResourceViewSet(viewsets.ModelViewSet):
+    queryset = JSONResource.objects.all()
+    serializer_class = JSONResourceSerializer
     lookup_field = "id"
-
-    def get_object(self):
-        if madoc_site_urn := request_madoc_site_urn(self.request):
-            logger.debug(f"Got madoc site urn: {madoc_site_urn}")
-            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-            url_id = self.kwargs.get(lookup_url_kwarg)
-            self.kwargs[lookup_url_kwarg] = f"{madoc_site_urn}|{url_id}"
-        return super().get_object()
 
 
 class ContextViewSet(viewsets.ModelViewSet):
@@ -86,64 +65,9 @@ class IndexablesViewSet(viewsets.ModelViewSet):
     filterset_fields = [
         "resource_id",
         "content_id",
-        "iiif__madoc_id",
-        "iiif__contexts__id",
         "type",
         "subtype",
     ]
-
-
-class CaptureModelViewSet(viewsets.ModelViewSet):
-    """
-    List/Create API view for Indexables that are being created/listed
-    """
-    queryset = Indexables.objects.all()
-    serializer_class = CaptureModelSerializer
-    lookup_field = "id"
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = [
-        "resource_id",
-        "content_id",
-        "iiif__madoc_id",
-        "iiif__contexts__id",
-        "type",
-        "subtype",
-    ]
-
-    def create(self, request, *args, **kwargs):
-        """
-        Override the .create() method on the rest-framework generic ListCreateAPIViewset
-        """
-        data = request.data
-        good_results = []
-        bad_results = []
-        indexables = []
-        if data.get("resource"):
-            indexables = gen_indexables(data)
-        if indexables:
-            for indexable in indexables:
-                serializer = self.get_serializer(data=indexable)  # Serialize the data
-                serializer.is_valid(raise_exception=True)  # Check it's valid
-                self.perform_create(serializer)  # Create the object
-                if serializer.errors != {}:
-                    bad_results.append(
-                        (serializer.data, self.get_success_headers(serializer.data))
-                    )
-                else:
-                    good_results.append(
-                        (serializer.data, self.get_success_headers(serializer.data))
-                    )
-            return_status = status.HTTP_201_CREATED
-            if len(good_results) > 0:
-                if len(bad_results) > 0:
-                    return_status = status.HTTP_206_PARTIAL_CONTENT
-                return Response(
-                    [res[0] for res in good_results],
-                    status=return_status,
-                    headers=good_results[-1][1],
-                )
-            raise ValidationError
-        raise ParseError
 
 
 class SearchBaseClass(viewsets.ReadOnlyModelViewSet):
@@ -151,8 +75,7 @@ class SearchBaseClass(viewsets.ReadOnlyModelViewSet):
     BaseClass for Search Service APIs.
     """
 
-    queryset = IIIFResource.objects.all().distinct().prefetch_related("contexts")
-    serializer_class = IIIFSearchSummarySerializer
+    queryset = Indexables.objects.all().distinct()
     parser_classes = [IIIFSearchParser]
     lookup_field = "id"
     permission_classes = [AllowAny]

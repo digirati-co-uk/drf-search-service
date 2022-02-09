@@ -253,7 +253,7 @@ class GenericFilter(BaseFilterBackend):
                                 output_field=CharField(),
                             ),
                             fullsnip=SearchHeadline(
-                                "indexable",
+                                "indexable_text",
                                 search_query,
                                 start_sel="<b>",
                                 stop_sel="</b>",
@@ -276,6 +276,7 @@ class JSONResourceFilter(BaseFilterBackend):
         and with snippets.
         """
         if (_filter := request.data.get("filter", None)) is not None:
+            query_prefix = request.data.get("query_prefix", "indexables__")
             logger.info(_filter)
             if type(_filter) == Q:
                 queryset = queryset.filter(_filter).distinct()
@@ -285,12 +286,12 @@ class JSONResourceFilter(BaseFilterBackend):
                     queryset = (
                         queryset.annotate(
                             rank=SearchRank(
-                                F("indexables__search_vector"), search_query, cover_density=True
+                                F(f"{query_prefix}search_vector"), search_query, cover_density=True
                             ),
                             snippet=Concat(
                                 Value("'"),
                                 SearchHeadline(
-                                    "indexables__original_content",
+                                    f"{query_prefix}original_content",
                                     search_query,
                                     max_words=50,
                                     min_words=25,
@@ -299,7 +300,7 @@ class JSONResourceFilter(BaseFilterBackend):
                                 output_field=CharField(),
                             ),
                             fullsnip=SearchHeadline(
-                                "indexables__indexable",
+                                f"{query_prefix}indexable_text",
                                 search_query,
                                 start_sel="<b>",
                                 stop_sel="</b>",

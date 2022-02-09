@@ -167,7 +167,7 @@ def parse_facets(facet_queries, prefix_q=""):
                                 Q(  # Iterate the keys in the facet dict to generate the Q()
                                     **{
                                         f"{prefix_q}"
-                                        f"{(lambda k: 'indexable' if k == 'value' else k)(k)}__"
+                                        f"{(lambda k: 'indexable_text' if k == 'value' else k)(k)}__"
                                         f"{facet_operator(k, sorted_facet_query.get('field_lookup', 'iexact'))}": date_query_value(
                                             q_key=k, value=v
                                         )
@@ -180,7 +180,7 @@ def parse_facets(facet_queries, prefix_q=""):
                                     "type",
                                     "subtype",
                                     "group_id",
-                                    "indexable",
+                                    "indexable_text",
                                     "value",
                                     "indexable_int",
                                     "ndexable_float",
@@ -285,7 +285,7 @@ class IIIFSearchParser(JSONParser):
                     [
                         postfilter_q.append(
                             Q(  # Iterate the split words/chars to make the Q objects
-                                **{f"indexables__indexable__icontains": split_search}
+                                **{f"indexables___text_icontains": split_search}
                             )
                         )
                         for split_search in search_string.split()
@@ -485,7 +485,7 @@ class SearchParser(JSONParser):
                     non_vector_search = reduce(
                         and_,
                         [
-                            Q(**{f"{self.q_prefix}indexable__icontains": split_search})
+                            Q(**{f"{self.q_prefix}indexable_text__icontains": split_search})
                             for split_search in search_string.split()
                         ],
                     )
@@ -536,6 +536,7 @@ class SearchParser(JSONParser):
                 "headline_query": headline_query,
                 "facet_list_filters": None,
                 "facet_types": facet_types,
+                "query_prefix": self.q_prefix
             }
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))

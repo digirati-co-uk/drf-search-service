@@ -7,7 +7,6 @@ from dateutil import parser
 import logging
 import unicodedata
 
-
 # Django imports
 from django.conf import settings
 from django.contrib.postgres.search import SearchQuery
@@ -21,6 +20,7 @@ from rest_framework.parsers import JSONParser
 
 
 from .models import BaseSearchResource
+from .settings import search_service_settings
 
 
 default_lang = get_language()
@@ -28,10 +28,10 @@ default_lang = get_language()
 logger = logging.getLogger(__name__)
 
 # Globals
-global_facet_on_manifests = settings.FACET_ON_MANIFESTS_ONLY
+global_facet_on_manifests = search_service_settings.FACET_ON_MANIFESTS_ONLY
 global_facet_types = ["metadata"]
-global_non_latin_fulltext = settings.NONLATIN_FULLTEXT
-global_search_multiple_fields = settings.SEARCH_MULTIPLE_FIELDS
+global_non_latin_fulltext = search_service_settings.NONLATIN_FULLTEXT
+global_search_multiple_fields = search_service_settings.SEARCH_MULTIPLE_FIELDS
 
 
 def date_query_value(q_key, value):

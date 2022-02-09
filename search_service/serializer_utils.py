@@ -294,7 +294,7 @@ def process_field(
 def flatten_iiif_descriptive(iiif, default_language=None, lang_base=None):
     """
     Flatten the descriptive fields in a Presentation API into a list of dicts
-    that can be passed to the Indexables model and serializers
+    that can be passed to the Indexable model and serializers
     """
     field_data = []
     dict_fields = [

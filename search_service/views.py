@@ -20,7 +20,7 @@ from rest_framework.response import Response
 
 # Local imports
 from .models import (
-    Indexables,
+    Indexable,
     JSONResource,
 )
 from .parsers import IIIFSearchParser, SearchParser, JSONSearchParser
@@ -29,9 +29,9 @@ from .serializer_utils import ActionBasedSerializerMixin
 from .serializers import (
     JSONResourceSerializer,
     JSONResourceRelationshipSerializer,
-    IndexedResourceRelationshipSerializer,
-    IndexablesSerializer,
-    IndexablesResultSerializer,
+    ResourceRelationshipSerializer,
+    IndexableSerializer,
+    IndexableResultSerializer,
     JSONSearchSerializer,
     AutocompleteSerializer,
 )
@@ -79,7 +79,7 @@ class JSONResourceViewSet(viewsets.ModelViewSet):
         relations_serializer = JSONResourceRelationshipSerializer(
             relationships, many=True
         )
-        indexed_relations_serializer = IndexedResourceRelationshipSerializer(
+        indexed_relations_serializer = ResourceRelationshipSerializer(
             data=relations_serializer.data, many=True
         )
         indexed_relations_serializer.is_valid(raise_exception=True)
@@ -94,9 +94,9 @@ class JSONResourceViewSet(viewsets.ModelViewSet):
         )
 
 
-class IndexablesViewSet(viewsets.ModelViewSet):
-    queryset = Indexables.objects.all()
-    serializer_class = IndexablesSerializer
+class IndexableViewSet(viewsets.ModelViewSet):
+    queryset = Indexable.objects.all()
+    serializer_class = IndexableSerializer
     lookup_field = "id"
     filter_backends = [DjangoFilterBackend]
     filterset_fields = [
@@ -112,7 +112,7 @@ class IndexablesViewSet(viewsets.ModelViewSet):
 #     BaseClass for Search Service APIs.
 #     """
 #
-#     queryset = Indexables.objects.all().distinct()
+#     queryset = Indexable.objects.all().distinct()
 #     parser_classes = [IIIFSearchParser]
 #     lookup_field = "id"
 #     permission_classes = [AllowAny]
@@ -309,12 +309,12 @@ class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
     BaseClass for Search Service APIs.
     """
 
-    queryset = Indexables.objects.all().distinct()
+    queryset = Indexable.objects.all().distinct()
     parser_classes = [SearchParser]
     lookup_field = "id"
     permission_classes = [AllowAny]
     filter_backends = [GenericFilter]
-    serializer_class = IndexablesResultSerializer
+    serializer_class = IndexableResultSerializer
 
     def create(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -342,7 +342,7 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
 
     parser_classes = [SearchParser]
     filter_backends = [GenericFacetListFilter]
-    serializer_class = IndexablesSerializer
+    serializer_class = IndexableSerializer
 
     def get_facet_list(self, request):
         facet_dict = defaultdict(list)

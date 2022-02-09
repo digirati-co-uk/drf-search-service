@@ -8,7 +8,7 @@ DEFAULT_SETTINGS = {
         "NONLATIN_FULLTEXT": False, 
         "SEARCH_MULTIPLE_FIELDS": False, 
         "THUMBNAIL_FALLBACK": False, 
-        "MAX_PAGE_SIZE": None
+        "MAX_PAGE_SIZE": 25
         }
 
 

@@ -115,10 +115,14 @@ class Indexables(UUIDModel, TimeStampedModel):
 
 
 class IndexedResourceRelationship(UUIDModel, TimeStampedModel):
-    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources")
+    source_content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources"
+    )
     source_id = models.UUIDField()
     source = GenericForeignKey("source_content_type", "source_id")
-    target_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name="%(class)s_targets")
+    target_content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, related_name="%(class)s_targets"
+    )
     target_id = models.UUIDField()
     target = GenericForeignKey("target_content_type", "target_id")
     type = models.CharField(max_length=100)
@@ -135,7 +139,6 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         related_query_name="%(app_label)s_%(class)s",
     )
 
-
     class Meta:
         abstract = True
         ordering = ["-modified"]
@@ -143,5 +146,6 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
 
 class JSONResource(BaseSearchResource):
     """An example resource for indexing."""
+
     label = models.CharField(max_length=50)
     data = models.JSONField(blank=True)

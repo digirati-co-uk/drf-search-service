@@ -328,6 +328,15 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
         return facet_dict
 
     def list(self, request, *args, **kwargs):
-        response = super(GenericFacets, self).list(request, args, kwargs)
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
         response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
+        return response
+
+    def create(self, request, *args, **kwargs):
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
+        response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
         return response

@@ -520,9 +520,12 @@ class SearchParser(JSONParser):
                 }
                 filter_kwargs.update(resource_filter_dict)
             # Construct the Q object by 'AND'-ing everything together
-            filter_q = reduce(
-                and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
-            )
+            if filter_kwargs:
+                filter_q = reduce(
+                    and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
+                )
+            else:
+                filter_q = Q()
             if non_vector_search:
                 filter_q = reduce(and_, [filter_q, non_vector_search])
             if facet_queries:

@@ -270,6 +270,7 @@ class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
     """
     BaseClass for Search Service APIs.
     """
+
     queryset = Indexables.objects.all().distinct()
     parser_classes = [SearchParser]
     lookup_field = "id"
@@ -277,7 +278,7 @@ class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [GenericFilter]
     serializer_class = IndexablesResultSerializer
 
-    def create(self, request, *args, **kwargs): 
+    def create(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
 
@@ -295,11 +296,15 @@ class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
         resp = super().list(request, *args, **kwargs)
         return resp
 
+    def create(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class GenericFacetsViewSet(GenericSearchBaseViewSet):
     """
     Simple read only view to return a list of facet fields
     """
+
     parser_classes = [SearchParser]
     filter_backends = [GenericFacetListFilter]
     serializer_class = IndexablesSerializer
@@ -315,9 +320,7 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
             request.data["facet_types"] = ["metadata"]
         for facet_type in request.data["facet_types"]:
             for t in (
-                facetable_q.filter(type__iexact=facet_type)
-                .values("subtype")
-                .distinct()
+                facetable_q.filter(type__iexact=facet_type).values("subtype").distinct()
             ):
                 for _, v in t.items():
                     if v and v != "":

@@ -278,7 +278,7 @@ class JSONResourceFilter(BaseFilterBackend):
         if (_filter := request.data.get("filter", None)) is not None:
             logger.info(_filter)
             if type(_filter) == Q:
-                queryset = queryset.filter(_filter)
+                queryset = queryset.filter(_filter).distinct()
                 # This only applies if there is a fulltext query we can use to rank
                 # and generate snippets
                 if (search_query := request.data.get("headline_query", None)) is not None:
@@ -310,3 +310,4 @@ class JSONResourceFilter(BaseFilterBackend):
                         .order_by("-rank")
                     )
         return queryset
+

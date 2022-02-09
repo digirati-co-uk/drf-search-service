@@ -135,7 +135,6 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         related_query_name="%(app_label)s_%(class)s",
     )
 
-
     class Meta:
         abstract = True
         ordering = ["-modified"]

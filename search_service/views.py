@@ -264,25 +264,6 @@ class IndexablesViewSet(viewsets.ModelViewSet):
 #         return response
 #
 #
-# class Autocomplete(SearchBaseClass):
-#     queryset = Indexables.objects.all()
-#     serializer_class = AutocompleteSerializer
-#     filter_backends = [AutoCompleteFilter]
-#
-#     def list(self, request, *args, **kwargs):
-#         facetable_queryset = self.filter_queryset(self.get_queryset().all())
-#         raw_data = (
-#             facetable_queryset.values("indexable")
-#             .distinct()
-#             .annotate(n=models.Count("pk", distinct=True))
-#             .order_by("-n")[:10]
-#         )
-#         return_data = {
-#             "results": [
-#                 {"id": x.get("indexable"), "text": x.get("indexable")} for x in raw_data
-#             ]
-#         }
-#         return Response(data=return_data)
 
 
 class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
@@ -349,3 +330,24 @@ class GenericFacets(GenericSearchBaseClass):
         response = super(GenericFacets, self).list(request, args, kwargs)
         response.data = self.get_facet_list(request=request)
         return response
+
+
+# class Autocomplete(GenericSearchBaseClass):
+#     queryset = Indexables.objects.all()
+#     serializer_class = AutocompleteSerializer
+#     filter_backends = [AutoCompleteFilter]
+#
+#     def list(self, request, *args, **kwargs):
+#         facetable_queryset = self.filter_queryset(self.get_queryset().all())
+#         raw_data = (
+#             facetable_queryset.values("indexable")
+#             .distinct()
+#             .annotate(n=models.Count("pk", distinct=True))
+#             .order_by("-n")[:10]
+#         )
+#         return_data = {
+#             "results": [
+#                 {"id": x.get("indexable"), "text": x.get("indexable")} for x in raw_data
+#             ]
+#         }
+#         return Response(data=return_data)

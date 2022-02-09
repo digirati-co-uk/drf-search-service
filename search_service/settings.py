@@ -3,7 +3,13 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SETTINGS = {"CANONICAL_HOSTNAME": ""}
+DEFAULT_SETTINGS = {
+        "FACET_ON_MANIFESTS_ONLY": True, 
+        "NONLATIN_FULLTEXT": False, 
+        "SEARCH_MULTIPLE_FIELDS": False, 
+        "THUMBNAIL_FALLBACK": False, 
+        "MAX_PAGE_SIZE": None
+        }
 
 
 class AppSettings(object):
@@ -26,7 +32,7 @@ class AppSettings(object):
             val = self.user_settings[attr]
         except KeyError:
             # Fall back to defaults
-            val = self.defaults[attr]
+            val = self.default_settings[attr]
         # Cache the result
         setattr(self, attr, val)
         return val

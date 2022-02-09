@@ -9,7 +9,7 @@ from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
-from .models import Indexables
+from .models import Indexable
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ class GenericFacetListFilter(BaseFilterBackend):
 #             if order_key.get("direction") == "descending":
 #                 queryset = queryset.annotate(
 #                     sortk=Subquery(
-#                         Indexables.objects.filter(
+#                         Indexable.objects.filter(
 #                             iiif=OuterRef("pk"),
 #                             type__iexact=order_key.get("type"),
 #                             subtype__iexact=order_key.get("subtype"),
@@ -193,7 +193,7 @@ class GenericFacetListFilter(BaseFilterBackend):
 #             else:
 #                 queryset = queryset.annotate(
 #                     sortk=Subquery(
-#                         Indexables.objects.filter(
+#                         Indexable.objects.filter(
 #                             iiif=OuterRef("pk"),
 #                             type__iexact=order_key.get("type"),
 #                             subtype__iexact=order_key.get("subtype"),

@@ -5,8 +5,8 @@ from .models import (
 )
 
 from .serializers import (
-    IndexablesCreateUpdateSerializer,
-    JSONResourceToIndexablesSerializer,
+    IndexableCreateUpdateSerializer,
+    JSONResourceToIndexableSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class BaseSearchServiceIndexingTask(object):
     def run(self):
         instance = self.get_object()
         instance_indexables = self.get_serializer(instance)
-        indexables_serializer = IndexablesCreateUpdateSerializer(
+        indexables_serializer = IndexableCreateUpdateSerializer(
             data=instance_indexables.data, many=True
         )
         if indexables_serializer.is_valid():
@@ -61,4 +61,4 @@ class BaseSearchServiceIndexingTask(object):
 
 class JSONResourceIndexingTask(BaseSearchServiceIndexingTask):
     model = JSONResource
-    serializer_class = JSONResourceToIndexablesSerializer
+    serializer_class = JSONResourceToIndexableSerializer

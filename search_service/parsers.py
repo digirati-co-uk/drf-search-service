@@ -381,7 +381,7 @@ class IIIFSearchParser(JSONParser):
 class SearchParser(JSONParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
-    that is linked to the Indexables.
+    that is linked to the Indexable.
     """
 
     def __init__(self):
@@ -541,7 +541,7 @@ class SearchParser(JSONParser):
 class JSONSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
-    that is linked to the Indexables.
+    that is linked to the Indexable.
     """
 
     def __init__(self):

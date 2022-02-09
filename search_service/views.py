@@ -266,11 +266,10 @@ class IndexablesViewSet(viewsets.ModelViewSet):
 #
 
 
-class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
+class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
     """
     BaseClass for Search Service APIs.
     """
-
     queryset = Indexables.objects.all().distinct()
     parser_classes = [SearchParser]
     lookup_field = "id"
@@ -278,8 +277,11 @@ class GenericSearchBaseClass(viewsets.ReadOnlyModelViewSet):
     filter_backends = [GenericFilter]
     serializer_class = IndexablesResultSerializer
 
+    def create(self, request, *args, **kwargs): 
+        return super().list(request, *args, **kwargs)
 
-class JSONResourceSearch(GenericSearchBaseClass):
+
+class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
     """ """
 
     queryset = JSONResource.objects.all().distinct()
@@ -294,7 +296,7 @@ class JSONResourceSearch(GenericSearchBaseClass):
         return resp
 
 
-class GenericFacets(GenericSearchBaseClass):
+class GenericFacetsViewSet(GenericSearchBaseViewSet):
     """
     Simple read only view to return a list of facet fields
     """

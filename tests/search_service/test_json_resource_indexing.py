@@ -50,10 +50,13 @@ def test_json_resource_indexables_creation(http_service):
     status = 200
     resource_id = test_data_store.get('json_resource_id')
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}/{resource_id}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
         headers=test_headers
     )
     response_json = response.json()
     assert response.status_code == status
-    assert response_json.get("id") == resource_id
+    assert len(response_json.get("results")) == 3
+    for indexable in response_json.get("results"):
+        assert indexable.get("resource_id") == resource_id
+
 

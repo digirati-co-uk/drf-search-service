@@ -15,6 +15,8 @@ from .serializer_utils import calc_offsets
 
 from .models import (
     Indexables,
+    IndexedResourceRelationship,
+    BaseSearchResource,
     JSONResource,
 )
 
@@ -182,7 +184,6 @@ class JSONResourceToIndexablesSerializer(BaseModelToIndexablesSerializer):
             )
 
         return indexables
-
 
 # class IIIFSearchSummarySerializer(serializers.HyperlinkedModelSerializer):
 #     """
@@ -413,6 +414,17 @@ class JSONResourceToIndexablesSerializer(BaseModelToIndexablesSerializer):
 #         "url": {"view_name": "api:search_service:iiif-detail", "lookup_field": "id"}
 #     }
 
+class IndexedResourceRelationshipSerializer(serializers.ModelSerializer): 
+
+    class Meta: 
+        model = IndexedResourceRelationship
+        fields = ['id', 'created', 'modified', 'type']
+
+class BaseSearchResourceSerializer(serializers.ModelSerializer): 
+
+    class Meta: 
+        model = BaseSearchResource
+        fields = ['id', 'created', 'modified']
 
 class ContentObjectRelatedField(serializers.RelatedField):
     """

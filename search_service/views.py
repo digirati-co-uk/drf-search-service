@@ -4,7 +4,6 @@ import itertools
 import logging
 from collections import defaultdict
 
-from django.conf import settings
 from django.db import models
 from django.utils.translation import get_language
 from django_filters.rest_framework import DjangoFilterBackend
@@ -44,9 +43,11 @@ from .filters import (
 )
 from .indexable_utils import gen_indexables
 
+from .settings import search_service_settings
+
 # Globals
 default_lang = get_language()
-global_facet_on_manifests = settings.FACET_ON_MANIFESTS_ONLY
+global_facet_on_manifests = search_service_settings.FACET_ON_MANIFESTS_ONLY
 global_facet_types = ["metadata"]
 
 logger = logging.getLogger(__name__)

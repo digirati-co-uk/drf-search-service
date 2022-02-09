@@ -169,18 +169,16 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 25,
 }
 
-# Search service settings.
 
-FACET_ON_MANIFESTS_ONLY = True
-# Use fulltext querying for non-latin scripts
-NONLATIN_FULLTEXT = env.bool("NONLATIN_FULLTEXT", False)
-
-# Search across multiple fields on a "fulltext" query (if True), will disable fulltext features
-SEARCH_MULTIPLE_FIELDS = env.bool("SEARCH_MULTIPLE_FIELDS", False)
-
-# Thumbnail request: if set to True if no thumbnail service/block is present on a IIIF resource,
-# fallback to constructing a thumbnail from the image service on the first canvas in that resource on ingest
-# defaults to True, but typically set to False during test coverage, so that we can mock services locally
-THUMBNAIL_FALLBACK = env.bool("THUMBNAIL_FALLBACK", False)
-
-MAX_PAGE_SIZE = env.int("MAX_PAGE_SIZE", None)
+SEARCH_SERVICE = {
+    "FACET_ON_MANIFESTS_ONLY": True,
+    # Use fulltext querying for non-latin scripts
+    "NONLATIN_FULLTEXT": env.bool("NONLATIN_FULLTEXT", False),
+    # Search across multiple fields on a "fulltext" query (if True), will disable fulltext features
+    "SEARCH_MULTIPLE_FIELDS": env.bool("SEARCH_MULTIPLE_FIELDS", False),
+    # Thumbnail request: if set to True if no thumbnail service/block is present on a IIIF resource,
+    # fallback to constructing a thumbnail from the image service on the first canvas in that resource on ingest
+    # defaults to True, but typically set to False during test coverage, so that we can mock services locally
+    "THUMBNAIL_FALLBACK": env.bool("THUMBNAIL_FALLBACK", False),
+    "MAX_PAGE_SIZE": env.int("MAX_PAGE_SIZE", None),
+}

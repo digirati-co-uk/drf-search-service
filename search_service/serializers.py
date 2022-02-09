@@ -469,8 +469,8 @@ class IndexablesResultSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class JSONSearchSerializer(serializers.ModelSerializer):
-    rank = serializers.FloatField()  # Not this isn't ranking the highest (yet)
-    snippet = serializers.CharField()
+    rank = serializers.FloatField(read_only=True)  # Not this isn't ranking the highest (yet)
+    snippet = serializers.CharField(read_only=True)
 
     class Meta:
         model = JSONResource

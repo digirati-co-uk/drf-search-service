@@ -7,6 +7,7 @@ import pytz
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
+from django.utils.module_loading import import_string
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
@@ -411,3 +412,74 @@ class JSONResourceToIndexablesSerializer(BaseModelToIndexablesSerializer):
 #     extra_kwargs = {
 #         "url": {"view_name": "api:search_service:iiif-detail", "lookup_field": "id"}
 #     }
+
+
+class ContentObjectRelatedField(serializers.RelatedField):
+    """
+    A custom field to serialize generic relations
+    """
+
+    def to_representation(self, object):
+        object_app = object._meta.app_label
+        object_name = object._meta.object_name
+        serializer_module_path = f'{object_app}.serializers.{object_name}Serializer'
+        serializer_class = import_string(serializer_module_path)
+        return serializer_class(object).data
+
+
+class IndexablesResultSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serializer for the Indexables with the snippets and ranks included
+    """
+    rank = serializers.FloatField()
+    snippet = serializers.CharField()
+    fullsnip = serializers.CharField()
+
+    class Meta:
+        model = Indexables
+        fields = [
+            "url",
+            "resource_id",
+            "content_id",
+            "original_content",
+            "group_id",
+            "indexable",
+            "indexable_date_range_start",
+            "indexable_date_range_end",
+            "indexable_int",
+            "indexable_float",
+            "indexable_json",
+            "selector",
+            "type",
+            "subtype",
+            "language_iso639_2",
+            "language_iso639_1",
+            "language_display",
+            "language_pg",
+            "rank",
+            "snippet",
+            "fullsnip"
+        ]
+        extra_kwargs = {
+            "url": {
+                "view_name": "api:search_service:indexables-detail",
+                "lookup_field": "id",
+            }
+        }
+
+
+class JSONSearchSerializer(serializers.ModelSerializer):
+    rank = serializers.FloatField()  # Not this isn't ranking the highest (yet)
+    snippet = serializers.CharField()
+
+    class Meta:
+        model = JSONResource
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "label",
+            "data",
+            "rank",
+            "snippet"
+        ]

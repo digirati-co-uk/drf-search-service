@@ -1,8 +1,9 @@
 import logging
-from django.conf import settings
+# from django.conf import settings
 
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from .settings import search_service_settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class MadocPagination(PageNumberPagination):
       }
     """
     page_size_query_param = "page_size"
-    max_page_size = settings.MAX_PAGE_SIZE
+    max_page_size = search_service_settings.MAX_PAGE_SIZE
 
     def get_paginated_response(self, data):
         return Response(

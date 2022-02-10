@@ -253,7 +253,7 @@ class GenericFilter(BaseFilterBackend):
                                 output_field=CharField(),
                             ),
                             fullsnip=SearchHeadline(
-                                "indexable",
+                                "indexable_text",
                                 search_query,
                                 start_sel="<b>",
                                 stop_sel="</b>",
@@ -275,38 +275,52 @@ class JSONResourceFilter(BaseFilterBackend):
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
         """
-        if (_filter := request.data.get("filter", None)) is not None:
-            logger.info(_filter)
-            if type(_filter) == Q:
-                queryset = queryset.filter(_filter)
-                # This only applies if there is a fulltext query we can use to rank
-                # and generate snippets
-                if (search_query := request.data.get("headline_query", None)) is not None:
-                    queryset = (
-                        queryset.annotate(
-                            rank=SearchRank(
-                                F("indexables__search_vector"), search_query, cover_density=True
-                            ),
-                            snippet=Concat(
-                                Value("'"),
-                                SearchHeadline(
-                                    "indexables__original_content",
-                                    search_query,
-                                    max_words=50,
-                                    min_words=25,
-                                    max_fragments=3,
-                                ),
-                                output_field=CharField(),
-                            ),
-                            fullsnip=SearchHeadline(
-                                "indexables__indexable",
-                                search_query,
-                                start_sel="<b>",
-                                stop_sel="</b>",
-                                highlight_all=True,
-                            ),
-                        )
-                        .filter(_filter, rank__gt=0.0)
-                        .order_by("-rank")
-                    )
-        return queryset
+        if (_filter := request.data.get("filter_query", None)) is not None and type(_filter) == Q:
+            queryset = queryset.filter(_filter).distinct()
+        if (facet_filter := request.data.get("facet_filters", None)) is not None \
+                and all([type(f) == Q for f in facet_filter]):
+            for f in facet_filter:
+                logger.info(f)
+                queryset = queryset.filter(*(f,))
+        return queryset.distinct()
+
+
+class RankSnippetFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Return a filtered queryset. Expects a Django Q object
+        to apply the filtering and an optional headline_query
+        which is a SearchQuery object that can be used by
+        SearchRank and SearchHeadline to annotate the results with ranking
+        and with snippets.
+        """
+        query_prefix = request.data.get("query_prefix", "indexables__")
+        if (search_query := request.data.get("headline_query", None)) is not None:
+            queryset = (
+                queryset.annotate(
+                    rank=SearchRank(
+                        F(f"indexables__search_vector"), search_query, cover_density=True
+                    ),
+                    snippet=Concat(
+                        Value("'"),
+                        SearchHeadline(
+                            f"{query_prefix}indexable_text",
+                            search_query,
+                            max_words=50,
+                            min_words=25,
+                            max_fragments=3,
+                        ),
+                        output_field=CharField(),
+                    ),
+                    fullsnip=SearchHeadline(
+                        f"{query_prefix}indexable_text",
+                        search_query,
+                        start_sel="<b>",
+                        stop_sel="</b>",
+                        highlight_all=True,
+                    ),
+                )
+                .filter(rank__gt=0.0)
+                .order_by("-rank")
+            )
+        return queryset.distinct()

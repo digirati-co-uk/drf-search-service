@@ -40,6 +40,7 @@ from .filters import (
     GenericFilter,
     JSONResourceFilter,
     GenericFacetListFilter,
+    RankSnippetFilter
 )
 from .indexable_utils import gen_indexables
 
@@ -328,12 +329,15 @@ class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
     parser_classes = [JSONSearchParser]
     lookup_field = "id"
     permission_classes = [AllowAny]
-    filter_backends = [JSONResourceFilter]
+    filter_backends = [JSONResourceFilter, RankSnippetFilter]
     serializer_class = JSONSearchSerializer
 
     def list(self, request, *args, **kwargs):
         resp = super().list(request, *args, **kwargs)
         return resp
+
+    def create(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class GenericFacetsViewSet(GenericSearchBaseViewSet):
@@ -367,6 +371,15 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
         return facet_dict
 
     def list(self, request, *args, **kwargs):
-        response = super(GenericFacets, self).list(request, args, kwargs)
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
         response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
+        return response
+
+    def create(self, request, *args, **kwargs):
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
+        response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
         return response

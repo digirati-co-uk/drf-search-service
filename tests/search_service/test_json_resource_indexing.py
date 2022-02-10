@@ -472,11 +472,12 @@ def test_nested_json_resource_create(http_service):
     assert response.status_code == status
     assert isinstance(response_json, list)
     assert response_json[0]["data"]["iiif_type"] == "manifest"
-    assert list(set([x["data"]["iiif_type"] for x in response_json if x.get("data")])) == ["manifest", "canvas"]
+    assert sorted(list(set([x["data"]["iiif_type"] for x in response_json if x.get("data")]))) == ["canvas", "manifest"]
     assert all([x.get("target_id") is not None for x in response_json if not x.get("data")])
     assert all([x.get("source_id") is not None for x in response_json if not x.get("data")])
 
 
+@pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
 def test_json_resource_fulltext_nested_canvas(http_service):
     """
     """

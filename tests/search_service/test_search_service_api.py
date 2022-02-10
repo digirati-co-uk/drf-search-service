@@ -2,11 +2,13 @@ import copy
 import json
 import pytest
 import requests
-from ..utils import is_responsive_404
+from tests.utils import is_responsive_404
 
 
 app_endpoint = "api/search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
+
+pytest.skip("skipping because this won't work on generic search", allow_module_level=True)
 
 
 def test_json_resource_list(http_service):

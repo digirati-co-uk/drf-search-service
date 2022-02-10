@@ -310,7 +310,7 @@ def test_json_html_resource_create(http_service):
             "Garibay (Sahagún, Garibay ed., Vol. IV, p. 84) translates "
             'the passage thus: "<em>Día y noche vinieron caminando para comunicar a '
             'Motecuzoma, para decirle y darle a saber con verdad lo que él pudiera saber</em>." </p>',
-            "additional": "The emperor was known as Moctezuma in some texts."
+            "additional": "The emperor was known as Moctezuma in some texts.",
         },
     }
     response = requests.post(
@@ -369,7 +369,11 @@ def test_json_resource_resource_query_by_list(http_service):
 
 def test_json_resource_fulltext_phrase_search(http_service):
     test_endpoint = "json_search"
-    post_json = {"fulltext": "turkey blood", "search_type": "phrase", "search_language": "english"}
+    post_json = {
+        "fulltext": "turkey blood",
+        "search_type": "phrase",
+        "search_language": "english",
+    }
     response = requests.post(
         f"{http_service}/{app_endpoint}/{test_endpoint}",
         json=post_json,
@@ -377,7 +381,9 @@ def test_json_resource_fulltext_phrase_search(http_service):
     )
     response_json = response.json()
     assert len(response_json.get("results")) == 1
-    assert "<b>turkey</b> <b>blood</b>" in response_json["results"][0].get("snippet", None)
+    assert "<b>turkey</b> <b>blood</b>" in response_json["results"][0].get(
+        "snippet", None
+    )
     assert response_json["results"][0]["rank"] > 0
 
 
@@ -426,6 +432,66 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
         headers=test_headers,
     )
     response_json = response.json()
-    assert len(response_json.get("results")) == 2  # One for each indexable, rather than one per resource object
+    assert (
+        len(response_json.get("results")) == 2
+    )  # One for each indexable, rather than one per resource object
     assert "<b>Moctezuma</b>" in response_json["results"][0].get("snippet", None)
+    assert response_json["results"][0]["rank"] == 1.0
+
+
+def test_nested_json_resource_create(http_service):
+    """ """
+    test_endpoint = "json_resource/create_nested"
+    status = 201
+    post_json = {
+        "label": "Manifest Resource",
+        "data": {"iiif_type": "manifest", "volume": "Volume 3"},
+        "child_resources": [
+            {
+                "label": "Vol 3: Canvas 1",
+                "data": {
+                    "iiif_type": "canvas",
+                    "transcript": "The quick brown fox jumped over the lazy dog.",
+                },
+            },
+            {
+                "label": "Vol 3: Canvas 2",
+                "data": {
+                    "iiif_type": "canvas",
+                    "transcript": "Round the rugged rock the ragged rascal ran.",
+                },
+            },
+        ],
+    }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert isinstance(response_json, list)
+    assert response_json[0]["data"]["iiif_type"] == "manifest"
+    assert list(set([x["data"]["iiif_type"] for x in response_json if x.get("data")])) == ["manifest", "canvas"]
+    assert all([x.get("target_id") is not None for x in response_json if not x.get("data")])
+    assert all([x.get("source_id") is not None for x in response_json if not x.get("data")])
+
+
+def test_json_resource_fulltext_nested_canvas(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 "facets": [{"type": "descriptive", "subtype": "iiif_type", "value": "canvas"}]
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 1
+    )
+    assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0

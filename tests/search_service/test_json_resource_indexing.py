@@ -426,6 +426,6 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
         headers=test_headers,
     )
     response_json = response.json()
-    assert len(response_json.get("results")) == 2
+    assert len(response_json.get("results")) == 2  # One for each indexable, rather than one per resource object
     assert "<b>Moctezuma</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0

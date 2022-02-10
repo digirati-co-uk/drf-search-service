@@ -477,8 +477,28 @@ def test_nested_json_resource_create(http_service):
     assert all([x.get("source_id") is not None for x in response_json if not x.get("data")])
 
 
-@pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
 def test_json_resource_fulltext_nested_canvas(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 1
+    )
+    assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
+    assert response_json["results"][0]["rank"] == 1.0
+    assert response_json["results"][0]["data"]["iiif_type"] == "canvas"
+
+
+# @pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
+def test_json_resource_fulltext_nested_canvas_facets(http_service):
     """
     """
     test_endpoint = "json_search"

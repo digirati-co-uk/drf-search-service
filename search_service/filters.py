@@ -275,11 +275,26 @@ class JSONResourceFilter(BaseFilterBackend):
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
         """
-        query_prefix = request.data.get("query_prefix", "indexables__")
         if (_filter := request.data.get("filter_query", None)) is not None and type(_filter) == Q:
             queryset = queryset.filter(_filter).distinct()
-        # Annotate before we apply all of the facet filters as the indexables that match
-        # the fulltext query are not the same indexables that match the facet query
+        if (facet_filter := request.data.get("facet_filters", None)) is not None \
+                and all([type(f) == Q for f in facet_filter]):
+            for f in facet_filter:
+                logger.info(f)
+                queryset = queryset.filter(*(f,))
+        return queryset.distinct()
+
+
+class RankSnippetFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Return a filtered queryset. Expects a Django Q object
+        to apply the filtering and an optional headline_query
+        which is a SearchQuery object that can be used by
+        SearchRank and SearchHeadline to annotate the results with ranking
+        and with snippets.
+        """
+        query_prefix = request.data.get("query_prefix", "indexables__")
         if (search_query := request.data.get("headline_query", None)) is not None:
             queryset = (
                 queryset.annotate(
@@ -308,10 +323,4 @@ class JSONResourceFilter(BaseFilterBackend):
                 .filter(rank__gt=0.0)
                 .order_by("-rank")
             )
-        if (facet_filter := request.data.get("facet_filters", None)) is not None \
-                and all([type(f) == Q for f in facet_filter]):
-            for f in facet_filter:
-                logger.info(f)
-                queryset = queryset.filter(*(f,))
         return queryset.distinct()
-

@@ -9,7 +9,7 @@ from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
-from .models import Indexable
+from .models import Indexable, BaseSearchResource, JSONResource
 
 logger = logging.getLogger(__name__)
 
@@ -316,8 +316,7 @@ class RankSnippetFilter(BaseFilterBackend):
         if (search_query := request.data.get("headline_query", None)) is not None:
             if queryset:
                 return (
-                    queryset[0]
-                    .__class__.objects.all()
+                    queryset[0].__class__.objects.all()  # objects in queryset
                     .filter(pk__in=queryset)
                     .annotate(
                         rank=SearchRank(
@@ -344,7 +343,7 @@ class RankSnippetFilter(BaseFilterBackend):
                             highlight_all=True,
                         ),
                     )
-                    .filter(rank__gt=0.0)
+                    .filter(**{f"{query_prefix}search_vector": search_query}, rank__gt=0.0)
                     .order_by("-rank")
                     .distinct()
                 )

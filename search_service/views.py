@@ -41,7 +41,7 @@ from .filters import (
     ResourceFilter,
     FacetFilter,
     GenericFacetListFilter,
-    RankSnippetFilter
+    RankSnippetFilter,
 )
 from .indexable_utils import gen_indexables
 

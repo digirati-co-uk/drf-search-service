@@ -275,40 +275,43 @@ class JSONResourceFilter(BaseFilterBackend):
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
         """
-        if (_filter := request.data.get("filter", None)) is not None:
-            query_prefix = request.data.get("query_prefix", "indexables__")
-            logger.info(_filter)
-            if type(_filter) == Q:
-                queryset = queryset.filter(_filter).distinct()
-                # This only applies if there is a fulltext query we can use to rank
-                # and generate snippets
-                if (search_query := request.data.get("headline_query", None)) is not None:
-                    queryset = (
-                        queryset.annotate(
-                            rank=SearchRank(
-                                F(f"{query_prefix}search_vector"), search_query, cover_density=True
-                            ),
-                            snippet=Concat(
-                                Value("'"),
-                                SearchHeadline(
-                                    f"{query_prefix}original_content",
-                                    search_query,
-                                    max_words=50,
-                                    min_words=25,
-                                    max_fragments=3,
-                                ),
-                                output_field=CharField(),
-                            ),
-                            fullsnip=SearchHeadline(
-                                f"{query_prefix}indexable_text",
-                                search_query,
-                                start_sel="<b>",
-                                stop_sel="</b>",
-                                highlight_all=True,
-                            ),
-                        )
-                        .filter(_filter, rank__gt=0.0)
-                        .order_by("-rank")
-                    )
-        return queryset
+        query_prefix = request.data.get("query_prefix", "indexables__")
+        if (_filter := request.data.get("filter_query", None)) is not None and type(_filter) == Q:
+            queryset = queryset.filter(_filter).distinct()
+        # Annotate before we apply all of the facet filters as the indexables that match
+        # the fulltext query are not the same indexables that match the facet query
+        if (search_query := request.data.get("headline_query", None)) is not None:
+            queryset = (
+                queryset.annotate(
+                    rank=SearchRank(
+                        F(f"indexables__search_vector"), search_query, cover_density=True
+                    ),
+                    snippet=Concat(
+                        Value("'"),
+                        SearchHeadline(
+                            f"{query_prefix}indexable_text",
+                            search_query,
+                            max_words=50,
+                            min_words=25,
+                            max_fragments=3,
+                        ),
+                        output_field=CharField(),
+                    ),
+                    fullsnip=SearchHeadline(
+                        f"{query_prefix}indexable_text",
+                        search_query,
+                        start_sel="<b>",
+                        stop_sel="</b>",
+                        highlight_all=True,
+                    ),
+                )
+                .filter(rank__gt=0.0)
+                .order_by("-rank")
+            )
+        if (facet_filter := request.data.get("facet_filters", None)) is not None \
+                and all([type(f) == Q for f in facet_filter]):
+            for f in facet_filter:
+                logger.info(f)
+                queryset = queryset.filter(*(f,))
+        return queryset.distinct()
 

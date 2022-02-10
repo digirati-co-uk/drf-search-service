@@ -193,7 +193,7 @@ def parse_facets(facet_queries, prefix_q=""):
                     ],
                 )
             )
-        return reduce(and_, postfilter_q)
+        return postfilter_q
     return
 
 
@@ -395,7 +395,9 @@ class SearchParser(JSONParser):
             request_data = json.loads(decoded_stream.read())
             filter_kwargs = {}
             headline_query = None
-            non_vector_search = None
+            non_vector_search = [Q()]
+            resource_filter_q = [Q()]
+            main_filters = [Q()]
             search_string = request_data.get("fulltext", None)
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")
@@ -462,6 +464,7 @@ class SearchParser(JSONParser):
                 if (
                     non_latin_fulltext or is_latin(search_string)
                 ) and not search_multiple_fields:
+                    logger.info(f"Search string {search_string}")
                     if language:
                         fulltext_q = {
                             f"{self.q_prefix}search_vector": SearchQuery(
@@ -482,13 +485,17 @@ class SearchParser(JSONParser):
                         )
                     filter_kwargs.update(fulltext_q)
                 else:
-                    non_vector_search = reduce(
+                    non_vector_search = [reduce(
                         and_,
                         [
-                            Q(**{f"{self.q_prefix}indexable_text__icontains": split_search})
+                            Q(
+                                **{
+                                    f"{self.q_prefix}indexable_text__icontains": split_search
+                                }
+                            )
                             for split_search in search_string.split()
                         ],
-                    )
+                    )]
             # Add any of the main indexable fields
             filter_kwargs.update(
                 {
@@ -510,34 +517,37 @@ class SearchParser(JSONParser):
             )
             # Add any queries that apply to the associated resource(s)
             if resource_filters and isinstance(resource_filters, list):
-                resource_filter_dict = {
-                    f"{self.q_prefix}{BaseSearchResource._meta.app_label}_"
-                    + f"{resource_filter_item['resource_class']}__"
-                    + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
-                        "value"
-                    ]
+                resource_filter_q = [
+                    Q(**{
+                        f"{self.q_prefix}{BaseSearchResource._meta.app_label}_"
+                        + f"{resource_filter_item['resource_class']}__"
+                        + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
+                            "value"
+                        ]
+                    })
                     for resource_filter_item in resource_filters
-                }
-                filter_kwargs.update(resource_filter_dict)
-            # Construct the Q object by 'AND'-ing everything together
+                ]
             if filter_kwargs:
-                filter_q = reduce(
+                main_filters = [reduce(
                     and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
+                )]
+            # Construct the primary Q object by 'AND'-ing everything together
+            filter_q = reduce(and_, resource_filter_q + non_vector_search + main_filters)
+            if facet_queries:
+                facet_filters = parse_facets(
+                    facet_queries=facet_queries, prefix_q=self.q_prefix
                 )
             else:
-                filter_q = Q()
-            if non_vector_search:
-                filter_q = reduce(and_, [filter_q, non_vector_search])
-            if facet_queries:
-                filter_q = reduce(and_, [filter_q, parse_facets(facet_queries=facet_queries,
-                                                                prefix_q=self.q_prefix)])
-            return {
-                "filter": filter_q,
+                facet_filters = None
+            _return = {
+                "filter_query": filter_q,
                 "headline_query": headline_query,
-                "facet_list_filters": None,
+                "facet_filters": facet_filters,
                 "facet_types": facet_types,
-                "query_prefix": self.q_prefix
+                "query_prefix": self.q_prefix,
             }
+            logger.info(_return)
+            return _return
         except ValueError as exc:
             raise ParseError("JSON parse error - %s" % str(exc))
 

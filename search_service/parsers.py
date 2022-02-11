@@ -398,6 +398,7 @@ class SearchParser(JSONParser):
             non_vector_search = [Q()]
             resource_filter_q = [Q()]
             main_filters = [Q()]
+            facet_on_q = None
             search_string = request_data.get("fulltext", None)
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")
@@ -409,6 +410,8 @@ class SearchParser(JSONParser):
             query_float = request_data.get("float", None)
             facet_types = request_data.get("facet_types", global_facet_types)
             facet_queries = request_data.get("facets", None)
+            facet_on = request_data.get("facet_on", None)
+            facet_on_relationship = request_data.get("facet_on_relationship", None)
             non_latin_fulltext = request_data.get(
                 "non_latin_fulltext", global_non_latin_fulltext
             )
@@ -527,6 +530,8 @@ class SearchParser(JSONParser):
                     })
                     for resource_filter_item in resource_filters
                 ]
+            if facet_on:
+                facet_on_q = Q(**facet_on)
             if filter_kwargs:
                 main_filters = [reduce(
                     and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
@@ -543,6 +548,8 @@ class SearchParser(JSONParser):
                 "filter_query": filter_q,
                 "headline_query": headline_query,
                 "facet_filters": facet_filters,
+                "facet_on": facet_on_q,
+                "facet_relation": facet_on_relationship,
                 "facet_types": facet_types,
                 "query_prefix": self.q_prefix,
             }

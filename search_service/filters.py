@@ -312,10 +312,14 @@ class RankSnippetFilter(BaseFilterBackend):
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
         """
-        query_prefix = request.data.get("query_prefix", "indexables__")
-        if (search_query := request.data.get("headline_query", None)) is not None:
+        if (
+            search_query := request.data.get("headline_query", None)
+        ) is not None and isinstance(search_query, SearchQuery):
             if queryset:
-                matches = Indexable.objects.filter(resource_id=OuterRef('pk')).annotate(highlight=Concat(
+                matches = (
+                    Indexable.objects.filter(resource_id=OuterRef("pk"))
+                    .annotate(
+                        highlight=Concat(
                             Value("'"),
                             SearchHeadline(
                                 "indexable_text",
@@ -325,20 +329,23 @@ class RankSnippetFilter(BaseFilterBackend):
                                 max_fragments=3,
                             ),
                             output_field=CharField(),
-                        )).annotate(
+                        )
+                    )
+                    .annotate(
                         rank=SearchRank(
                             F("search_vector"),
                             search_query,
                             cover_density=True,
-                        )).order_by("-rank")
-                return (
-                    queryset[0].__class__.objects.all()  # objects in queryset
-                    .filter(pk__in=queryset)
-                    .annotate(
-                        rank=Subquery(matches.values('rank')[:1]),
-                        snippet=Subquery(matches.values('highlight')[:1]),
+                        )
                     )
-                    .filter(**{f"{query_prefix}search_vector": search_query}, rank__gt=0.0)
+                    .order_by("-rank")
+                )
+                return (
+                    queryset.annotate(  # this will effectively be Max(rank) as we are ordering by descending rank
+                        rank=Subquery(matches.values("rank")[:1]),
+                        snippet=Subquery(matches.values("highlight")[:1]),
+                    )
+                    .filter(rank__gt=0.0)
                     .order_by("-rank")
                     .distinct()
                 )

@@ -398,7 +398,7 @@ class SearchParser(JSONParser):
             non_vector_search = [Q()]
             resource_filter_q = [Q()]
             main_filters = [Q()]
-            facet_on_q = None
+            facet_on_q = Q()
             search_string = request_data.get("fulltext", None)
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")

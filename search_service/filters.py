@@ -278,7 +278,9 @@ class ResourceFilter(BaseFilterBackend):
         if (_filter := request.data.get("filter_query", None)) is not None and type(
             _filter
         ) == Q:
-            queryset = queryset.filter(_filter)
+            queryset = queryset.filter(
+                _filter
+            )  # .select_related("relationship_sources")
         return queryset
 
 
@@ -289,38 +291,23 @@ class FacetFilter(BaseFilterBackend):
         """
         facetable = queryset
         filter_facetable_resources = request.data.get("facet_on", None)
-        filter_relationship_type = request.data.get("facet_relation", None)
-        if filter_facetable_resources:
-            if filter_relationship_type:
-                facetable = (
-                    queryset[0]
-                    .__class__.objects.all()
-                    .filter(
-                        filter_facetable_resources,
-                        pk__in=queryset.filter(
-                            relationship_sources__type=filter_relationship_type
-                        ).values("relationship_sources__target_id"),
-                    )
+        if filter_facetable_resources and queryset:  # Facet on something other than the original queryset
+            facetable = (
+                queryset.first()
+                .__class__.objects.all()
+                .filter(
+                    filter_facetable_resources,
+                    pk__in=queryset.values("relationship_sources__target_id"),
                 )
-            else:
-                facetable = (
-                    queryset[0]
-                    .__class__.objects.all()
-                    .filter(
-                        filter_facetable_resources,
-                        pk__in=queryset.values("relationship_sources__target_id"),
-                    )
-                )
+            )
         if (
             facet_filter := request.data.get("facet_filters", None)
         ) is not None and all([type(f) == Q for f in facet_filter]):
             for f in facet_filter:
-                logger.info(f)
                 facetable = facetable.filter(*(f,))
         if filter_facetable_resources:
-            logger.info(facetable.all().values("relationship_targets__source_id"))
             return queryset.filter(
-                pk__in=facetable.all().values("relationship_targets__source_id")
+                pk__in=facetable.values("relationship_targets__source_id")
             )
         else:
             return facetable

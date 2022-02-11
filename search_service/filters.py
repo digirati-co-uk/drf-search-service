@@ -315,33 +315,28 @@ class RankSnippetFilter(BaseFilterBackend):
         query_prefix = request.data.get("query_prefix", "indexables__")
         if (search_query := request.data.get("headline_query", None)) is not None:
             if queryset:
-                return (
-                    queryset[0].__class__.objects.all()  # objects in queryset
-                    .filter(pk__in=queryset)
-                    .annotate(
-                        rank=SearchRank(
-                            F(f"{query_prefix}search_vector"),
-                            search_query,
-                            cover_density=True,
-                        ),
-                        snippet=Concat(
+                matches = Indexable.objects.filter(resource_id=OuterRef('pk')).annotate(highlight=Concat(
                             Value("'"),
                             SearchHeadline(
-                                f"{query_prefix}indexable_text",
+                                "indexable_text",
                                 search_query,
                                 max_words=50,
                                 min_words=25,
                                 max_fragments=3,
                             ),
                             output_field=CharField(),
-                        ),
-                        fullsnip=SearchHeadline(
-                            f"{query_prefix}indexable_text",
+                        )).annotate(
+                        rank=SearchRank(
+                            F("search_vector"),
                             search_query,
-                            start_sel="<b>",
-                            stop_sel="</b>",
-                            highlight_all=True,
-                        ),
+                            cover_density=True,
+                        )).order_by("-rank")
+                return (
+                    queryset[0].__class__.objects.all()  # objects in queryset
+                    .filter(pk__in=queryset)
+                    .annotate(
+                        rank=Subquery(matches.values('rank')[:1]),
+                        snippet=Subquery(matches.values('highlight')[:1]),
                     )
                     .filter(**{f"{query_prefix}search_vector": search_query}, rank__gt=0.0)
                     .order_by("-rank")

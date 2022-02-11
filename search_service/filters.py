@@ -9,7 +9,7 @@ from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
-from .models import Indexable
+from .models import Indexable, BaseSearchResource, JSONResource
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +42,7 @@ class GenericFacetListFilter(BaseFilterBackend):
                 for f in request.data["facet_list_filters"]:
                     queryset = queryset.filter(*(f,))
         return queryset
+
 
 # class AutoCompleteFilter(BaseFilterBackend):
 #     def filter_queryset(self, request, queryset, view):
@@ -235,7 +236,9 @@ class GenericFilter(BaseFilterBackend):
                 queryset = queryset.filter(_filter)
                 # This only applies if there is a fulltext query we can use to rank
                 # and generate snippets
-                if (search_query := request.data.get("headline_query", None)) is not None:
+                if (
+                    search_query := request.data.get("headline_query", None)
+                ) is not None:
                     queryset = (
                         queryset.annotate(
                             rank=SearchRank(
@@ -266,61 +269,78 @@ class GenericFilter(BaseFilterBackend):
         return queryset
 
 
-class JSONResourceFilter(BaseFilterBackend):
+class ResourceFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
         Return a filtered queryset. Expects a Django Q object
-        to apply the filtering and an optional headline_query
-        which is a SearchQuery object that can be used by
-        SearchRank and SearchHeadline to annotate the results with ranking
-        and with snippets.
+        to apply the filtering.
         """
-        if (_filter := request.data.get("filter_query", None)) is not None and type(_filter) == Q:
-            queryset = queryset.filter(_filter).distinct()
-        if (facet_filter := request.data.get("facet_filters", None)) is not None \
-                and all([type(f) == Q for f in facet_filter]):
+        if (_filter := request.data.get("filter_query", None)) is not None and type(
+            _filter
+        ) == Q:
+            queryset = queryset.filter(_filter)
+        return queryset
+
+
+class FacetFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        """
+        Return a filtered queryset. Expects a list of Django Q objects.
+        """
+        if (
+            facet_filter := request.data.get("facet_filters", None)
+        ) is not None and all([type(f) == Q for f in facet_filter]):
             for f in facet_filter:
                 logger.info(f)
                 queryset = queryset.filter(*(f,))
-        return queryset.distinct()
+        return queryset
 
 
 class RankSnippetFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
-        Return a filtered queryset. Expects a Django Q object
-        to apply the filtering and an optional headline_query
+        Return a filtered queryset. Expects an optional headline_query
         which is a SearchQuery object that can be used by
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
         """
-        query_prefix = request.data.get("query_prefix", "indexables__")
-        if (search_query := request.data.get("headline_query", None)) is not None:
-            queryset = (
-                queryset.annotate(
-                    rank=SearchRank(
-                        F(f"indexables__search_vector"), search_query, cover_density=True
-                    ),
-                    snippet=Concat(
-                        Value("'"),
-                        SearchHeadline(
-                            f"{query_prefix}indexable_text",
+        if (
+            search_query := request.data.get("headline_query", None)
+        ) is not None and isinstance(search_query, SearchQuery):
+            if queryset:
+                # Create a subquery to produce the matching snippets and ranks
+                # on the Indexables
+                matches = (
+                    Indexable.objects.filter(resource_id=OuterRef("pk"))
+                    .annotate(
+                        highlight=Concat(
+                            Value("'"),
+                            SearchHeadline(
+                                "indexable_text",
+                                search_query,
+                                max_words=50,
+                                min_words=25,
+                                max_fragments=3,
+                            ),
+                            output_field=CharField(),
+                        )
+                    )
+                    .annotate(
+                        rank=SearchRank(
+                            F("search_vector"),
                             search_query,
-                            max_words=50,
-                            min_words=25,
-                            max_fragments=3,
-                        ),
-                        output_field=CharField(),
-                    ),
-                    fullsnip=SearchHeadline(
-                        f"{query_prefix}indexable_text",
-                        search_query,
-                        start_sel="<b>",
-                        stop_sel="</b>",
-                        highlight_all=True,
-                    ),
+                            cover_density=True,
+                        )
+                    )
+                    .order_by("-rank")
                 )
-                .filter(rank__gt=0.0)
-                .order_by("-rank")
-            )
+                return (
+                    queryset.annotate(  # this will effectively be Max(rank) as we are ordering by descending rank
+                        rank=Subquery(matches.values("rank")[:1]),
+                        snippet=Subquery(matches.values("highlight")[:1]),
+                    )
+                    .filter(rank__gt=0.0)
+                    .order_by("-rank")
+                    .distinct()
+                )
         return queryset.distinct()

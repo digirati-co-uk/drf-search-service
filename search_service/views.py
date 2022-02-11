@@ -38,9 +38,10 @@ from .serializers import (
 from .filters import (
     FacetListFilter,
     GenericFilter,
-    JSONResourceFilter,
+    ResourceFilter,
+    FacetFilter,
     GenericFacetListFilter,
-    RankSnippetFilter
+    RankSnippetFilter,
 )
 from .indexable_utils import gen_indexables
 
@@ -329,7 +330,7 @@ class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
     parser_classes = [JSONSearchParser]
     lookup_field = "id"
     permission_classes = [AllowAny]
-    filter_backends = [JSONResourceFilter, RankSnippetFilter]
+    filter_backends = [ResourceFilter, FacetFilter, RankSnippetFilter]
     serializer_class = JSONSearchSerializer
 
     def list(self, request, *args, **kwargs):

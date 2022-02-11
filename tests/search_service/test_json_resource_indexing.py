@@ -206,7 +206,7 @@ def test_json_resource_simple_query_data_key_broader(http_service):
         headers=test_headers,
     )
     response_json = response.json()
-    assert len(response_json.get("results")) == 4
+    assert len(response_json.get("results")) == 2  # No longer one per hit, but one per resource
     assert "<b>Value</b>" in response_json["results"][0].get("snippet", None)
 
 
@@ -422,7 +422,7 @@ def test_json_resource_fulltext_search_single(http_service):
 
 def test_json_resource_fulltext_search_multiple_indexables(http_service):
     """
-    Validate that naive annotation fails because we get TWO results, not one
+    Validate that annotation works because we get 1 result, not 2.
     """
     test_endpoint = "json_search"
     post_json = {"fulltext": "moctezuma"}
@@ -433,8 +433,8 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
     )
     response_json = response.json()
     assert (
-        len(response_json.get("results")) == 2
-    )  # One for each indexable, rather than one per resource object
+        len(response_json.get("results")) == 1
+    )
     assert "<b>Moctezuma</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
 
@@ -477,8 +477,28 @@ def test_nested_json_resource_create(http_service):
     assert all([x.get("source_id") is not None for x in response_json if not x.get("data")])
 
 
-@pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
 def test_json_resource_fulltext_nested_canvas(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 1
+    )
+    assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
+    assert response_json["results"][0]["rank"] == 1.0
+    assert response_json["results"][0]["data"]["iiif_type"] == "canvas"
+
+
+# @pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
+def test_json_resource_fulltext_nested_canvas_facets(http_service):
     """
     """
     test_endpoint = "json_search"

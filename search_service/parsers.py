@@ -411,7 +411,6 @@ class SearchParser(JSONParser):
             facet_types = request_data.get("facet_types", global_facet_types)
             facet_queries = request_data.get("facets", None)
             facet_on = request_data.get("facet_on", None)
-            facet_on_relationship = request_data.get("facet_on_relationship", None)
             non_latin_fulltext = request_data.get(
                 "non_latin_fulltext", global_non_latin_fulltext
             )
@@ -545,12 +544,11 @@ class SearchParser(JSONParser):
             else:
                 facet_filters = None
             _return = {
-                "filter_query": filter_q,
-                "headline_query": headline_query,
-                "facet_filters": facet_filters,
-                "facet_on": facet_on_q,
-                "facet_relation": facet_on_relationship,
-                "facet_types": facet_types,
+                "filter_query": filter_q,  # fulltext plus indexable properties
+                "headline_query": headline_query,  # fulltext
+                "facet_filters": facet_filters,  # facets
+                "facet_on": facet_on_q,  # query that identifies the queryset to facet over
+                "facet_types": facet_types,  # items to return in the facet data on the results
                 "query_prefix": self.q_prefix,
             }
             logger.info(_return)

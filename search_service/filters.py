@@ -273,26 +273,19 @@ class ResourceFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
         Return a filtered queryset. Expects a Django Q object
-        to apply the filtering and an optional headline_query
-        which is a SearchQuery object that can be used by
-        SearchRank and SearchHeadline to annotate the results with ranking
-        and with snippets.
+        to apply the filtering.
         """
         if (_filter := request.data.get("filter_query", None)) is not None and type(
             _filter
         ) == Q:
-            queryset = queryset.filter(_filter).distinct()
-        return queryset.distinct()
+            queryset = queryset.filter(_filter)
+        return queryset
 
 
 class FacetFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
-        Return a filtered queryset. Expects a Django Q object
-        to apply the filtering and an optional headline_query
-        which is a SearchQuery object that can be used by
-        SearchRank and SearchHeadline to annotate the results with ranking
-        and with snippets.
+        Return a filtered queryset. Expects a list of Django Q objects.
         """
         if (
             facet_filter := request.data.get("facet_filters", None)
@@ -300,14 +293,13 @@ class FacetFilter(BaseFilterBackend):
             for f in facet_filter:
                 logger.info(f)
                 queryset = queryset.filter(*(f,))
-        return queryset.distinct()
+        return queryset
 
 
 class RankSnippetFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
-        Return a filtered queryset. Expects a Django Q object
-        to apply the filtering and an optional headline_query
+        Return a filtered queryset. Expects an optional headline_query
         which is a SearchQuery object that can be used by
         SearchRank and SearchHeadline to annotate the results with ranking
         and with snippets.
@@ -316,6 +308,8 @@ class RankSnippetFilter(BaseFilterBackend):
             search_query := request.data.get("headline_query", None)
         ) is not None and isinstance(search_query, SearchQuery):
             if queryset:
+                # Create a subquery to produce the matching snippets and ranks
+                # on the Indexables
                 matches = (
                     Indexable.objects.filter(resource_id=OuterRef("pk"))
                     .annotate(

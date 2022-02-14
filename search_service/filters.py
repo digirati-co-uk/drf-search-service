@@ -231,7 +231,6 @@ class GenericFilter(BaseFilterBackend):
         and with snippets.
         """
         if (_filter := request.data.get("filter", None)) is not None:
-            logger.info(_filter)
             if type(_filter) == Q:
                 queryset = queryset.filter(_filter)
                 # This only applies if there is a fulltext query we can use to rank

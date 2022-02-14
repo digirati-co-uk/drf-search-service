@@ -516,3 +516,61 @@ def test_json_resource_fulltext_nested_canvas_facets(http_service):
     )
     assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
+
+
+def test_json_resource_fulltext_nested_canvas_facet_on_without_query(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 "facets": [{"type": "descriptive", "subtype": "label", "value": "Volume 3"}]
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 0
+    )
+
+
+def test_json_resource_fulltext_nested_canvas_facet_on_with_query(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 3"}],
+                 "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 1
+    )
+    assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
+    assert response_json["results"][0]["rank"] == 1.0
+
+
+def test_json_resource_fulltext_nested_canvas_facet_on_no_match(http_service):
+    """
+    """
+    test_endpoint = "json_search"
+    post_json = {"fulltext": "rugged",
+                 "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 11"}],
+                 "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
+                 }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert (
+        len(response_json.get("results")) == 0
+    )

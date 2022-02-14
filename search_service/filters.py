@@ -9,7 +9,7 @@ from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
-from .models import Indexable, BaseSearchResource, JSONResource
+from .models import Indexable, BaseSearchResource, JSONResource, ResourceRelationship
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +231,6 @@ class GenericFilter(BaseFilterBackend):
         and with snippets.
         """
         if (_filter := request.data.get("filter", None)) is not None:
-            logger.info(_filter)
             if type(_filter) == Q:
                 queryset = queryset.filter(_filter)
                 # This only applies if there is a fulltext query we can use to rank
@@ -278,8 +277,10 @@ class ResourceFilter(BaseFilterBackend):
         if (_filter := request.data.get("filter_query", None)) is not None and type(
             _filter
         ) == Q:
-            queryset = queryset.filter(_filter)
-        return queryset
+            queryset = queryset.filter(
+                _filter
+            )
+        return queryset.prefetch_related("relationship_sources")
 
 
 class FacetFilter(BaseFilterBackend):
@@ -287,13 +288,28 @@ class FacetFilter(BaseFilterBackend):
         """
         Return a filtered queryset. Expects a list of Django Q objects.
         """
+        facetable = queryset
+        filter_facetable_resources = request.data.get("facet_on", None)
+        if filter_facetable_resources and queryset:  # Facet on something other than the original queryset
+            facetable = (
+                queryset.first()
+                .__class__.objects.all()
+                .filter(
+                    filter_facetable_resources,
+                    pk__in=queryset.values("relationship_sources__target_id"),
+                )
+            )
         if (
             facet_filter := request.data.get("facet_filters", None)
         ) is not None and all([type(f) == Q for f in facet_filter]):
             for f in facet_filter:
-                logger.info(f)
-                queryset = queryset.filter(*(f,))
-        return queryset
+                facetable = facetable.filter(*(f,))
+        if filter_facetable_resources:
+            return queryset.filter(
+                pk__in=facetable.values("relationship_targets__source_id")
+            )
+        else:
+            return facetable
 
 
 class RankSnippetFilter(BaseFilterBackend):

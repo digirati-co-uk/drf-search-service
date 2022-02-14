@@ -13,6 +13,10 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from .serializer_utils import calc_offsets
 
+
+from .language.indexable import (
+        format_indexable_language_fields, 
+        )
 from .models import (
     Indexable,
     ResourceRelationship,
@@ -76,7 +80,8 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         }
         indexables_data = []
         for indexable in self.to_indexables(instance):
-            indexables_data.append({**resource_fields, **indexable})
+            indexable_language = format_indexable_language_fields(indexable.pop("language", None))
+            indexables_data.append({**resource_fields, **indexable_language, **indexable)
         return indexables_data
 
 

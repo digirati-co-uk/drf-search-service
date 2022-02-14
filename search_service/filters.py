@@ -279,8 +279,8 @@ class ResourceFilter(BaseFilterBackend):
         ) == Q:
             queryset = queryset.filter(
                 _filter
-            )  # .select_related("relationship_sources")
-        return queryset
+            )
+        return queryset.prefetch_related("relationship_sources")
 
 
 class FacetFilter(BaseFilterBackend):

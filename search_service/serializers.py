@@ -15,8 +15,8 @@ from .serializer_utils import calc_offsets
 
 
 from .language.indexable import (
-        format_indexable_language_fields, 
-        )
+    format_indexable_language_fields,
+)
 from .models import (
     Indexable,
     ResourceRelationship,
@@ -63,8 +63,10 @@ class IndexableSummarySerializer(serializers.HyperlinkedModelSerializer):
 class BaseModelToIndexableSerializer(serializers.Serializer):
     @property
     def data(self):
-        """Bypasses the wrapping of the returned value with a ReturnDict from the serializers.Serializer data method.
-        This allows the serializer to return a list of items from an individual instance.
+        """Bypasses the wrapping of the returned value with a ReturnDict from
+        the serializers.Serializer data method.
+        This allows the serializer to return a list of items from an
+        individual instance.
         """
         if not hasattr(self, "_data"):
             self._data = self.to_representation(self.instance)
@@ -80,8 +82,12 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         }
         indexables_data = []
         for indexable in self.to_indexables(instance):
-            indexable_language = format_indexable_language_fields(indexable.pop("language", None))
-            indexables_data.append({**resource_fields, **indexable_language, **indexable)
+            indexable_language = format_indexable_language_fields(
+                indexable.pop("language", None)
+            )
+            indexables_data.append(
+                {**resource_fields, **indexable_language, **indexable}
+            )
         return indexables_data
 
 

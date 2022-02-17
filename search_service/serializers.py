@@ -1,8 +1,4 @@
 import logging
-import json
-import itertools
-from datetime import datetime
-import pytz
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
@@ -11,8 +7,6 @@ from django.utils.module_loading import import_string
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
-from .serializer_utils import calc_offsets
-
 
 from .language.indexable import (
     format_indexable_language_fields,
@@ -27,7 +21,38 @@ from .models import (
 
 logger = logging.getLogger(__name__)
 
-utc = pytz.UTC
+
+def calc_offsets(obj):
+    """
+    The search "hit" should have a 'fullsnip' annotation which is a the entire
+    text of the indexable resource, with <start_sel> and <end_sel> wrapping each
+    highlighted word.
+
+    Check if there's a selector on the indexable, and then if there's a box-selector
+    use this to generate a list of xywh coordinates by retrieving the selector by
+    its index from a list of lists
+    """
+    if hasattr(obj, "fullsnip"):
+        words = obj.fullsnip.split(" ")
+        offsets = []
+        if words:
+            for i, word in enumerate(words):
+                if "<start_sel>" in word and "<end_sel>" in word:
+                    offsets.append(i)
+            if offsets:
+                if obj.selector:
+                    if (boxes := obj.selector.get("box-selector")) is not None:
+                        box_list = []
+                        for x in offsets:
+                            try:
+                                box_list.append(boxes[x])
+                            except (IndexError, ValueError):
+                                pass
+                        if box_list:
+                            return box_list  # [boxes[x] for x in offsets if boxes[x]]
+                        else:
+                            return
+    return
 
 
 class IndexableSummarySerializer(serializers.HyperlinkedModelSerializer):

@@ -112,10 +112,32 @@ class ResourceFilter(BaseFilterBackend):
         Return a filtered queryset. Expects a Django Q object
         to apply the filtering.
         """
+        query_prefix = request.data.get("query_prefix")
         if (_filter := request.data.get("filter_query", None)) is not None and type(
             _filter
         ) == Q:
             queryset = queryset.filter(_filter)
+        # Apply a list of filters against the resource class objects that the queryset is
+        # filtering over, e.g. to filter by some property of the JSONResource or
+        # any other associated model, e.g. TextResource, IIIFResource, etc.
+        if (_resource_filters := request.data.get("resource_filters", None)) and type(
+            _resource_filters
+        ) == list:
+            if queryset.first():
+                resource_filter_q = [
+                    Q(
+                        **{
+                            f"{query_prefix}{queryset.first()._meta.app_label}_"
+                            + f"{resource_filter_item['resource_class']}__"
+                            + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
+                                "value"
+                            ]
+                        }
+                    )
+                    for resource_filter_item in _resource_filters
+                ]
+                for f in resource_filter_q:
+                    queryset = queryset.filter(*(f,))
         return queryset.prefetch_related("relationship_sources")
 
 

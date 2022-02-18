@@ -399,6 +399,7 @@ class SearchParser(JSONParser):
             resource_filter_q = [Q()]
             main_filters = [Q()]
             facet_on_q = Q()
+            resource_filter_queries = []
             search_string = request_data.get("fulltext", None)
             language = request_data.get("search_language", None)
             search_type = request_data.get("search_type", "websearch")
@@ -487,17 +488,19 @@ class SearchParser(JSONParser):
                         )
                     filter_kwargs.update(fulltext_q)
                 else:
-                    non_vector_search = [reduce(
-                        and_,
-                        [
-                            Q(
-                                **{
-                                    f"{self.q_prefix}indexable_text__icontains": split_search
-                                }
-                            )
-                            for split_search in search_string.split()
-                        ],
-                    )]
+                    non_vector_search = [
+                        reduce(
+                            and_,
+                            [
+                                Q(
+                                    **{
+                                        f"{self.q_prefix}indexable_text__icontains": split_search
+                                    }
+                                )
+                                for split_search in search_string.split()
+                            ],
+                        )
+                    ]
             # Add any of the main indexable fields
             filter_kwargs.update(
                 {
@@ -517,34 +520,41 @@ class SearchParser(JSONParser):
                     if v
                 }
             )
-            # Add any queries that apply to the associated resource(s)
-            if resource_filters and isinstance(resource_filters, list):
-                resource_filter_q = [
-                    Q(**{
-                        f"{self.q_prefix}{BaseSearchResource._meta.app_label}_"
-                        + f"{resource_filter_item['resource_class']}__"
-                        + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
-                            "value"
-                        ]
-                    })
-                    for resource_filter_item in resource_filters
-                ]
             if facet_on:
                 facet_on_q = Q(**facet_on)
             if filter_kwargs:
-                main_filters = [reduce(
-                    and_, [Q(**{key: value}) for key, value in filter_kwargs.items()]
-                )]
+                main_filters = [
+                    reduce(
+                        and_,
+                        [Q(**{key: value}) for key, value in filter_kwargs.items()],
+                    )
+                ]
             # Construct the primary Q object by 'AND'-ing everything together
-            filter_q = reduce(and_, resource_filter_q + non_vector_search + main_filters)
+            filter_q = reduce(
+                and_, resource_filter_q + non_vector_search + main_filters
+            )
             if facet_queries:
                 facet_filters = parse_facets(
                     facet_queries=facet_queries, prefix_q=self.q_prefix
                 )
             else:
                 facet_filters = None
+            # Parse the filters that apply to the resource class associated with this queryset
+            # parser validates that these are all dicts with the right keys but does not
+            # construct the Q object as that requires access to the queryset app label
+            if (
+                resource_filters
+                and isinstance(resource_filters, list)
+                and all([isinstance(x, dict) for x in resource_filters])
+            ):
+                resource_filter_queries += [
+                    d
+                    for d in resource_filters
+                    if all([x in d for x in ["resource_class", "field", "operator", "value"]])
+                ]
             _return = {
                 "filter_query": filter_q,  # fulltext plus indexable properties
+                "resource_filters": resource_filter_queries,
                 "headline_query": headline_query,  # fulltext
                 "facet_filters": facet_filters,  # facets
                 "facet_on": facet_on_q,  # query that identifies the queryset to facet over

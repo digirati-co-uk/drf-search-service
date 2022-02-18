@@ -344,6 +344,29 @@ def test_json_resource_resource_query_by_label(http_service):
     assert len(response_json.get("results")) == 1
 
 
+def test_json_resource_resource_query_by_label_missing(http_service):
+    test_endpoint = "json_search"
+    status = 200
+    post_json = {
+        "resource_filters": [
+            {
+                "value": "I don't exist",
+                "field": "label",
+                "operator": "exact",
+                "resource_class": "jsonresource",
+            }
+        ],
+    }
+    response = requests.post(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert len(response_json.get("results")) == 0
+
+
 def test_json_resource_resource_query_by_list(http_service):
     test_endpoint = "json_search"
     status = 200

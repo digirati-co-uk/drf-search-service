@@ -18,7 +18,7 @@ from .models import (
     Indexable,
     JSONResource,
 )
-from .parsers import IIIFSearchParser, SearchParser, JSONSearchParser
+from .parsers import SearchParser, JSONSearchParser
 from .pagination import MadocPagination
 from .serializers import (
     JSONResourceSerializer,

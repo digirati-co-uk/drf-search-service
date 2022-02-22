@@ -308,6 +308,7 @@ class SearchParser(JSONParser):
                         )
                     }
             else:
+                # Should be an independent `get_non_vector_search` method. 
                 non_vector_search = [
                     reduce(
                         and_,
@@ -369,20 +370,18 @@ class SearchParser(JSONParser):
                 )
             ]
 
+        # Construct the primary Q object by 'AND'-ing everything together
         filter_q = reduce(and_, resource_filter_q + non_vector_search + main_filters)
         return filter_q
 
-
-    def parse(self, stream, media_type=None, parser_context={}):
-        request_data = super().parse(stream, media_type, parser_context)
+    def get_resource_filters(self, request_data):
+        """
+        Parse the filters that apply to the resource class associated with this queryset
+        parser validates that these are all dicts with the right keys but does not
+        construct the Q object as that requires access to the queryset app label
+        """
         resource_filter_queries = []
-
         resource_filters = request_data.get("resource_filters", None)
-        facet_types = request_data.get("facet_types", self.default_facet_types)
-        # Construct the primary Q object by 'AND'-ing everything together
-        # Parse the filters that apply to the resource class associated with this queryset
-        # parser validates that these are all dicts with the right keys but does not
-        # construct the Q object as that requires access to the queryset app label
         if (
             resource_filters
             and isinstance(resource_filters, list)
@@ -395,11 +394,16 @@ class SearchParser(JSONParser):
                     [x in d for x in ["resource_class", "field", "operator", "value"]]
                 )
             ]
+        return resource_filter_queries
+
+    def parse(self, stream, media_type=None, parser_context={}):
+        request_data = super().parse(stream, media_type, parser_context)
+        facet_types = request_data.get("facet_types", self.default_facet_types)
         _return = {
             "filter_query": self.get_filter_query(
                 request_data
             ),  # fulltext plus indexable properties
-            "resource_filters": resource_filter_queries,
+            "resource_filters": self.get_resource_filters(request_data),
             "headline_query": self.get_headline_query(request_data),  # fulltext
             "facet_filters": self.get_facet_filters(request_data),  # facets
             "facet_on": self.get_facet_on_query(
@@ -417,5 +421,4 @@ class JSONSearchParser(SearchParser):
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
-
     q_prefix = "indexables__"

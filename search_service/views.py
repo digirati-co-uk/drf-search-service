@@ -32,7 +32,6 @@ from .serializers import (
 from .utils import ActionBasedSerializerMixin
 
 from .filters import (
-    FacetListFilter,
     GenericFilter,
     ResourceFilter,
     FacetFilter,

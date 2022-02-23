@@ -114,19 +114,19 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         Indexable,
         content_type_field="resource_content_type",
         object_id_field="resource_id",
-        related_query_name="%(app_label)s_%(class)s",
+        related_query_name="%(class)s",
     )
     relationship_sources = GenericRelation(
         ResourceRelationship,
         content_type_field="source_content_type",
         object_id_field="source_id",
-        related_query_name="%(app_label)s_%(class)s_sources",
+        related_query_name="%(class)s_sources",
     )
     relationship_targets = GenericRelation(
         ResourceRelationship,
         content_type_field="target_content_type",
         object_id_field="target_id",
-        related_query_name="%(app_label)s_%(class)s_targets",
+        related_query_name="%(class)s_targets",
     )
 
     class Meta:

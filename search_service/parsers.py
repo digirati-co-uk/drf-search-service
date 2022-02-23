@@ -27,12 +27,6 @@ default_lang = get_language()
 
 logger = logging.getLogger(__name__)
 
-# Globals
-global_facet_on_manifests = search_service_settings.FACET_ON_MANIFESTS_ONLY
-global_facet_types = ["metadata"]
-global_non_latin_fulltext = search_service_settings.NONLATIN_FULLTEXT
-global_search_multiple_fields = search_service_settings.SEARCH_MULTIPLE_FIELDS
-
 
 def date_query_value(q_key, value):
     """
@@ -56,32 +50,6 @@ def date_query_value(q_key, value):
         else:
             return value
     return value
-
-
-def date_q(value, date_query_type=None, q_prefix=""):
-    date_types = {
-        "start": [f"{q_prefix}indexable_date_range_end__gte"],
-        "end": [f"{q_prefix}indexable_date_range_start__lte"],
-        "exact": [
-            f"{q_prefix}indexable_date_range_start",
-            f"{q_prefix}indexable_date_range_end",
-        ],
-    }
-    if value and date_query_type and date_query_type in date_types.keys():
-        try:
-            parsed_date = parser.parse(value)
-            if (
-                parsed_date.tzinfo is None
-                or parsed_date.tzinfo.utcoffset(parsed_date) is None
-            ):
-                query_date = parsed_date.replace(tzinfo=pytz.utc)
-            else:
-                query_date = parsed_date
-        except ValueError:
-            query_date = None
-        if query_date:
-            return {x: query_date for x in date_types[date_query_type]}
-    return
 
 
 def facet_operator(q_key, field_lookup):
@@ -217,354 +185,235 @@ def is_latin(text):
     )
 
 
-class IIIFSearchParser(JSONParser):
-    def parse(self, stream, media_type=None, parser_context=None):
-        logger.debug("IIIF Search Parser being invoked")
-        parser_context = parser_context or {}
-        encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
-        try:
-            decoded_stream = codecs.getreader(encoding)(stream)
-            request_data = json.loads(decoded_stream.read())
-            prefilter_kwargs = []
-            postfilter_q = []
-            filter_kwargs = {}
-            search_string = request_data.get("fulltext", None)
-            date_start = request_data.get("date_start", None)
-            date_end = request_data.get("date_end", None)
-            date_exact = request_data.get("date_exact", None)
-            query_integer = request_data.get("integer", None)
-            query_float = request_data.get("float", None)
-            query_raw = request_data.get("raw", None)
-            language = request_data.get("search_language", None)
-            search_type = request_data.get("search_type", "websearch")
-            facet_fields = request_data.get("facet_fields", None)
-            contexts = request_data.get("contexts", None)
-            contexts_all = request_data.get("contexts_all", None)
-            madoc_identifiers = request_data.get("madoc_identifiers", None)
-            iiif_identifiers = request_data.get("iiif_identifiers", None)
-            facet_queries = request_data.get("facets", None)
-            facet_on_manifests = request_data.get(
-                "facet_on_manifests", global_facet_on_manifests
-            )
-            facet_types = request_data.get("facet_types", global_facet_types)
-            facet_languages = request_data.get("facet_languages")
-            non_latin_fulltext = request_data.get(
-                "non_latin_fulltext", global_non_latin_fulltext
-            )
-            search_multiple_fields = request_data.get(
-                "search_multiple_fields", global_search_multiple_fields
-            )
-            num_facets = request_data.get("number_of_facets", 10)
-            metadata_fields = request_data.get("metadata_fields", None)
-            autocomplete_type = request_data.get("autocomplete_type", None)
-            autocomplete_subtype = request_data.get("autocomplete_subtype", None)
-            autocomplete_query = request_data.get("autocomplete_query", None)
-            if contexts:
-                prefilter_kwargs.append(Q(**{f"contexts__id__in": contexts}))
-            if contexts_all:
-                for c in contexts_all:
-                    prefilter_kwargs.append(Q(**{"contexts__id__iexact": c}))
-            if madoc_identifiers:
-                prefilter_kwargs.append(Q(**{f"madoc_id__in": madoc_identifiers}))
-            if iiif_identifiers:
-                prefilter_kwargs.append(Q(**{f"id__in": iiif_identifiers}))
-            if search_string:
-                if (
-                    non_latin_fulltext or is_latin(search_string)
-                ) and not search_multiple_fields:
-                    # Search string is good candidate for fulltext query and we are not searching across multiple fields
-                    if language:
-                        filter_kwargs["indexables__search_vector"] = SearchQuery(
-                            search_string, config=language, search_type=search_type
-                        )
-                    else:
-                        filter_kwargs["indexables__search_vector"] = SearchQuery(
-                            search_string, search_type=search_type
-                        )
-                else:
-                    [
-                        postfilter_q.append(
-                            Q(  # Iterate the split words/chars to make the Q objects
-                                **{f"indexables___text_icontains": split_search}
-                            )
-                        )
-                        for split_search in search_string.split()
-                    ]
-            for p in [
-                "type",
-                "subtype",
-                "language_iso639_2",
-                "language_iso639_1",
-                "language_display",
-                "language_pg",
-                "group_id",
-            ]:
-                if request_data.get(p, None):
-                    filter_kwargs[f"indexables__{p}__iexact"] = request_data[p]
-            if query_raw and isinstance(query_raw, dict):
-                for raw_k, raw_v in query_raw.items():
-                    if raw_k.startswith(
-                        ("indexables__", "type__", "madoc_id__", "id__")
-                    ):
-                        filter_kwargs[raw_k] = raw_v
-            if query_float:
-                if query_float.get("value"):
-                    if query_float.get("operator", "exact") in [
-                        "exact",
-                        "gt",
-                        "lt",
-                        "gte",
-                        "lte",
-                    ]:
-                        filter_kwargs[
-                            f"indexables__indexable_float__{query_float.get('operator', 'exact')}"
-                        ] = query_float["value"]
-            if query_integer:
-                if query_integer.get("value"):
-                    if query_integer.get("operator", "exact") in [
-                        "exact",
-                        "gt",
-                        "lt",
-                        "gte",
-                        "lte",
-                    ]:
-                        filter_kwargs[
-                            f"indexables__indexable_integer__{query_integer.get('operator', 'exact')}"
-                        ] = query_integer["value"]
-            if date_start:
-                date_kwargs = date_q(value=date_start, date_query_type="start")
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            if date_end:
-                date_kwargs = date_q(value=date_end, date_query_type="end")
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            if date_exact:
-                date_kwargs = date_q(value=date_exact, date_query_type="exact")
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            if facet_queries:
-                postfilter_q += parse_facets(facet_queries=facet_queries)
-            hits_filter_kwargs = {
-                k.replace("indexables__", ""): v
-                for k, v in filter_kwargs.items()
-                if k.startswith("indexables")
-            }
-            if search_string:
-                hits_filter_kwargs["search_string"] = search_string
-            if language:
-                hits_filter_kwargs["language"] = language
-            if search_type:
-                hits_filter_kwargs["search_type"] = search_type
-            sort_order = request_data.get("ordering", {"ordering": "descending"})
-            logger.info(f"Filter kwargs: {filter_kwargs}")
-            return {
-                "prefilter_kwargs": prefilter_kwargs,
-                "filter_kwargs": filter_kwargs,
-                "postfilter_kwargs": postfilter_q,
-                "facet_fields": facet_fields,
-                "hits_filter_kwargs": hits_filter_kwargs,
-                "sort_order": sort_order,
-                "facet_on_manifest": facet_on_manifests,
-                "facet_types": facet_types,
-                "facet_languages": facet_languages,
-                "num_facets": num_facets,
-                "metadata_fields": metadata_fields,
-                "autocomplete_type": autocomplete_type,
-                "autocomplete_subtype": autocomplete_subtype,
-                "autocomplete_query": autocomplete_query,
-            }
-        except ValueError as exc:
-            raise ParseError("JSON parse error - %s" % str(exc))
-
-
 class SearchParser(JSONParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
 
-    def __init__(self):
-        self.q_prefix = ""
+    numerical_operators = [
+        "exact",
+        "gt",
+        "lt",
+        "gte",
+        "lte",
+    ]
+    default_search_language = None
+    default_search_type = search_service_settings.DEFAULT_SEARCH_TYPE
+    default_facet_types = search_service_settings.DEFAULT_FACET_TYPES
+    q_prefix = ""
 
-    def parse(self, stream, media_type=None, parser_context=None):
-        parser_context = parser_context or {}
-        encoding = parser_context.get("encoding", settings.DEFAULT_CHARSET)
-        try:
-            decoded_stream = codecs.getreader(encoding)(stream)
-            request_data = json.loads(decoded_stream.read())
-            filter_kwargs = {}
-            headline_query = None
-            non_vector_search = [Q()]
-            resource_filter_q = [Q()]
-            main_filters = [Q()]
-            facet_on_q = Q()
-            resource_filter_queries = []
-            search_string = request_data.get("fulltext", None)
-            language = request_data.get("search_language", None)
-            search_type = request_data.get("search_type", "websearch")
-            resource_filters = request_data.get("resource_filters", None)
-            date_start = request_data.get("date_start", None)
-            date_end = request_data.get("date_end", None)
-            date_exact = request_data.get("date_exact", None)
-            query_integer = request_data.get("integer", None)
-            query_float = request_data.get("float", None)
-            facet_types = request_data.get("facet_types", global_facet_types)
-            facet_queries = request_data.get("facets", None)
-            facet_on = request_data.get("facet_on", None)
-            non_latin_fulltext = request_data.get(
-                "non_latin_fulltext", global_non_latin_fulltext
-            )
-            search_multiple_fields = request_data.get(
-                "search_multiple_fields", global_search_multiple_fields
-            )
-            # Numerical queries
-            if query_float:
-                if query_float.get("value"):
-                    if query_float.get("operator", "exact") in [
-                        "exact",
-                        "gt",
-                        "lt",
-                        "gte",
-                        "lte",
-                    ]:
-                        filter_kwargs[
-                            f"{self.q_prefix}indexable_float__{query_float.get('operator', 'exact')}"
-                        ] = query_float["value"]
-            if query_integer:
-                if query_integer.get("value"):
-                    if query_integer.get("operator", "exact") in [
-                        "exact",
-                        "gt",
-                        "lt",
-                        "gte",
-                        "lte",
-                    ]:
-                        filter_kwargs[
-                            f"{self.q_prefix}indexable_integer__{query_integer.get('operator', 'exact')}"
-                        ] = query_integer["value"]
-            # Date queries
-            if date_start:
-                date_kwargs = date_q(
-                    value=date_start, date_query_type="start", q_prefix=self.q_prefix
-                )
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            if date_end:
-                date_kwargs = date_q(
-                    value=date_end, date_query_type="end", q_prefix=self.q_prefix
-                )
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            if date_exact:
-                date_kwargs = date_q(
-                    value=date_exact, date_query_type="exact", q_prefix=self.q_prefix
-                )
-                if date_kwargs:
-                    filter_kwargs.update(date_kwargs)
-            # Fulltext search
-            if search_string:
-                if (
-                    non_latin_fulltext or is_latin(search_string)
-                ) and not search_multiple_fields:
-                    logger.info(f"Search string {search_string}")
-                    if language:
-                        fulltext_q = {
-                            f"{self.q_prefix}search_vector": SearchQuery(
-                                search_string, config=language, search_type=search_type
-                            )
-                        }
-                        headline_query = SearchQuery(
-                            search_string, config=language, search_type=search_type
-                        )
+    def float_filter_kwargs(self, request_data, key="float", default_value=None):
+        f_kwargs = {}
+        if query := request_data.get(key, default_value):
+            if (value := query.get("value")) and (
+                operator := query.get("operator", "exact")
+            ) in self.numerical_operators:
+                f_kwargs[f"{self.q_prefix}indexable_float__{operator}"] = value
+        return f_kwargs
+
+    def integer_filter_kwargs(self, request_data, key="integer", default_value=None):
+        f_kwargs = {}
+        if query := request_data.get(key, default_value):
+            if (value := query.get("value")) and (
+                operator := query.get("operator", "exact")
+            ) in self.numerical_operators:
+                f_kwargs[f"{self.q_prefix}indexable_integer__{operator}"] = value
+        return f_kwargs
+
+    def date_filter_kwargs(self, request_data, key="date_exact", default_value=None):
+        date_types = {
+            "date_start": [f"{self.q_prefix}indexable_date_range_end__gte"],
+            "date_end": [f"{self.q_prefix}indexable_date_range_start__lte"],
+            "date_exact": [
+                f"{self.q_prefix}indexable_date_range_start",
+                f"{self.q_prefix}indexable_date_range_end",
+            ],
+        }
+        f_kwargs = {}
+        if query := request_data.get(key, default_value):
+            if value := query.get("value"):
+                try:
+                    parsed_date = parser.parse(value)
+                    if (
+                        parsed_date.tzinfo is None
+                        or parsed_date.tzinfo.utcoffset(parsed_date) is None
+                    ):
+                        query_date = parsed_date.replace(tzinfo=pytz.utc)
                     else:
-                        fulltext_q = {
-                            f"{self.q_prefix}search_vector": SearchQuery(
-                                search_string, search_type=search_type
-                            )
-                        }
-                        headline_query = SearchQuery(
+                        query_date = parsed_date
+
+                    f_kwargs = {x: query_date for x in date_types[key]}
+                except ValueError:
+                    pass
+        return f_kwargs
+
+    def indexable_field_filter_kwargs(self, request_data):
+        indexable_fields = [
+            "type",
+            "subtype",
+            "language_iso639_2",
+            "language_iso639_1",
+            "language_display",
+            "language_pg",
+            "group_id",
+        ]
+        return {
+            f"{self.q_prefix}{indexable_field}__iexact": value
+            for indexable_field in indexable_fields
+            if (value := request_data.get(indexable_field))
+        }
+
+    def parse_filter_kwargs(self, request_data):
+        return {
+            **self.float_filter_kwargs(request_data),
+            **self.integer_filter_kwargs(request_data),
+            **self.date_filter_kwargs(request_data, key="date_start"),
+            **self.date_filter_kwargs(request_data, key="date_end"),
+            **self.date_filter_kwargs(request_data, key="date_exact"),
+            **self.integer_filter_kwargs(request_data),
+        }
+
+    def parse_search_query(self, request_data):
+        non_vector_search = [Q()]
+        filter_kwargs = {}
+        search_language = request_data.get(
+            "search_language", self.default_search_language
+        )
+        search_type = request_data.get("search_type", self.default_search_type)
+        non_latin_fulltext = request_data.get(
+            "non_latin_fulltext", search_service_settings.NONLATIN_FULLTEXT
+        )
+        search_multiple_fields = request_data.get(
+            "search_multiple_fields", search_service_settings.SEARCH_MULTIPLE_FIELDS
+        )
+
+        if search_string := request_data.get("fulltext", None):
+            if (
+                non_latin_fulltext or is_latin(search_string)
+            ) and not search_multiple_fields:
+                logger.info(f"Search string {search_string}")
+                if search_language:
+                    filter_kwargs = {
+                        f"{self.q_prefix}search_vector": SearchQuery(
+                            search_string,
+                            config=search_language,
+                            search_type=search_type,
+                        )
+                    }
+                else:
+                    filter_kwargs = {
+                        f"{self.q_prefix}search_vector": SearchQuery(
                             search_string, search_type=search_type
                         )
-                    filter_kwargs.update(fulltext_q)
-                else:
-                    non_vector_search = [
-                        reduce(
-                            and_,
-                            [
-                                Q(
-                                    **{
-                                        f"{self.q_prefix}indexable_text__icontains": split_search
-                                    }
-                                )
-                                for split_search in search_string.split()
-                            ],
-                        )
-                    ]
-            # Add any of the main indexable fields
-            filter_kwargs.update(
-                {
-                    k: v
-                    for k, v in {
-                        f"{self.q_prefix}{p}__iexact": request_data.get(p, None)
-                        for p in [
-                            "type",
-                            "subtype",
-                            "language_iso639_2",
-                            "language_iso639_1",
-                            "language_display",
-                            "language_pg",
-                            "group_id",
-                        ]
-                    }.items()
-                    if v
-                }
-            )
-            if facet_on:
-                facet_on_q = Q(**facet_on)
-            if filter_kwargs:
-                main_filters = [
+                    }
+            else:
+                # Should be an independent `get_non_vector_search` method. 
+                non_vector_search = [
                     reduce(
                         and_,
-                        [Q(**{key: value}) for key, value in filter_kwargs.items()],
+                        [
+                            Q(
+                                **{
+                                    f"{self.q_prefix}indexable_text__icontains": split_search
+                                }
+                            )
+                            for split_search in search_string.split()
+                        ],
                     )
                 ]
-            # Construct the primary Q object by 'AND'-ing everything together
-            filter_q = reduce(
-                and_, resource_filter_q + non_vector_search + main_filters
-            )
-            if facet_queries:
-                facet_filters = parse_facets(
-                    facet_queries=facet_queries, prefix_q=self.q_prefix
+        return filter_kwargs, non_vector_search
+
+    def get_headline_query(self, request_data):
+        headline_query = None
+        search_type = request_data.get("search_type", self.default_search_type)
+        if search_string := request_data.get("fulltext", None):
+            if search_language := request_data.get("search_language", None):
+                headline_query = SearchQuery(
+                    search_string, config=search_language, search_type=search_type
                 )
             else:
-                facet_filters = None
-            # Parse the filters that apply to the resource class associated with this queryset
-            # parser validates that these are all dicts with the right keys but does not
-            # construct the Q object as that requires access to the queryset app label
-            if (
-                resource_filters
-                and isinstance(resource_filters, list)
-                and all([isinstance(x, dict) for x in resource_filters])
-            ):
-                resource_filter_queries += [
-                    d
-                    for d in resource_filters
-                    if all([x in d for x in ["resource_class", "field", "operator", "value"]])
-                ]
-            _return = {
-                "filter_query": filter_q,  # fulltext plus indexable properties
-                "resource_filters": resource_filter_queries,
-                "headline_query": headline_query,  # fulltext
-                "facet_filters": facet_filters,  # facets
-                "facet_on": facet_on_q,  # query that identifies the queryset to facet over
-                "facet_types": facet_types,  # items to return in the facet data on the results
-                "query_prefix": self.q_prefix,
-            }
-            logger.info(_return)
-            return _return
-        except ValueError as exc:
-            raise ParseError("JSON parse error - %s" % str(exc))
+                headline_query = SearchQuery(search_string, search_type=search_type)
+
+        return headline_query
+
+    def get_facet_on_query(self, request_data):
+        facet_on_q = Q()
+        if facet_on := request_data.get("facet_on", None):
+            facet_on_q = Q(**facet_on)
+        return facet_on_q
+
+    def get_facet_filters(self, request_data):
+        facet_filters = None
+        if facet_queries := request_data.get("facets", None):
+            facet_filters = parse_facets(
+                facet_queries=facet_queries, prefix_q=self.q_prefix
+            )
+
+        return facet_filters
+
+    def get_filter_query(self, request_data):
+        non_vector_search = [Q()]
+        main_filters = [Q()]
+        filter_kwargs = self.parse_filter_kwargs(request_data)
+        # Fulltext search
+        search_query_filter_kwargs, non_vector_search = self.parse_search_query(
+            request_data
+        )
+        filter_kwargs = {**filter_kwargs, **search_query_filter_kwargs}
+        resource_filter_q = [Q()]
+        if filter_kwargs:
+            main_filters = [
+                reduce(
+                    and_,
+                    [Q(**{key: value}) for key, value in filter_kwargs.items()],
+                )
+            ]
+
+        # Construct the primary Q object by 'AND'-ing everything together
+        filter_q = reduce(and_, resource_filter_q + non_vector_search + main_filters)
+        return filter_q
+
+    def get_resource_filters(self, request_data):
+        """
+        Parse the filters that apply to the resource class associated with this queryset
+        parser validates that these are all dicts with the right keys but does not
+        construct the Q object as that requires access to the queryset app label
+        """
+        resource_filter_queries = []
+        resource_filters = request_data.get("resource_filters", None)
+        if (
+            resource_filters
+            and isinstance(resource_filters, list)
+            and all([isinstance(x, dict) for x in resource_filters])
+        ):
+            resource_filter_queries += [
+                d
+                for d in resource_filters
+                if all(
+                    [x in d for x in ["resource_class", "field", "operator", "value"]]
+                )
+            ]
+        return resource_filter_queries
+
+    def parse(self, stream, media_type=None, parser_context={}):
+        request_data = super().parse(stream, media_type, parser_context)
+        facet_types = request_data.get("facet_types", self.default_facet_types)
+        _return = {
+            "filter_query": self.get_filter_query(
+                request_data
+            ),  # fulltext plus indexable properties
+            "resource_filters": self.get_resource_filters(request_data),
+            "headline_query": self.get_headline_query(request_data),  # fulltext
+            "facet_filters": self.get_facet_filters(request_data),  # facets
+            "facet_on": self.get_facet_on_query(
+                request_data
+            ),  # query that identifies the queryset to facet over
+            "facet_types": facet_types,  # items to return in the facet data on the results
+            "query_prefix": self.q_prefix,
+        }
+        logger.info(_return)
+        return _return
 
 
 class JSONSearchParser(SearchParser):
@@ -572,7 +421,4 @@ class JSONSearchParser(SearchParser):
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
-
-    def __init__(self):
-        super().__init__()
-        self.q_prefix = "indexables__"
+    q_prefix = "indexables__"

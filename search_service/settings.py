@@ -8,6 +8,8 @@ DEFAULT_SETTINGS = {
         "NONLATIN_FULLTEXT": False, 
         "SEARCH_MULTIPLE_FIELDS": False, 
         "THUMBNAIL_FALLBACK": False, 
+        "DEFAULT_SEARCH_TYPE": "websearch", 
+        "DEFAULT_FACET_TYPES": ["metadata"], 
         "MAX_PAGE_SIZE": 25
         }
 

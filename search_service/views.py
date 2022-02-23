@@ -18,7 +18,7 @@ from .models import (
     Indexable,
     JSONResource,
 )
-from .parsers import IIIFSearchParser, SearchParser, JSONSearchParser
+from .parsers import SearchParser, JSONSearchParser
 from .pagination import MadocPagination
 from .serializers import (
     JSONResourceSerializer,
@@ -32,7 +32,6 @@ from .serializers import (
 from .utils import ActionBasedSerializerMixin
 
 from .filters import (
-    FacetListFilter,
     GenericFilter,
     ResourceFilter,
     FacetFilter,

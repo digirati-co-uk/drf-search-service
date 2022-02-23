@@ -14,21 +14,6 @@ from .models import Indexable, BaseSearchResource, JSONResource, ResourceRelatio
 logger = logging.getLogger(__name__)
 
 
-class FacetListFilter(BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
-        """
-        Return a filtered queryset.
-        """
-
-        if request.data.get("prefilter_kwargs", None):
-            # Just check if this thing is all nested Q() objects
-            if all([type(k) == Q for k in request.data["prefilter_kwargs"]]):
-                # This is a chaining operation
-                for f in request.data["prefilter_kwargs"]:
-                    queryset = queryset.filter(*(f,))
-        return queryset
-
-
 class GenericFacetListFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
@@ -40,21 +25,6 @@ class GenericFacetListFilter(BaseFilterBackend):
             if all([type(k) == Q for k in request.data["facet_list_filters"]]):
                 # This is a chaining operation
                 for f in request.data["facet_list_filters"]:
-                    queryset = queryset.filter(*(f,))
-        return queryset
-
-
-class FacetListFilter(BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
-        """
-        Return a filtered queryset.
-        """
-
-        if request.data.get("prefilter_kwargs", None):
-            # Just check if this thing is all nested Q() objects
-            if all([type(k) == Q for k in request.data["prefilter_kwargs"]]):
-                # This is a chaining operation
-                for f in request.data["prefilter_kwargs"]:
                     queryset = queryset.filter(*(f,))
         return queryset
 
@@ -127,7 +97,7 @@ class ResourceFilter(BaseFilterBackend):
                 resource_filter_q = [
                     Q(
                         **{
-                            f"{query_prefix}{queryset.first()._meta.app_label}_"
+                            f"{query_prefix}"
                             + f"{resource_filter_item['resource_class']}__"
                             + f"{resource_filter_item['field']}__{resource_filter_item['operator']}": resource_filter_item[
                                 "value"

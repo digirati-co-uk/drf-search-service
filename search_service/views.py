@@ -16,8 +16,10 @@ from rest_framework.response import Response
 # Local imports
 from .models import (
     Indexable,
+    ResourceRelationship,
     JSONResource,
 )
+
 from .parsers import SearchParser, JSONSearchParser
 from .pagination import MadocPagination
 from .serializers import (
@@ -96,6 +98,12 @@ class IndexableViewSet(viewsets.ModelViewSet):
         "type",
         "subtype",
     ]
+
+class ResourceRelationshipViewSet(viewsets.ModelViewSet): 
+    queryset = ResourceRelationship.objects.all()
+    serializer_class = ResourceRelationshipSerializer
+    lookup_field = "id"
+
 
 
 class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):

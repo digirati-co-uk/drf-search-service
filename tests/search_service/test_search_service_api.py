@@ -24,18 +24,7 @@ def test_json_resource_list(http_service):
 
 def test_indexables_list(http_service):
     """ """
-    test_endpoint = "indexables"
-    status = 200
-    response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
-    )
-    resp_data = response.json()
-    assert response.status_code == status
-
-
-def test_contexts_list(http_service):
-    """ """
-    test_endpoint = "context"
+    test_endpoint = "indexable"
     status = 200
     response = requests.get(
         f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers

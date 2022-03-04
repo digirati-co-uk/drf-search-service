@@ -4,6 +4,7 @@ from rest_framework import routers
 from .views import (
     JSONResourceViewSet,
     IndexableViewSet,
+    ResourceRelationshipViewSet,
     JSONResourceSearchViewSet,
     GenericSearchBaseViewSet,
 )
@@ -11,8 +12,9 @@ from .views import (
 app_name = "search_service"
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register("json_resource", JSONResourceViewSet, basename="iiif")
-router.register("indexables", IndexableViewSet, basename="indexables")
+router.register("json_resource", JSONResourceViewSet)
+router.register("indexable", IndexableViewSet)
+router.register("resource_relationship", ResourceRelationshipViewSet)
 router.register("generic_search", GenericSearchBaseViewSet, basename="generic_search")
 router.register("json_search", JSONResourceSearchViewSet, basename="json_search")
 

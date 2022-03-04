@@ -153,7 +153,7 @@ class IndexableSerializer(serializers.HyperlinkedModelSerializer):
         ]
         extra_kwargs = {
             "url": {
-                "view_name": "api:search_service:indexables-detail",
+                "view_name": "api:search_service:indexable-detail",
                 "lookup_field": "id",
             }
         }
@@ -295,7 +295,7 @@ class IndexableResultSerializer(serializers.HyperlinkedModelSerializer):
         ]
         extra_kwargs = {
             "url": {
-                "view_name": "api:search_service:indexables-detail",
+                "view_name": "api:search_service:indexable-detail",
                 "lookup_field": "id",
             }
         }

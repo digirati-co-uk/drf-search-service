@@ -1,8 +1,4 @@
-import copy
-import json
-import pytest
 import requests
-from ..utils import is_responsive_404
 
 app_endpoint = "api/search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -48,7 +44,7 @@ def test_json_resource_get(http_service):
 
 def test_json_resource_indexables_creation(http_service):
     """ """
-    test_endpoint = "indexables"
+    test_endpoint = "indexable"
     status = 200
     resource_id = test_data_store.get("json_resource_id")
     response = requests.get(

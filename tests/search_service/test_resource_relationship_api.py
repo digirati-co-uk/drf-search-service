@@ -58,6 +58,7 @@ def test_resource_relationship_create_resources_for_resource_relationship(http_s
     assert response_json.get("id") is not None
     test_data_store["child_id"] = response_json.get("id")
 
+
 def test_resource_relationship_create_resource_relationship(http_service):
     """ """
     test_endpoint = "resource_relationship"
@@ -65,7 +66,7 @@ def test_resource_relationship_create_resource_relationship(http_service):
     post_json = {
         "source_id": test_data_store.get("child_id"),
         "source_content_type": 7,
-        "target_id": test_data_store.get("child_id"),
+        "target_id": test_data_store.get("parent_id"),
         "target_content_type": 7,
         "type": "partOf",
     }
@@ -84,6 +85,7 @@ def test_resource_relationship_create_resource_relationship(http_service):
     assert response_json.get("id") is not None
     test_data_store["relationship_id"] = response_json.get("id")
 
+
 def test_resource_relationship_list(http_service):
     test_endpoint = "resource_relationship"
     status = 200
@@ -98,6 +100,7 @@ def test_resource_relationship_list(http_service):
     relationship = response_json["results"][0]
     assert relationship.get("id") == test_data_store.get("relationship_id")
 
+
 def test_resource_relationship_get(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 200
@@ -110,6 +113,61 @@ def test_resource_relationship_get(http_service):
     assert response_json.get("source_id") == test_data_store.get("child_id")
     assert response_json.get("target_id") == test_data_store.get("parent_id")
     assert response_json.get("type") == "partOf"
+
+
+def test_resource_relationship_update_resource_relationship(http_service):
+    test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
+    status = 200
+    put_json = {
+        "source_id": test_data_store.get("parent_id"),
+        "source_content_type": 7,
+        "target_id": test_data_store.get("child_id"),
+        "target_content_type": 7,
+        "type": "contains",
+    }
+    response = requests.put(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=put_json,
+        headers=test_headers,
+    )
+    assert response.status_code == status
+    response_json = response.json()
+    assert response_json.get("id") == test_data_store.get("relationship_id")
+    assert response_json.get("source_id") == test_data_store.get("parent_id")
+    assert response_json.get("target_id") == test_data_store.get("child_id")
+    assert response_json.get("type") == "contains"
+
+def test_resource_relationship_partial_update_resource_relationship(http_service):
+    test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
+    status = 200
+    patch_json = {
+        "type": "parentOf",
+    }
+    response = requests.patch(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        json=patch_json,
+        headers=test_headers,
+    )
+    assert response.status_code == status
+    response_json = response.json()
+    assert response_json.get("id") == test_data_store.get("relationship_id")
+    assert response_json.get("source_id") == test_data_store.get("parent_id")
+    assert response_json.get("target_id") == test_data_store.get("child_id")
+    assert response_json.get("type") == "parentOf"
+
+def test_resource_relationship_get_updated(http_service):
+    test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
+    status = 200
+    response = requests.get(
+        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+    )
+    assert response.status_code == status
+    response_json = response.json()
+    assert response_json.get("id") == test_data_store.get("relationship_id")
+    assert response_json.get("source_id") == test_data_store.get("parent_id")
+    assert response_json.get("target_id") == test_data_store.get("child_id")
+    assert response_json.get("type") == "parentOf"
+
 
 
 def test_resource_relationship_delete_resources_for_relationship(http_service):
@@ -126,6 +184,7 @@ def test_resource_relationship_delete_resources_for_relationship(http_service):
         f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
     )
     assert response.status_code == status
+
 
 def test_resource_relationship_deleted(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"

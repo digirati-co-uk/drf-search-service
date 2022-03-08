@@ -1,8 +1,4 @@
-import copy
-import json
-import pytest
 import requests
-from ..utils import is_responsive_404
 
 app_endpoint = "api/search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -48,7 +44,7 @@ def test_json_resource_get(http_service):
 
 def test_json_resource_indexables_creation(http_service):
     """ """
-    test_endpoint = "indexables"
+    test_endpoint = "indexable"
     status = 200
     resource_id = test_data_store.get("json_resource_id")
     response = requests.get(
@@ -597,3 +593,21 @@ def test_json_resource_fulltext_nested_canvas_facet_on_no_match(http_service):
     assert (
         len(response_json.get("results")) == 0
     )
+
+
+def test_resource_relationship_delete_resources_for_relationship(http_service):
+    test_endpoint = "json_resource"
+    status = 200
+    response = requests.get(
+        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    for resource_id in [res.get("id") for res in response_json.get('results')]: 
+        test_endpoint = f"json_resource/{resource_id}"
+        status = 204
+        response = requests.delete(
+            f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        )
+        assert response.status_code == status

@@ -51,6 +51,7 @@ class BaseSearchServiceIndexingTask(object):
         )
         if indexables_serializer.is_valid():
             logger.info(indexables_serializer.validated_data)
+            self.delete_existing_indexables(instance)
             indexables_serializer.save()
             return indexables_serializer.data
         else:

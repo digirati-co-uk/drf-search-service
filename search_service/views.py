@@ -23,16 +23,21 @@ from .models import (
 
 from .parsers import SearchParser, IndexableSearchParser
 from .pagination import MadocPagination
-from .serializers import (
-    JSONResourceSerializer,
+
+from .serializers.api import (
+    ContentTypeAPISerializer,
+    JSONResourceAPISerializer,
+    ResourceRelationshipAPISerializer,
+    IndexableAPISerializer,
+)
+from .serializers.query_param import (
+    FacetedSearchQueryParamDataSerializer,
+)
+from .serializers.search import (
     JSONResourceRelationshipSerializer,
-    ResourceRelationshipSerializer,
-    IndexableSerializer,
     IndexableResultSerializer,
     JSONSearchSerializer,
     AutocompleteSerializer,
-    ContentTypeAPISerializer,
-    FacetedSearchQueryParamDataSerializer,
 )
 from .utils import ActionBasedSerializerMixin
 
@@ -50,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 class JSONResourceAPIViewSet(viewsets.ModelViewSet):
     queryset = JSONResource.objects.all()
-    serializer_class = JSONResourceSerializer
+    serializer_class = JSONResourceAPISerializer
     lookup_field = "id"
 
     @action(detail=False, methods=["post"])
@@ -75,7 +80,7 @@ class JSONResourceAPIViewSet(viewsets.ModelViewSet):
         relations_serializer = JSONResourceRelationshipSerializer(
             relationships, many=True
         )
-        indexed_relations_serializer = ResourceRelationshipSerializer(
+        indexed_relations_serializer = ResourceRelationshipAPISerializer(
             data=relations_serializer.data, many=True
         )
         indexed_relations_serializer.is_valid(raise_exception=True)
@@ -92,7 +97,7 @@ class JSONResourceAPIViewSet(viewsets.ModelViewSet):
 
 class IndexableAPIViewSet(viewsets.ModelViewSet):
     queryset = Indexable.objects.all()
-    serializer_class = IndexableSerializer
+    serializer_class = IndexableAPISerializer
     lookup_field = "id"
     filter_backends = [DjangoFilterBackend]
     filterset_fields = [
@@ -105,7 +110,7 @@ class IndexableAPIViewSet(viewsets.ModelViewSet):
 
 class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
     queryset = ResourceRelationship.objects.all()
-    serializer_class = ResourceRelationshipSerializer
+    serializer_class = ResourceRelationshipAPISerializer
     lookup_field = "id"
 
 
@@ -175,7 +180,7 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
 
     parser_classes = [SearchParser]
     filter_backends = [GenericFacetListFilter]
-    serializer_class = IndexableSerializer
+    serializer_class = IndexableAPISerializer
 
     def get_facet_list(self, request):
         facet_dict = defaultdict(list)

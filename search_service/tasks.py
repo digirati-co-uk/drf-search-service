@@ -4,7 +4,7 @@ from .models import (
     JSONResource,
 )
 
-from .serializers import (
+from .serializers.indexing import (
     IndexableCreateUpdateSerializer,
     JSONResourceToIndexableSerializer,
 )

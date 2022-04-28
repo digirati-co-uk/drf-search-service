@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 
-from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.contenttypes.models import ContentType
 
 # DRF Imports
 from rest_framework import status
@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Local imports
 from .models import (
@@ -30,6 +31,7 @@ from .serializers import (
     IndexableResultSerializer,
     JSONSearchSerializer,
     AutocompleteSerializer,
+    ContentTypeAPISerializer,
 )
 from .utils import ActionBasedSerializerMixin
 
@@ -45,7 +47,7 @@ from .settings import search_service_settings
 logger = logging.getLogger(__name__)
 
 
-class JSONResourceViewSet(viewsets.ModelViewSet):
+class JSONResourceAPIViewSet(viewsets.ModelViewSet):
     queryset = JSONResource.objects.all()
     serializer_class = JSONResourceSerializer
     lookup_field = "id"
@@ -87,7 +89,7 @@ class JSONResourceViewSet(viewsets.ModelViewSet):
         )
 
 
-class IndexableViewSet(viewsets.ModelViewSet):
+class IndexableAPIViewSet(viewsets.ModelViewSet):
     queryset = Indexable.objects.all()
     serializer_class = IndexableSerializer
     lookup_field = "id"
@@ -99,12 +101,15 @@ class IndexableViewSet(viewsets.ModelViewSet):
         "subtype",
     ]
 
-class ResourceRelationshipViewSet(viewsets.ModelViewSet): 
+class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet): 
     queryset = ResourceRelationship.objects.all()
     serializer_class = ResourceRelationshipSerializer
     lookup_field = "id"
 
-
+class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ContentType.objects.all()
+    serializer_class = ContentTypeAPISerializer
+    lookup_field = "id"
 
 class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
     """

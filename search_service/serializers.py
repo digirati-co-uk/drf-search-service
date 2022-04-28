@@ -187,6 +187,16 @@ class AutocompleteSerializer(serializers.ModelSerializer):
         ]
 
 
+class ContentTypeAPISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = [
+            "id",
+            "app_label",
+            "model",
+        ]
+
+
 class JSONResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = JSONResource

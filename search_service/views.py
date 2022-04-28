@@ -21,7 +21,7 @@ from .models import (
     JSONResource,
 )
 
-from .parsers import SearchParser, JSONSearchParser
+from .parsers import SearchParser, IndexableSearchParser
 from .pagination import MadocPagination
 from .serializers import (
     JSONResourceSerializer,
@@ -32,6 +32,7 @@ from .serializers import (
     JSONSearchSerializer,
     AutocompleteSerializer,
     ContentTypeAPISerializer,
+    FacetedSearchQueryParamDataSerializer,
 )
 from .utils import ActionBasedSerializerMixin
 
@@ -101,48 +102,70 @@ class IndexableAPIViewSet(viewsets.ModelViewSet):
         "subtype",
     ]
 
-class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet): 
+
+class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
     queryset = ResourceRelationship.objects.all()
     serializer_class = ResourceRelationshipSerializer
     lookup_field = "id"
+
 
 class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ContentType.objects.all()
     serializer_class = ContentTypeAPISerializer
     lookup_field = "id"
 
-class GenericSearchBaseViewSet(viewsets.ReadOnlyModelViewSet):
+
+class QueryParamDataMixin(object):
+    """
+    Gets the request's query params, effect a transform using
+    the serializer provided as `query_param_serializer`,
+    parse the transformed data with the parsers defined in
+    `parsers_classes`, and update the request `data`
+    property with the parsed data.
+
+    The parsers provided in `parsers_classes` must define a
+    `parse_data` method
+    """
+
+    query_param_serializer_class = None
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        if request.query_params and self.query_param_serializer_class:
+            logger.debug(
+                f"Serialising query_params to parsable data: ({self.query_param_serializer_class}, {request.query_params})"
+            )
+            query_serializer = self.query_param_serializer_class(
+                dict(request.query_params)
+            )
+            parsers = self.get_parsers()
+            for p in parsers:
+                if hasattr(p, "parse_data"):
+                    logger.debug(
+                        f"Parsing serialised data: ({p.__class__}, {query_serializer.data})"
+                    )
+                    request.data.update(p.parse_data(query_serializer.data))
+
+
+class BaseSearchViewSet(viewsets.ReadOnlyModelViewSet):
     """
     BaseClass for Search Service APIs.
     """
 
+    lookup_field = "id"
     queryset = Indexable.objects.all().distinct()
     parser_classes = [SearchParser]
-    lookup_field = "id"
     permission_classes = [AllowAny]
     filter_backends = [GenericFilter]
     serializer_class = IndexableResultSerializer
 
     def create(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
 
 
-class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
-    """ """
-
-    queryset = JSONResource.objects.all().distinct()
-    parser_classes = [JSONSearchParser]
-    lookup_field = "id"
-    permission_classes = [AllowAny]
-    filter_backends = [ResourceFilter, FacetFilter, RankSnippetFilter]
-    serializer_class = JSONSearchSerializer
-
-    def list(self, request, *args, **kwargs):
-        resp = super().list(request, *args, **kwargs)
-        return resp
-
-    def create(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+class GenericSearchBaseViewSet(QueryParamDataMixin, BaseSearchViewSet):
+    query_param_serializer_class = FacetedSearchQueryParamDataSerializer
+    pass
 
 
 class GenericFacetsViewSet(GenericSearchBaseViewSet):
@@ -188,3 +211,14 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
         logger.info("Facets")
         logger.info(self.get_facet_list(request=request))
         return response
+
+
+class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
+    """ """
+
+    queryset = JSONResource.objects.all().distinct()
+    parser_classes = [IndexableSearchParser]
+    lookup_field = "id"
+    permission_classes = [AllowAny]
+    filter_backends = [ResourceFilter, FacetFilter, RankSnippetFilter]
+    serializer_class = JSONSearchSerializer

@@ -292,7 +292,7 @@ class SearchParser(JSONParser):
             if (
                 non_latin_fulltext or is_latin(search_string)
             ) and not search_multiple_fields:
-                logger.info(f"Search string {search_string}")
+                logger.debug(f"Search string {search_string}")
                 if search_language:
                     filter_kwargs = {
                         f"{self.q_prefix}search_vector": SearchQuery(
@@ -396,10 +396,9 @@ class SearchParser(JSONParser):
             ]
         return resource_filter_queries
 
-    def parse(self, stream, media_type=None, parser_context={}):
-        request_data = super().parse(stream, media_type, parser_context)
-        facet_types = request_data.get("facet_types", self.default_facet_types)
-        _return = {
+    def parse_data(self, request_data): 
+        logger.debug(f"Parsing filter data from: ({request_data})")
+        filter_data = {
             "filter_query": self.get_filter_query(
                 request_data
             ),  # fulltext plus indexable properties
@@ -409,14 +408,20 @@ class SearchParser(JSONParser):
             "facet_on": self.get_facet_on_query(
                 request_data
             ),  # query that identifies the queryset to facet over
-            "facet_types": facet_types,  # items to return in the facet data on the results
+            "facet_types": request_data.get("facet_types", self.default_facet_types), 
             "query_prefix": self.q_prefix,
         }
-        logger.info(_return)
-        return _return
+
+        logger.debug(f"Parsed search filter data: ({filter_data})")
+        return filter_data
+
+    def parse(self, stream, media_type=None, parser_context={}):
+        request_data = super().parse(stream, media_type, parser_context)
+        return self.parse_data(request_data)
 
 
-class JSONSearchParser(SearchParser):
+
+class IndexableSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.

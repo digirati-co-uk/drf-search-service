@@ -1,6 +1,7 @@
 import requests
 
-app_endpoint = "api/search_service"
+api_endpoint = "api/search_service"
+public_endpoint = "search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
 test_data_store = {}
 
@@ -14,7 +15,7 @@ def test_json_resource_create(http_service):
         "data": {"key_1": "Value 1", "key_2": "Value 2"},
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -34,7 +35,7 @@ def test_json_resource_get(http_service):
     status = 200
     resource_id = test_data_store.get("json_resource_id")
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}/{resource_id}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}/{resource_id}/",
         headers=test_headers,
     )
     response_json = response.json()
@@ -48,7 +49,7 @@ def test_json_resource_indexables_creation(http_service):
     status = 200
     resource_id = test_data_store.get("json_resource_id")
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{api_endpoint}/{test_endpoint}/", headers=test_headers
     )
     response_json = response.json()
     assert response.status_code == status
@@ -62,7 +63,7 @@ def test_json_resource_simple_query(http_service):
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -76,7 +77,7 @@ def test_json_resource_simple_query_no_match(http_service):
     status = 200
     post_json = {"fulltext": "digirati"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -90,11 +91,12 @@ def test_json_resource_simple_query_rank(http_service):
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
+    assert response.status_code == status
     assert (
         int(response_json["results"][0].get("rank", 0)) > 0
     )  # There is a non-zero rank
@@ -105,11 +107,12 @@ def test_json_resource_simple_query_snippet(http_service):
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
+    assert response.status_code == status
     assert "<b>Resource</b>" in response_json["results"][0].get("snippet", None)
 
 
@@ -120,7 +123,7 @@ def test_json_resource_facet_query(http_service):
         "facets": [{"type": "descriptive", "subtype": "key_1", "value": "Value 1"}]
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -138,7 +141,7 @@ def test_json_another_resource_create(http_service):
         "data": {"key_1": "Value 1", "key_3": "Value 3"},
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -152,7 +155,7 @@ def test_json_resource_another_facet_query(http_service):
         "facets": [{"type": "descriptive", "subtype": "key_1", "value": "Value 1"}]
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -171,7 +174,7 @@ def test_json_resource_facet_query_wrong_key(http_service):
         "facets": [{"type": "descriptive", "subtype": "key_3", "value": "Value 1"}]
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -184,7 +187,7 @@ def test_json_resource_simple_query_data_key(http_service):
     test_endpoint = "json_search"
     post_json = {"fulltext": "Value 3"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -197,7 +200,7 @@ def test_json_resource_simple_query_data_key_broader(http_service):
     test_endpoint = "json_search"
     post_json = {"fulltext": "Value"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -220,7 +223,7 @@ def test_json_resource_resource_query(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -243,7 +246,7 @@ def test_json_resource_resource_query_no_match(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -269,7 +272,7 @@ def test_json_resource_resource_query_no_resourceclass(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -310,7 +313,7 @@ def test_json_html_resource_create(http_service):
         },
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -331,7 +334,7 @@ def test_json_resource_resource_query_by_label(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -354,7 +357,7 @@ def test_json_resource_resource_query_by_label_missing(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -377,7 +380,7 @@ def test_json_resource_resource_query_by_list(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -394,7 +397,7 @@ def test_json_resource_fulltext_phrase_search(http_service):
         "search_language": "english",
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -415,7 +418,7 @@ def test_json_resource_fulltext_search_multiples(http_service):
     test_endpoint = "json_search"
     post_json = {"fulltext": "behold"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -429,7 +432,7 @@ def test_json_resource_fulltext_search_single(http_service):
     test_endpoint = "json_search"
     post_json = {"fulltext": "grandfathers"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -446,7 +449,7 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
     test_endpoint = "json_search"
     post_json = {"fulltext": "moctezuma"}
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -460,7 +463,7 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
 
 def test_nested_json_resource_create(http_service):
     """ """
-    test_endpoint = "json_resource/create_nested"
+    test_endpoint = "json_resource/create_nested/"
     status = 201
     post_json = {
         "label": "Manifest Resource",
@@ -483,7 +486,7 @@ def test_nested_json_resource_create(http_service):
         ],
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}",
         json=post_json,
         headers=test_headers,
     )
@@ -503,7 +506,7 @@ def test_json_resource_fulltext_nested_canvas(http_service):
     post_json = {"fulltext": "rugged",
                  }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -525,7 +528,7 @@ def test_json_resource_fulltext_nested_canvas_facets(http_service):
                  "facets": [{"type": "descriptive", "subtype": "iiif_type", "value": "canvas"}]
                  }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -545,7 +548,7 @@ def test_json_resource_fulltext_nested_canvas_facet_on_without_query(http_servic
                  "facets": [{"type": "descriptive", "subtype": "label", "value": "Volume 3"}]
                  }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -564,7 +567,7 @@ def test_json_resource_fulltext_nested_canvas_facet_on_with_query(http_service):
                  "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
                  }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -585,7 +588,7 @@ def test_json_resource_fulltext_nested_canvas_facet_on_no_match(http_service):
                  "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
                  }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -599,15 +602,16 @@ def test_resource_relationship_delete_resources_for_relationship(http_service):
     test_endpoint = "json_resource"
     status = 200
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
         headers=test_headers,
     )
     response_json = response.json()
     assert response.status_code == status
     for resource_id in [res.get("id") for res in response_json.get('results')]: 
+        print(resource_id)
         test_endpoint = f"json_resource/{resource_id}"
         status = 204
         response = requests.delete(
-            f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+            f"{http_service}/{api_endpoint}/{test_endpoint}/", headers=test_headers
         )
         assert response.status_code == status

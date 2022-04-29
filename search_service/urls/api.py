@@ -14,9 +14,9 @@ from ..views import (
 app_name = "search_service"
 
 router = routers.DefaultRouter()
-router.register("json_resource", JSONResourceAPIViewSet)
 router.register("indexable", IndexableAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)
 router.register("content_type", ContentTypeAPIViewSet)
+router.register("json_resource", JSONResourceAPIViewSet)
 
 urlpatterns = router.urls

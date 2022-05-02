@@ -168,12 +168,18 @@ class BaseSearchViewSet(viewsets.ReadOnlyModelViewSet):
         return self.list(request, *args, **kwargs)
 
 
-class GenericSearchBaseViewSet(QueryParamDataMixin, BaseSearchViewSet):
+class BasePublicSearchViewSet(QueryParamDataMixin, BaseSearchViewSet):
+    """
+    BaseClass for Public Search Service APIs.
+    Allows for querying via a GET request using query params, with the
+    query_param_serializer_class being used to filter and transform data
+    for parsing by the search parsers_classes.
+    """
+
     query_param_serializer_class = FacetedSearchQueryParamDataSerializer
-    pass
 
 
-class GenericFacetsViewSet(GenericSearchBaseViewSet):
+class GenericFacetsViewSet(BasePublicSearchViewSet):
     """
     Simple read only view to return a list of facet fields
     """
@@ -218,7 +224,7 @@ class GenericFacetsViewSet(GenericSearchBaseViewSet):
         return response
 
 
-class JSONResourceSearchViewSet(GenericSearchBaseViewSet):
+class JSONResourceSearchViewSet(BasePublicSearchViewSet):
     """ """
 
     queryset = JSONResource.objects.all().distinct()

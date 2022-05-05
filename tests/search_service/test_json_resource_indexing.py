@@ -59,7 +59,7 @@ def test_json_resource_indexables_creation(http_service):
 
 
 def test_json_resource_simple_query(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
@@ -73,7 +73,7 @@ def test_json_resource_simple_query(http_service):
 
 
 def test_json_resource_simple_query_no_match(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {"fulltext": "digirati"}
     response = requests.post(
@@ -87,7 +87,7 @@ def test_json_resource_simple_query_no_match(http_service):
 
 
 def test_json_resource_simple_query_rank(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
@@ -103,7 +103,7 @@ def test_json_resource_simple_query_rank(http_service):
 
 
 def test_json_resource_simple_query_snippet(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {"fulltext": "resource"}
     response = requests.post(
@@ -117,7 +117,7 @@ def test_json_resource_simple_query_snippet(http_service):
 
 
 def test_json_resource_facet_query(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "facets": [{"type": "descriptive", "subtype": "key_1", "value": "Value 1"}]
@@ -149,7 +149,7 @@ def test_json_another_resource_create(http_service):
 
 
 def test_json_resource_another_facet_query(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "facets": [{"type": "descriptive", "subtype": "key_1", "value": "Value 1"}]
@@ -168,7 +168,7 @@ def test_json_resource_facet_query_wrong_key(http_service):
     """
     Looking for a value, but it's stored in a different key
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "facets": [{"type": "descriptive", "subtype": "key_3", "value": "Value 1"}]
@@ -184,7 +184,7 @@ def test_json_resource_facet_query_wrong_key(http_service):
 
 
 def test_json_resource_simple_query_data_key(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "Value 3"}
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
@@ -197,7 +197,7 @@ def test_json_resource_simple_query_data_key(http_service):
 
 
 def test_json_resource_simple_query_data_key_broader(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "Value"}
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
@@ -210,7 +210,7 @@ def test_json_resource_simple_query_data_key_broader(http_service):
 
 
 def test_json_resource_resource_query(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {  # Partial match on label, should match against "Another"
         "resource_filters": [
@@ -233,7 +233,7 @@ def test_json_resource_resource_query(http_service):
 
 
 def test_json_resource_resource_query_no_match(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "resource_filters": [
@@ -259,7 +259,7 @@ def test_json_resource_resource_query_no_resourceclass(http_service):
     """
     THis will 500 as there is no `foo` model defined in the application
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 500
     post_json = {
         "resource_filters": [
@@ -321,7 +321,7 @@ def test_json_html_resource_create(http_service):
 
 
 def test_json_resource_resource_query_by_label(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "resource_filters": [
@@ -344,7 +344,7 @@ def test_json_resource_resource_query_by_label(http_service):
 
 
 def test_json_resource_resource_query_by_label_missing(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "resource_filters": [
@@ -367,7 +367,7 @@ def test_json_resource_resource_query_by_label_missing(http_service):
 
 
 def test_json_resource_resource_query_by_list(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     status = 200
     post_json = {
         "resource_filters": [
@@ -390,7 +390,7 @@ def test_json_resource_resource_query_by_list(http_service):
 
 
 def test_json_resource_fulltext_phrase_search(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {
         "fulltext": "turkey blood",
         "search_type": "phrase",
@@ -415,7 +415,7 @@ def test_json_resource_fulltext_search_multiples(http_service):
     that the rank for that result is going ot be higher than when the term only
     matches once
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "behold"}
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
@@ -429,7 +429,7 @@ def test_json_resource_fulltext_search_multiples(http_service):
 
 
 def test_json_resource_fulltext_search_single(http_service):
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "grandfathers"}
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
@@ -446,7 +446,7 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
     """
     Validate that annotation works because we get 1 result, not 2.
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "moctezuma"}
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
@@ -502,7 +502,7 @@ def test_nested_json_resource_create(http_service):
 def test_json_resource_fulltext_nested_canvas(http_service):
     """
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "rugged",
                  }
     response = requests.post(
@@ -523,7 +523,7 @@ def test_json_resource_fulltext_nested_canvas(http_service):
 def test_json_resource_fulltext_nested_canvas_facets(http_service):
     """
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "rugged",
                  "facets": [{"type": "descriptive", "subtype": "iiif_type", "value": "canvas"}]
                  }
@@ -543,7 +543,7 @@ def test_json_resource_fulltext_nested_canvas_facets(http_service):
 def test_json_resource_fulltext_nested_canvas_facet_on_without_query(http_service):
     """
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "rugged",
                  "facets": [{"type": "descriptive", "subtype": "label", "value": "Volume 3"}]
                  }
@@ -561,7 +561,7 @@ def test_json_resource_fulltext_nested_canvas_facet_on_without_query(http_servic
 def test_json_resource_fulltext_nested_canvas_facet_on_with_query(http_service):
     """
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "rugged",
                  "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 3"}],
                  "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
@@ -582,7 +582,7 @@ def test_json_resource_fulltext_nested_canvas_facet_on_with_query(http_service):
 def test_json_resource_fulltext_nested_canvas_facet_on_no_match(http_service):
     """
     """
-    test_endpoint = "json_search"
+    test_endpoint = "json_resource_search"
     post_json = {"fulltext": "rugged",
                  "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 11"}],
                  "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},

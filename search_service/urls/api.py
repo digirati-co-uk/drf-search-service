@@ -9,6 +9,8 @@ from ..views import (
     IndexableAPIViewSet,
     ResourceRelationshipAPIViewSet,
     ContentTypeAPIViewSet,
+    IndexableAPISearchViewSet, 
+    JSONResourceAPISearchViewSet, 
 )
 
 app_name = "search_service"
@@ -18,5 +20,7 @@ router.register("indexable", IndexableAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)
 router.register("content_type", ContentTypeAPIViewSet)
 router.register("json_resource", JSONResourceAPIViewSet)
+router.register("indexable_search", IndexableAPISearchViewSet)
+router.register("json_resource_search", JSONResourceAPISearchViewSet)
 
 urlpatterns = router.urls

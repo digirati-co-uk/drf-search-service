@@ -44,7 +44,16 @@ class JSONResourceAPISerializer(serializers.ModelSerializer):
 class ResourceRelationshipAPISerializer(serializers.ModelSerializer):
     class Meta:
         model = ResourceRelationship
-        fields = "__all__"
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "source_id",
+            "source_content_type",
+            "type", 
+            "target_id",
+            "target_content_type",
+        ]
 
 
 class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):

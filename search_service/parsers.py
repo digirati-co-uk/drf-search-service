@@ -419,9 +419,14 @@ class SearchParser(JSONParser):
         request_data = super().parse(stream, media_type, parser_context)
         return self.parse_data(request_data)
 
-
-
 class IndexableSearchParser(SearchParser):
+    """
+    Generic search parser that makes no assumptions about the shape of the resource
+    that is linked to the Indexable.
+    """
+    q_prefix = ""
+
+class ResourceSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.

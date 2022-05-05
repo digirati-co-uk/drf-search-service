@@ -52,35 +52,20 @@ def calc_offsets(obj):
                             return
     return
 
-
-class IndexableSummarySerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serializer that produces a summary of an individually indexed "field" or text
-    resource for return in lists of results or other similar nested views
-    """
-
-    rank = serializers.FloatField(default=None, read_only=True)
+class RankSnippetSerializerMixin(metaclass=serializers.SerializerMetaclass): 
+    rank = serializers.FloatField(default=None, 
+        read_only=True
+    )  # Not this isn't ranking the highest (yet)
     snippet = serializers.CharField(default=None, read_only=True)
-    language = serializers.CharField(
-        default=None, read_only=None, source="language_iso639_1"
-    )
-    bounding_boxes = serializers.SerializerMethodField()
+    fullsnip = serializers.CharField(default=None, read_only=True)
 
-    @staticmethod
-    def get_bounding_boxes(obj):
-        return calc_offsets(obj)
+class BaseRankSnippetSearchSerializer(RankSnippetSerializerMixin, serializers.HyperlinkedModelSerializer): 
+    """
+    Provides a Model serializer with access to the additional fields `rank`, `snippet`
+    and `fullsnip` which are annotated to the queryset as part of search filtering. 
+    """
+    pass
 
-    class Meta:
-        model = Indexable
-        fields = [
-            "type",
-            "subtype",
-            "group_id",
-            "snippet",
-            "language",
-            "rank",
-            "bounding_boxes",
-        ]
 
 
 class AutocompleteSerializer(serializers.ModelSerializer):
@@ -107,34 +92,10 @@ class JSONResourceRelationshipSerializer(serializers.Serializer):
         }
 
 
-class BaseSearchResourceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BaseSearchResource
-        fields = ["id", "created", "modified"]
-
-
-class ContentObjectRelatedField(serializers.RelatedField):
-    """
-    A custom field to serialize generic relations
-    """
-
-    def to_representation(self, object):
-        object_app = object._meta.app_label
-        object_name = object._meta.object_name
-        serializer_module_path = f"{object_app}.serializers.{object_name}Serializer"
-        serializer_class = import_string(serializer_module_path)
-        return serializer_class(object).data
-
-
-class IndexableResultSerializer(serializers.HyperlinkedModelSerializer):
+class IndexableAPISearchSerializer(BaseRankSnippetSearchSerializer): 
     """
     Serializer for the Indexable with the snippets and ranks included
     """
-
-    rank = serializers.FloatField()
-    snippet = serializers.CharField()
-    fullsnip = serializers.CharField()
-
     class Meta:
         model = Indexable
         fields = [
@@ -167,13 +128,54 @@ class IndexableResultSerializer(serializers.HyperlinkedModelSerializer):
             }
         }
 
+class IndexablePublicSearchSerializer(BaseRankSnippetSearchSerializer): 
+    """
+    Serializer for the Indexable with the snippets and ranks included
+    """
+    language = serializers.CharField(
+        default=None, read_only=None, source="language_iso639_1"
+    )
+    bounding_boxes = serializers.SerializerMethodField()
 
-class JSONSearchSerializer(serializers.ModelSerializer):
-    rank = serializers.FloatField(
-        read_only=True
-    )  # Not this isn't ranking the highest (yet)
-    snippet = serializers.CharField(read_only=True)
+    @staticmethod
+    def get_bounding_boxes(obj):
+        return calc_offsets(obj)
 
+    class Meta:
+        model = Indexable
+        fields = [
+            "type",
+            "subtype",
+            "group_id",
+            "indexable_text",
+            "snippet",
+            "language",
+            "rank",
+            "bounding_boxes",
+        ]
+
+
+class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
+    class Meta:
+        model = JSONResource
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "label",
+            "data",
+            "rank",
+            "snippet",
+        ]
+        extra_kwargs = {
+            "url": {
+                "view_name": "api:search_service:jsonresource-detail",
+                "lookup_field": "id",
+            }
+        }
+
+
+class JSONResourcePublicSearchSerializer(RankSnippetSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = JSONResource
         fields = [

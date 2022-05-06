@@ -9,7 +9,7 @@ def test_resource_relationship_list_empty(http_service):
     test_endpoint = "resource_relationship"
     status = 200
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
     response_json = response.json()
@@ -27,7 +27,7 @@ def test_resource_relationship_create_resources_for_resource_relationship(http_s
         "data": {},
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -45,7 +45,7 @@ def test_resource_relationship_create_resources_for_resource_relationship(http_s
         "data": {},
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -71,7 +71,7 @@ def test_resource_relationship_create_resource_relationship(http_service):
         "type": "partOf",
     }
     response = requests.post(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
@@ -90,7 +90,7 @@ def test_resource_relationship_list(http_service):
     test_endpoint = "resource_relationship"
     status = 200
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
     response_json = response.json()
@@ -105,7 +105,7 @@ def test_resource_relationship_get(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 200
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
     response_json = response.json()
@@ -126,7 +126,7 @@ def test_resource_relationship_update_resource_relationship(http_service):
         "type": "contains",
     }
     response = requests.put(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}/",
         json=put_json,
         headers=test_headers,
     )
@@ -144,7 +144,7 @@ def test_resource_relationship_partial_update_resource_relationship(http_service
         "type": "parentOf",
     }
     response = requests.patch(
-        f"{http_service}/{app_endpoint}/{test_endpoint}",
+        f"{http_service}/{app_endpoint}/{test_endpoint}/",
         json=patch_json,
         headers=test_headers,
     )
@@ -159,7 +159,7 @@ def test_resource_relationship_get_updated(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 200
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
     response_json = response.json()
@@ -174,14 +174,14 @@ def test_resource_relationship_delete_resources_for_relationship(http_service):
     test_endpoint = f"json_resource/{test_data_store.get('parent_id')}"
     status = 204
     response = requests.delete(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
 
     test_endpoint = f"json_resource/{test_data_store.get('child_id')}"
     status = 204
     response = requests.delete(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status
 
@@ -190,6 +190,6 @@ def test_resource_relationship_deleted(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 404
     response = requests.get(
-        f"{http_service}/{app_endpoint}/{test_endpoint}", headers=test_headers
+        f"{http_service}/{app_endpoint}/{test_endpoint}/", headers=test_headers
     )
     assert response.status_code == status

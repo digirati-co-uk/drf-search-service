@@ -1,390 +1,264 @@
 # Django Imports
 
-import itertools
 import logging
 from collections import defaultdict
 
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.db import models
-from django.utils.translation import get_language
-from django_filters import rest_framework as df_filters
-from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.contenttypes.models import ContentType
 
 # DRF Imports
-from rest_framework import generics, filters, status
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
-from rest_framework.exceptions import ValidationError, ParseError
+from rest_framework import (
+    status,
+    viewsets,
+    mixins,
+)
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Local imports
-from .models import Indexables, IIIFResource, Context
-from .parsers import IIIFSearchParser, IIIFCreateUpdateParser
-from .pagination import MadocPagination
-from .prezi_upgrader import Upgrader
-from .serializer_utils import MethodBasedSerializerMixin
-from .serializers import (
-    UserSerializer,
-    IndexablesSerializer,
-    IIIFSerializer,
-    ContextSerializer,
-    IIIFSearchSummarySerializer,
-    CaptureModelSerializer,
-    AutocompleteSerializer,
-    IIIFCreateUpdateSerializer,
+from .models import (
+    Indexable,
+    ResourceRelationship,
+    JSONResource,
 )
+
+from .parsers import (
+    SearchParser,
+    IndexableSearchParser,
+    ResourceSearchParser,
+)
+from .pagination import MadocPagination
+
+from .serializers.api import (
+    ContentTypeAPISerializer,
+    JSONResourceAPISerializer,
+    ResourceRelationshipAPISerializer,
+    IndexableAPISerializer,
+)
+from .serializers.query_param import (
+    FacetedSearchQueryParamDataSerializer,
+)
+from .serializers.search import (
+    JSONResourceRelationshipSerializer,
+    IndexableAPISearchSerializer,
+    IndexablePublicSearchSerializer,
+    JSONResourceAPISearchSerializer,
+    JSONResourcePublicSearchSerializer,
+    AutocompleteSerializer,
+)
+from .utils import ActionBasedSerializerMixin
 
 from .filters import (
-        IIIFSearchFilter,
-        FacetListFilter,
-        AutoCompleteFilter
-        )
-from .indexable_utils import gen_indexables
-from .madoc_jwt import (
-    request_madoc_site_urn,
+    GenericFilter,
+    ResourceFilter,
+    FacetFilter,
+    GenericFacetListFilter,
+    RankSnippetFilter,
 )
-
-# Globals
-default_lang = get_language()
-upgrader = Upgrader(flags={"default_lang": default_lang})
-global_facet_on_manifests = settings.FACET_ON_MANIFESTS_ONLY
-global_facet_types = ["metadata"]
-
+from .settings import search_service_settings
 
 logger = logging.getLogger(__name__)
 
 
-@api_view(["GET"])
-def api_root(request, format=None):
-    return Response(
-        {
-            "iiif": reverse("api:search_service:iiifresource_list", request=request, format=format),
-            "indexable": reverse(
-                "api:search_service:indexables_list", request=request, format=format
-            ),
-            "contexts": reverse("api:search_service:context_list", request=request, format=format),
-            "search": reverse("api:search_service:search", request=request, format=format),
-        }
-    )
+class JSONResourceAPIViewSet(viewsets.ModelViewSet):
+    queryset = JSONResource.objects.all()
+    serializer_class = JSONResourceAPISerializer
+    lookup_field = "id"
+
+    @action(detail=False, methods=["post"])
+    def create_nested(self, request, *args, **kwargs):
+        parent_serializer = self.get_serializer(data=request.data)
+        parent_serializer.is_valid(raise_exception=True)
+        self.perform_create(parent_serializer)
+
+        child_resource_data = request.data.get("child_resources")
+        child_serializer = self.get_serializer(data=child_resource_data, many=True)
+        child_serializer.is_valid(raise_exception=True)
+        self.perform_create(child_serializer)
+
+        relationships = [
+            {
+                "source": child.get("id"),
+                "target": parent_serializer.data.get("id"),
+                "type": "part_of",
+            }
+            for child in child_serializer.data
+        ]
+        relations_serializer = JSONResourceRelationshipSerializer(
+            relationships, many=True
+        )
+        indexed_relations_serializer = ResourceRelationshipAPISerializer(
+            data=relations_serializer.data, many=True
+        )
+        indexed_relations_serializer.is_valid(raise_exception=True)
+        indexed_relations_serializer.save()
+        headers = self.get_success_headers(parent_serializer.data)
+        return Response(
+            [parent_serializer.data]
+            + child_serializer.data
+            + indexed_relations_serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
 
 
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class IIIFDetail(MethodBasedSerializerMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = IIIFResource.objects.all()
-    serializer_class = IIIFSerializer
-    serializer_mapping = {
-        "get": IIIFSerializer,
-        "put": IIIFCreateUpdateSerializer,
-    }
-    # permission_classes = [AllowAny]
-    parser_classes = [IIIFCreateUpdateParser]
-
-    def get_object(self):
-        if madoc_site_urn := request_madoc_site_urn(self.request):
-            logger.debug(f"Got madoc site urn: {madoc_site_urn}")
-            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-            url_id = self.kwargs.get(lookup_url_kwarg)
-            self.kwargs[lookup_url_kwarg] = f"{madoc_site_urn}|{url_id}"
-        return super().get_object()
-
-
-class IIIFList(MethodBasedSerializerMixin, generics.ListCreateAPIView):
-    queryset = IIIFResource.objects.all().prefetch_related("contexts")
-    serializer_class = IIIFSerializer
-    serializer_mapping = {
-        "get": IIIFSerializer,
-        "post": IIIFCreateUpdateSerializer,
-    }
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["madoc_id"]
-    # permission_classes = [AllowAny]
-    parser_classes = [IIIFCreateUpdateParser]
-
-
-class ContextDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Context.objects.all()
-    serializer_class = ContextSerializer
-    lookup_field = "slug"
-
-
-class ContextList(generics.ListCreateAPIView):
-    queryset = Context.objects.all()
-    serializer_class = ContextSerializer
-
-
-class IndexablesDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Indexables.objects.all()
-    serializer_class = IndexablesSerializer
-
-
-class IndexablesList(generics.ListCreateAPIView):
-    serializer_class = IndexablesSerializer
+class IndexableAPIViewSet(viewsets.ModelViewSet):
+    queryset = Indexable.objects.all()
+    serializer_class = IndexableAPISerializer
+    lookup_field = "id"
     filter_backends = [DjangoFilterBackend]
-    queryset = Indexables.objects.all()
     filterset_fields = [
         "resource_id",
         "content_id",
-        "iiif__madoc_id",
-        "iiif__contexts__id",
         "type",
         "subtype",
     ]
 
 
-class ContextFilterSet(df_filters.FilterSet):
+class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
+    queryset = ResourceRelationship.objects.all()
+    serializer_class = ResourceRelationshipAPISerializer
+    lookup_field = "id"
+
+
+class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ContentType.objects.all()
+    serializer_class = ContentTypeAPISerializer
+    lookup_field = "id"
+
+
+class QueryParamDataMixin(object):
     """
-    Currently unused. Test filterset to change the filter field for contexts, e.g. to
-    "cont"
+    Gets the request's query params, effect a transform using
+    the serializer provided as `query_param_serializer`,
+    parse the transformed data with the parsers defined in
+    `parsers_classes`, and update the request `data`
+    property with the parsed data.
+
+    The parsers provided in `parsers_classes` must define a
+    `parse_data` method
     """
 
-    cont = df_filters.filters.CharFilter(field_name="contexts__id", lookup_expr="iexact")
+    query_param_serializer_class = None
 
-    class Meta:
-        model = Context
-        fields = ["cont"]
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        if request.query_params and self.query_param_serializer_class:
+            logger.debug(
+                f"Serialising query_params to parsable data: ({self.query_param_serializer_class}, {request.query_params})"
+            )
+            query_serializer = self.query_param_serializer_class(
+                dict(request.query_params)
+            )
+            parsers = self.get_parsers()
+            for p in parsers:
+                if hasattr(p, "parse_data"):
+                    logger.debug(
+                        f"Parsing serialised data: ({p.__class__}, {query_serializer.data})"
+                    )
+                    request.data.update(p.parse_data(query_serializer.data))
 
 
-class ModelDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Indexables.objects.all()
-    serializer_class = CaptureModelSerializer
-
-
-class ModelList(generics.ListCreateAPIView):
+class BaseSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
-    List/Create API view for Indexables that are being created/listed
+    Base class for search viewsets, implements only a `list` and `create`
+    to allow for GET and POST searches. Detail views for models are to be
+    implemented by other viewsets.
     """
 
-    serializer_class = CaptureModelSerializer
-    filter_backends = [DjangoFilterBackend]
-    queryset = Indexables.objects.all()
-    filterset_fields = [
-        "resource_id",
-        "content_id",
-        "iiif__madoc_id",
-        "iiif__contexts__id",
-        "type",
-        "subtype",
-    ]
+    lookup_field = "id"
+    parser_classes = [SearchParser]
+    filter_backends = [GenericFilter]
 
     def create(self, request, *args, **kwargs):
-        """
-        Override the .create() method on the rest-framework generic ListCreateAPIViewset
-        """
-        data = request.data
-        good_results = []
-        bad_results = []
-        indexables = []
-        if data.get("resource"):
-            indexables = gen_indexables(data)
-        if indexables:
-            for indexable in indexables:
-                serializer = self.get_serializer(data=indexable)  # Serialize the data
-                serializer.is_valid(raise_exception=True)  # Check it's valid
-                self.perform_create(serializer)  # Create the object
-                if serializer.errors != {}:
-                    bad_results.append(
-                        (serializer.data, self.get_success_headers(serializer.data))
-                    )
-                else:
-                    good_results.append(
-                        (serializer.data, self.get_success_headers(serializer.data))
-                    )
-            return_status = status.HTTP_201_CREATED
-            if len(good_results) > 0:
-                if len(bad_results) > 0:
-                    return_status = status.HTTP_206_PARTIAL_CONTENT
-                return Response(
-                    [res[0] for res in good_results],
-                    status=return_status,
-                    headers=good_results[-1][1],
-                )
-            raise ValidationError
-        raise ParseError
+        return self.list(request, *args, **kwargs)
 
 
-class SearchBaseClass(viewsets.ReadOnlyModelViewSet):
+class BaseAPISearchViewSet(BaseSearchViewSet):
     """
     BaseClass for Search Service APIs.
     """
 
-    queryset = IIIFResource.objects.all().distinct().prefetch_related("contexts")
-    serializer_class = IIIFSearchSummarySerializer
-    parser_classes = [IIIFSearchParser]
+    pass
+
+
+class BasePublicSearchViewSet(QueryParamDataMixin, BaseSearchViewSet):
+    """
+    BaseClass for Public Search Service APIs.
+    Allows for querying via a GET request using query params, with the
+    query_param_serializer_class being used to filter and transform data
+    for parsing by the search parsers_classes.
+    """
+
     permission_classes = [AllowAny]
+    query_param_serializer_class = FacetedSearchQueryParamDataSerializer
 
 
-class IIIFSearch(SearchBaseClass):
-    """
-    Simple read only view for the IIIF data with methods for
-    adding hits and generating facets for return in the results
-
-    Uses a custom paginator to fit the Madoc model.
-    """
-
-    filter_backends = [IIIFSearchFilter]
-    pagination_class = MadocPagination
-
-    def get_facets(self, request):
-        facet_summary = defaultdict(dict)
-        # If we haven't been provided a list of facet fields via a POST
-        # just generate the list by querying the unique list of metadata subtypes
-        # Make a copy of the query so we aren't running the get_queryset logic every time
-        facetable_queryset = self.filter_queryset(queryset=self.get_queryset())
-        if request.data.get("facet_on_manifests", None):
-            """
-            Facet on IIIF objects where:
-
-             1. They are associated (via the reverse relationship on `contexts`) with the queryset,
-                and where the associated context is a manifest
-             2. The object type is manifest
-
-             In other words, give me all the manifests where they are associated with a manifest context
-              that is related to the objects in the queryset. This manifest context should/will be
-              themselves as manifests are associated with themselves as context.
-            """
-            facetable_q = self.queryset.filter(
-                contexts__associated_iiif__madoc_id__in=facetable_queryset,
-                contexts__type__iexact="manifest",
-                type__iexact="manifest",
-            ).distinct()
-        else:
-            """
-            Otherwise, just create the facets on the objects that are in the queryset, rather than their
-            containing manifest contexts.
-            """
-            facetable_q = facetable_queryset
-        # if not request.data.get("facet_types", None):
-        #     request.data["facet_types"] = ["metadata"]
-        # if request.data.get("facet_fields"):
-        #     facet_summary = (
-        #         facetable_q.filter(
-        #             indexables__type__in=request.data["facet_types"],
-        #             indexables__subtype__in=request.data["facet_fields"],
-        #         )
-        #         .values("indexables__type", "indexables__subtype", "indexables__indexable")
-        #         .annotate(n=models.Count("pk", distinct=True))
-        #         .order_by("indexables__type", "indexables__subtype", "-n", "indexables__indexable")
-        #     )
-        # else:
-        #     facet_summary = (
-        #         facetable_q.filter(indexables__type__in=request.data["facet_types"])
-        #         .values("indexables__type", "indexables__subtype", "indexables__indexable")
-        #         .annotate(n=models.Count("pk", distinct=True))
-        #         .order_by("indexables__type", "indexables__subtype", "-n", "indexables__indexable")
-        #     )
-        facet_filter_args = [
-            models.Q(indexables__type__in=request.data.get("facet_types", ["metadata"])),
-        ]
-        if facet_fields := request.data.get("facet_fields"):
-            facet_filter_args.append(models.Q(indexables__subtype__in=facet_fields))
-        if facet_languages := request.data.get("facet_languages"):
-            facet_language_codes = set(map(lambda x: x.split("-")[0], facet_languages))
-            iso639_1_codes = list(filter(lambda x: len(x) == 2, facet_language_codes))
-            iso639_2_codes = list(filter(lambda x: len(x) == 3, facet_language_codes))
-            # Always include indexables where no language is specified.
-            # This will be cases where there it has neither iso639 field set.
-            facet_language_filter = models.Q(
-                indexables__language_iso639_1__isnull=True
-            ) & models.Q(indexables__language_iso639_2__isnull=True)
-            if iso639_1_codes:
-                facet_language_filter |= models.Q(indexables__language_iso639_1__in=iso639_1_codes)
-            if iso639_2_codes:
-                facet_language_filter |= models.Q(indexables__language_iso639_2__in=iso639_2_codes)
-            facet_filter_args.append(facet_language_filter)
-        facet_summary = (
-            facetable_q.filter(*facet_filter_args)
-            .values("indexables__type", "indexables__subtype", "indexables__indexable")
-            .annotate(n=models.Count("pk", distinct=True))
-            .order_by("indexables__type", "indexables__subtype", "-n", "indexables__indexable")
-        )
-        grouped_facets = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
-        truncate_to = request.data.get("num_facets", 10)
-        truncated_facets = defaultdict(lambda: defaultdict(dict))
-        # Turn annotated list of results into a deeply nested dict
-        for facet in facet_summary:
-            grouped_facets[facet["indexables__type"]][facet["indexables__subtype"]][
-                facet["indexables__indexable"]
-            ] = facet["n"]
-        # Take the deeply nested dict and truncate the leaves of the tree to just N keys.
-        for facet_type, facet_subtypes in grouped_facets.items():
-            for k, v in facet_subtypes.items():
-                truncated_facets[facet_type][k] = dict(itertools.islice(v.items(), truncate_to))
-        return truncated_facets
-
-    def list(self, request, *args, **kwargs):
-        resp = super().list(request, *args, **kwargs)
-        resp.data.update({"facets": self.get_facets(request=request)})
-        reverse_sort = False
-        if request.data.get("sort_order", None):
-            if (direction := request.data["sort_order"].get("direction")) is not None:
-                if direction == "descending":
-                    logger.debug("Descending")
-                    reverse_sort = True
-        resp.data["results"] = sorted(
-            resp.data["results"],
-            key=lambda k: (k.get("sortk"),),
-            reverse=reverse_sort,
-        )
-        return resp
+class IndexableAPISearchViewSet(BaseAPISearchViewSet):
+    queryset = Indexable.objects.all().distinct()
+    parser_classes = [IndexableSearchParser]
+    filter_backends = [GenericFilter]
+    serializer_class = IndexableAPISearchSerializer
 
 
-class Facets(SearchBaseClass):
+class IndexablePublicSearchViewSet(BaseAPISearchViewSet):
+    queryset = Indexable.objects.all().distinct()
+    parser_classes = [IndexableSearchParser]
+    filter_backends = [GenericFilter]
+    serializer_class = IndexablePublicSearchSerializer
+
+
+class JSONResourceAPISearchViewSet(BaseAPISearchViewSet):
+    """ """
+
+    queryset = JSONResource.objects.all().distinct()
+    parser_classes = [ResourceSearchParser]
+    lookup_field = "id"
+    filter_backends = [
+        ResourceFilter,
+        FacetFilter,
+        RankSnippetFilter,
+    ]
+    serializer_class = JSONResourceAPISearchSerializer
+
+
+class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
+    """ """
+
+    queryset = JSONResource.objects.all().distinct()
+    parser_classes = [ResourceSearchParser]
+    lookup_field = "id"
+    filter_backends = [
+        ResourceFilter,
+        FacetFilter,
+        RankSnippetFilter,
+    ]
+    serializer_class = JSONResourcePublicSearchSerializer
+
+
+class GenericFacetsViewSet(BasePublicSearchViewSet):
     """
     Simple read only view to return a list of facet fields
     """
 
-    filter_backends = [FacetListFilter]
+    parser_classes = [SearchParser]
+    filter_backends = [GenericFacetListFilter]
+    serializer_class = IndexableAPISerializer
 
     def get_facet_list(self, request):
         facet_dict = defaultdict(list)
         # If we haven't been provided a list of facet fields via a POST
         # just generate the list by querying the unique list of metadata subtypes
         # Make a copy of the query so we aren't running the get_queryset logic every time
-        facetable_queryset = self.filter_queryset(queryset=self.get_queryset())
-        if request.data.get("facet_on_manifests", None):
-            """
-            Facet on IIIF objects where:
-
-             1. They are associated (via the reverse relationship on `contexts`) with the queryset,
-                and where the associated context is a manifest
-             2. The object type is manifest
-
-             In other words, give me all the manifests where they are associated with a manifest
-             context that is related to the objects in the queryset. This manifest context
-             should/will be themselves as manifests are associated with themselves as context.
-            """
-            facetable_q = IIIFResource.objects.filter(
-                contexts__associated_iiif__madoc_id__in=facetable_queryset,
-                contexts__type__iexact="manifest",
-                type__iexact="manifest",
-            ).distinct()
-        else:
-            """
-            Otherwise, just create the facets on the objects that are in the queryset,
-            rather than their containing manifest contexts.
-            """
-            facetable_q = facetable_queryset
+        facetable_q = self.filter_queryset(queryset=self.get_queryset())
         facet_fields = []
         if not request.data.get("facet_types", None):
             request.data["facet_types"] = ["metadata"]
         for facet_type in request.data["facet_types"]:
             for t in (
-                facetable_q.filter(indexables__type__iexact=facet_type)
-                .values("indexables__subtype")
-                .distinct()
+                facetable_q.filter(type__iexact=facet_type).values("subtype").distinct()
             ):
                 for _, v in t.items():
                     if v and v != "":
@@ -395,25 +269,15 @@ class Facets(SearchBaseClass):
         return facet_dict
 
     def list(self, request, *args, **kwargs):
-        response = super(Facets, self).list(request, args, kwargs)
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
         response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
         return response
 
-
-class Autocomplete(SearchBaseClass):
-    queryset = Indexables.objects.all()
-    serializer_class = AutocompleteSerializer
-    filter_backends = [AutoCompleteFilter]
-
-    def list(self, request, *args, **kwargs):
-        facetable_queryset = self.filter_queryset(self.get_queryset().all())
-        raw_data = (
-            facetable_queryset.values("indexable")
-            .distinct()
-            .annotate(n=models.Count("pk", distinct=True))
-            .order_by("-n")[:10]
-        )
-        return_data = {
-            "results": [{"id": x.get("indexable"), "text": x.get("indexable")} for x in raw_data]
-        }
-        return Response(data=return_data)
+    def create(self, request, *args, **kwargs):
+        response = super(GenericFacetsViewSet, self).list(request, args, kwargs)
+        response.data = self.get_facet_list(request=request)
+        logger.info("Facets")
+        logger.info(self.get_facet_list(request=request))
+        return response

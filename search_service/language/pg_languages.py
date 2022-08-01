@@ -1,0 +1,17 @@
+PG_LANGUAGES = [
+    "danish",
+    "dutch",
+    "english",
+    "finnish",
+    "french",
+    "german",
+    "hungarian",
+    "italian",
+    "norwegian",
+    "portuguese",
+    "romanian",
+    "russian",
+    "spanish",
+    "swedish",
+    "turkish",
+]

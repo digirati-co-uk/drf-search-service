@@ -45,7 +45,6 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         return [{}]
 
     def to_representation(self, instance):
-        logger.debug(f"ns: ({instance.namespaces})")
         resource_fields = {
             "resource_id": instance.id,
             "resource_content_type": ContentType.objects.get_for_model(instance).pk,

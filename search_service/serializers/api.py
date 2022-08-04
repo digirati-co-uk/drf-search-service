@@ -47,7 +47,7 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
 
 class JSONResourceAPISerializer(serializers.ModelSerializer):
 
-    namespaces = NamespacesField(many=True, slug_field="urn")
+    namespaces = NamespacesField(many=True, slug_field="urn", required=False)
 
     class Meta:
         model = JSONResource
@@ -82,7 +82,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
     drive search and which are associated with a IIIF resource
     """
 
-    namespaces = NamespacesField(many=True, slug_field="urn")
+    namespaces = NamespacesField(many=True, slug_field="urn", required=False)
 
     class Meta:
         model = Indexable

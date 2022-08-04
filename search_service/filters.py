@@ -29,6 +29,17 @@ class GenericFacetListFilter(BaseFilterBackend):
         return queryset
 
 
+class AuthNamespacesFilter(BaseFilterBackend):
+    """Filters a queryset by the namespaces set in the `auth` of the request
+    by an authenticator.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        if request.auth and (namespaces := request.auth.get("namespaces")):
+            queryset = queryset.filter(namespaces__urn__in=namespaces)
+        return queryset
+
+
 class GenericFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """

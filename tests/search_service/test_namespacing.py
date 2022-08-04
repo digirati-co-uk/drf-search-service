@@ -1,8 +1,10 @@
+import pytest
 import requests
+import collections
 
 api_endpoint = "api/search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
-test_data_store = {}
+test_data_store = collections.defaultdict(list)
 
 
 def test_namespaced_json_resource_create(http_service):
@@ -61,21 +63,34 @@ def test_namespaced_json_resource_indexables_creation(http_service):
         assert indexable.get("resource_id") == resource_id
         assert indexable.get("namespaces") == namespaces
 
-
-def test_namespaced_json_resource_namespace_header_create(http_service):
     """ """
-    namespace = "urn:test:value:2"
+
+
+@pytest.mark.parametrize(
+    "namespace,label",
+    [
+        ("urn:test:value:3", "Test Resource 1"),
+        ("urn:test:value:3", "Test Resource 2"),
+        ("urn:test:value:3", "Test Resource 3"),
+        ("urn:test:value:4", "Test Resource 1"),
+        ("urn:test:value:4", "Test Resource 2"),
+        ("urn:test:value:5", "Test Resource 1"),
+    ],
+)
+def test_namespaced_json_resource_namespace_header_create(
+    http_service, namespace, label
+):
     test_endpoint = "namespaced/json_resource"
-    test_headers = {"x-namespace": namespace}
+    namespaced_headers = {"x-namespace": namespace, **test_headers}
     status = 201
     post_json = {
-        "label": "A Test Resource",
+        "label": label,
         "data": {"key_1": "Value 1", "key_2": "Value 2"},
     }
     response = requests.post(
         f"{http_service}/{api_endpoint}/{test_endpoint}/",
         json=post_json,
-        headers=test_headers,
+        headers=namespaced_headers,
     )
     response_json = response.json()
     assert response.status_code == status
@@ -85,9 +100,111 @@ def test_namespaced_json_resource_namespace_header_create(http_service):
     assert response_json.get("modified") is not None
     assert response_json.get("id") is not None
     assert response_json.get("namespaces") == [namespace]
-    test_data_store["json_resource_id"] = response_json.get("id")
+    test_data_store[namespace].append(response_json.get("id"))
 
 
+def test_namespaced_json_resource_list_auth_fail(http_service):
+    test_endpoint = "namespaced/json_resource"
+    status = 403
+    response = requests.get(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert response_json.get("detail") == "x-namespace header not present on request."
+
+
+@pytest.mark.parametrize(
+    "namespace",
+    [
+        ("urn:test:value:3"),
+        ("urn:test:value:4"),
+        ("urn:test:value:5"),
+    ],
+)
+def test_namespaced_json_resource_namespace_header_list(http_service, namespace):
+    test_endpoint = "namespaced/json_resource"
+    namespaced_headers = {"x-namespace": namespace, **test_headers}
+    status = 200
+    response = requests.get(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
+        headers=namespaced_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert len(response_json.get("results")) == len(test_data_store.get(namespace))
+    for r in response_json.get("results"):
+        assert r.get("id") in test_data_store.get(namespace)
+
+
+@pytest.mark.parametrize(
+    "namespace",
+    [
+        ("urn:test:value:3"),
+        ("urn:test:value:4"),
+        ("urn:test:value:5"),
+    ],
+)
+def test_namespaced_json_resource_namespace_header_detail(http_service, namespace):
+    resource_id = test_data_store[namespace][0]
+    test_endpoint = "namespaced/json_resource"
+    namespaced_headers = {"x-namespace": namespace, **test_headers}
+    status = 200
+    response = requests.get(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/{resource_id}/",
+        headers=namespaced_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert response_json.get("id") == resource_id
+
+
+@pytest.mark.parametrize(
+    "access_namespace,target_namespace",
+    [
+        ("urn:test:value:3", "urn:test:value:4"),
+        ("urn:test:value:4", "urn:test:value:5"),
+        ("urn:test:value:5", "urn:test:value:3"),
+    ],
+)
+def test_namespaced_json_resource_namespace_header_detail_wrong_namespace(
+    http_service, access_namespace, target_namespace
+):
+    resource_id = test_data_store[target_namespace][0]
+    test_endpoint = "namespaced/json_resource"
+    namespaced_headers = {"x-namespace": access_namespace, **test_headers}
+    status = 404
+    response = requests.get(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/{resource_id}/",
+        headers=namespaced_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert response_json.get("detail") == "Not found."
+
+@pytest.mark.parametrize(
+    "access_namespace,target_namespace",
+    [
+        ("urn:test:value:3", "urn:test:value:4"),
+        ("urn:test:value:4", "urn:test:value:5"),
+        ("urn:test:value:5", "urn:test:value:3"),
+    ],
+)
+def test_namespaced_json_resource_namespace_header_delete_wrong_namespace(
+    http_service, access_namespace, target_namespace
+):
+    resource_id = test_data_store[target_namespace][0]
+    test_endpoint = "namespaced/json_resource"
+    namespaced_headers = {"x-namespace": access_namespace, **test_headers}
+    status = 404
+    response = requests.delete(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/{resource_id}/",
+        headers=namespaced_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert response_json.get("detail") == "Not found."
 
 
 def test_namespaced_json_resource_cleanup(http_service):

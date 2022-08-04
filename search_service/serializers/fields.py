@@ -3,14 +3,16 @@ search_service/serializers/fields.py - Fields for search service types and relat
 """
 import logging
 
-from rest_framework import serializers
+from rest_framework import (
+    serializers,
+    relations,
+)
 
 from ..models import (
     Namespace,
 )
 
 logger = logging.getLogger(__name__)
-
 
 class NamespacesField(serializers.SlugRelatedField):
     """Namespaces on an Indexable or Resource are serialized

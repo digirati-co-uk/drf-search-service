@@ -61,6 +61,35 @@ def test_namespaced_json_resource_indexables_creation(http_service):
         assert indexable.get("resource_id") == resource_id
         assert indexable.get("namespaces") == namespaces
 
+
+def test_namespaced_json_resource_namespace_header_create(http_service):
+    """ """
+    namespace = "urn:test:value:2"
+    test_endpoint = "namespaced/json_resource"
+    test_headers = {"x-namespace": namespace}
+    status = 201
+    post_json = {
+        "label": "A Test Resource",
+        "data": {"key_1": "Value 1", "key_2": "Value 2"},
+    }
+    response = requests.post(
+        f"{http_service}/{api_endpoint}/{test_endpoint}/",
+        json=post_json,
+        headers=test_headers,
+    )
+    response_json = response.json()
+    assert response.status_code == status
+    assert response_json.get("label") == post_json.get("label")
+    assert response_json.get("data") == post_json.get("data")
+    assert response_json.get("created") is not None
+    assert response_json.get("modified") is not None
+    assert response_json.get("id") is not None
+    assert response_json.get("namespaces") == [namespace]
+    test_data_store["json_resource_id"] = response_json.get("id")
+
+
+
+
 def test_namespaced_json_resource_cleanup(http_service):
     # Get a list of all resources
     test_endpoint = "json_resource"

@@ -55,10 +55,13 @@ from .utils import ActionBasedSerializerMixin
 from .filters import (
     GenericFilter,
     ResourceFilter,
-    AuthNamespacesFilter, 
+    AuthNamespacesFilter,
     FacetFilter,
     GenericFacetListFilter,
     RankSnippetFilter,
+)
+from .authentication import (
+    NamespacesHeaderAuthentication,
 )
 from .settings import search_service_settings
 
@@ -111,6 +114,10 @@ class JSONResourceAPIViewSet(viewsets.ModelViewSet):
         )
 
 
+class NamespacedJSONResourceAPIViewSet(JSONResourceAPIViewSet):
+    authentication_classes = [NamespacesHeaderAuthentication]
+
+
 class IndexableAPIViewSet(viewsets.ModelViewSet):
     queryset = Indexable.objects.all()
     serializer_class = IndexableAPISerializer
@@ -122,6 +129,10 @@ class IndexableAPIViewSet(viewsets.ModelViewSet):
         "type",
         "subtype",
     ]
+
+
+class NamespacedIndexableAPIViewSet(IndexableAPIViewSet):
+    authentication_classes = [NamespacesHeaderAuthentication]
 
 
 class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
@@ -216,6 +227,10 @@ class IndexableAPISearchViewSet(BaseAPISearchViewSet):
     serializer_class = IndexableAPISearchSerializer
 
 
+class NamespacedIndexableAPISearchViewSet(IndexableAPISearchViewSet):
+    authentication_classes = [NamespacesHeaderAuthentication]
+
+
 class IndexablePublicSearchViewSet(BaseAPISearchViewSet):
     queryset = Indexable.objects.all().distinct()
     parser_classes = [IndexableSearchParser]
@@ -230,12 +245,16 @@ class JSONResourceAPISearchViewSet(BaseAPISearchViewSet):
     parser_classes = [ResourceSearchParser]
     lookup_field = "id"
     filter_backends = [
-        AuthNamespacesFilter, 
+        AuthNamespacesFilter,
         ResourceFilter,
         FacetFilter,
         RankSnippetFilter,
     ]
     serializer_class = JSONResourceAPISearchSerializer
+
+
+class NamespacedJSONResourceAPISearchViewSet(JSONResourceAPISearchViewSet):
+    authentication_classes = [NamespacesHeaderAuthentication]
 
 
 class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
@@ -245,7 +264,7 @@ class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
     parser_classes = [ResourceSearchParser]
     lookup_field = "id"
     filter_backends = [
-        AuthNamespacesFilter, 
+        AuthNamespacesFilter,
         ResourceFilter,
         FacetFilter,
         RankSnippetFilter,

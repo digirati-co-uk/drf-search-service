@@ -48,7 +48,24 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class BaseResourceAPISerializer(serializers.ModelSerializer):
+class AuthNamespacesValidationMixin: 
+
+    def validate(self, data):
+        """Used to ensure the presence of any required namespaces
+        set by an authentication_class on the serializer context.
+        """
+        namespaces = []
+        current_namespaces = data.get("namespaces", [])
+        if request := self.context.get("request"):
+            if request.auth and (auth_namespaces := request.auth.get("namespaces")):
+                namespaces += auth_namespaces
+        additional_namespaces = NamespacesField(many=True, slug_field="urn").to_internal_value(namespaces)
+        data["namespaces"] = current_namespaces + additional_namespaces
+        return data
+
+
+
+class BaseResourceAPISerializer(AuthNamespacesValidationMixin, serializers.ModelSerializer):
     namespaces = NamespacesField(many=True, slug_field="urn", required=False)
 
     def signal_completed(self, instance):

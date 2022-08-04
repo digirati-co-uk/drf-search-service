@@ -15,6 +15,9 @@ from ..models import (
     BaseSearchResource,
     JSONResource,
 )
+from ..signals import (
+    ready_for_indexing,
+)
 
 from .fields import (
     NamespacesField,
@@ -45,10 +48,25 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class JSONResourceAPISerializer(serializers.ModelSerializer):
-
+class BaseResourceAPISerializer(serializers.ModelSerializer):
     namespaces = NamespacesField(many=True, slug_field="urn", required=False)
 
+    def signal_completed(self, instance):
+        logger.debug(instance.__class__)
+        ready_for_indexing.send(sender=instance.__class__, instance=instance)
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self.signal_completed(instance)
+        return instance
+
+    def update(self, validated_data):
+        instance = super().update(validated_data)
+        self.signal_completed(instance)
+        return instance
+
+
+class JSONResourceAPISerializer(BaseResourceAPISerializer):
     class Meta:
         model = JSONResource
         fields = [

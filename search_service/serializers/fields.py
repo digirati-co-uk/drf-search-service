@@ -23,6 +23,8 @@ class NamespacesField(serializers.SlugRelatedField):
 
     def to_internal_value(self, data):
         queryset = self.get_queryset()
+        logger.debug(f"{self.slug_field}")
+        logger.debug(f"{data}")
         try:
             return queryset.get_or_create(**{self.slug_field: data})[0]
         except (TypeError, ValueError):

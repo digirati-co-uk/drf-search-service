@@ -24,6 +24,9 @@ class Namespace(UUIDModel, TimeStampedModel):
 
     urn = models.CharField(max_length=512, unique=True)
 
+    def __str__(self): 
+        return self.urn
+
     class Meta:
         ordering = ["-modified"]
 

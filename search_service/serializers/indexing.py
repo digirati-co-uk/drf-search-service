@@ -43,6 +43,7 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         resource_fields = {
             "resource_id": instance.id,
             "resource_content_type": ContentType.objects.get_for_model(instance).pk,
+            "namespaces": instance.namespaces, 
         }
         indexables_data = []
         for indexable in self.to_indexables(instance):

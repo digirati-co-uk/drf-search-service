@@ -127,7 +127,8 @@ class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
 class NamespaceAPIViewSet(viewsets.ModelViewSet):
     queryset = Namespace.objects.all()
     serializer_class = NamespaceAPISerializer
-    lookup_field = "id"
+    lookup_field = "urn"
+
 
 class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ContentType.objects.all()

@@ -16,6 +16,10 @@ from ..models import (
     JSONResource,
 )
 
+from .fields import (
+        NamespacesField, 
+        )
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +32,7 @@ class ContentTypeAPISerializer(serializers.ModelSerializer):
             "app_label",
             "model",
         ]
+
 
 class NamespaceAPISerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,12 +47,16 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
 
 
 class JSONResourceAPISerializer(serializers.ModelSerializer):
+
+    namespaces = NamespacesField(many=True, slug_field="urn")
+
     class Meta:
         model = JSONResource
         fields = [
             "id",
             "created",
             "modified",
+            "namespaces",
             "label",
             "data",
         ]
@@ -62,7 +71,7 @@ class ResourceRelationshipAPISerializer(serializers.ModelSerializer):
             "modified",
             "source_id",
             "source_content_type",
-            "type", 
+            "type",
             "target_id",
             "target_content_type",
         ]
@@ -73,6 +82,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
     Serializer for the Indexable, i.e. the indexed objects that are used to
     drive search and which are associated with a IIIF resource
     """
+    namespaces = NamespacesField(many=True, slug_field="urn")
 
     class Meta:
         model = Indexable
@@ -81,6 +91,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
+            "namespaces", 
             "group_id",
             "indexable_text",
             "indexable_date_range_start",

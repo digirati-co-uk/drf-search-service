@@ -6,6 +6,7 @@ from rest_framework import routers
 
 from ..views import (
     JSONResourceAPIViewSet,
+    NamespaceAPIViewSet,
     IndexableAPIViewSet,
     ResourceRelationshipAPIViewSet,
     ContentTypeAPIViewSet,
@@ -17,6 +18,7 @@ app_name = "search_service"
 
 router = routers.DefaultRouter()
 router.register("indexable", IndexableAPIViewSet)
+router.register("namespace", NamespaceAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)
 router.register("content_type", ContentTypeAPIViewSet)
 router.register("json_resource", JSONResourceAPIViewSet)

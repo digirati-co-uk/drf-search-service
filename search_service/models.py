@@ -15,12 +15,27 @@ from model_utils.models import TimeStampedModel, UUIDModel
 logger = logging.getLogger(__name__)
 
 
+class Namespace(UUIDModel, TimeStampedModel):
+    """Provides namespaces for Indexables and Resources derived from the 
+    BaseSearchResource through the `namespaces` M2M relationship.
+    
+    Namespace is expected to be in the form of a urn e.g. urn:madoc:site:1
+    """
+
+    urn = models.CharField(max_length=512, unique=True)
+
+    class Meta:
+        ordering = ["-modified"]
+
+
 class Indexable(UUIDModel, TimeStampedModel):
     """ """
 
     resource_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     resource_id = models.UUIDField()
     resource = GenericForeignKey("resource_content_type", "resource_id")
+
+    namespaces = models.ManyToManyField(Namespace)
 
     type = models.CharField(max_length=64)
     subtype = models.CharField(max_length=256)
@@ -67,8 +82,8 @@ class Indexable(UUIDModel, TimeStampedModel):
             self.save(update_fields=["search_vector"])
 
     class Meta:
-        # Add a postgres index for the search_vector
         ordering = ["-modified"]
+        # Add a postgres index for the search_vector
         indexes = [
             GinIndex(fields=["search_vector"]),
             models.Index(fields=["content_id"]),
@@ -91,8 +106,8 @@ class Indexable(UUIDModel, TimeStampedModel):
 
 
 class ResourceRelationship(UUIDModel, TimeStampedModel):
-    """ Model-agnostic relationship between resources. 
-        """
+    """Model-agnostic relationship between resources."""
+
     source_content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources"
     )
@@ -128,6 +143,7 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         object_id_field="target_id",
         related_query_name="%(class)s_targets",
     )
+    namespaces = models.ManyToManyField(Namespace)
 
     class Meta:
         abstract = True

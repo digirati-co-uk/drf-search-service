@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from ..models import (
+    Namespace,
     Indexable,
     ResourceRelationship,
     BaseSearchResource,
@@ -27,6 +28,17 @@ class ContentTypeAPISerializer(serializers.ModelSerializer):
             "app_label",
             "model",
         ]
+
+class NamespaceAPISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Namespace
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "urn",
+        ]
+
 
 
 class JSONResourceAPISerializer(serializers.ModelSerializer):

@@ -19,6 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 # Local imports
 from .models import (
+    Namespace,
     Indexable,
     ResourceRelationship,
     JSONResource,
@@ -33,6 +34,7 @@ from .pagination import MadocPagination
 
 from .serializers.api import (
     ContentTypeAPISerializer,
+    NamespaceAPISerializer,
     JSONResourceAPISerializer,
     ResourceRelationshipAPISerializer,
     IndexableAPISerializer,
@@ -122,6 +124,10 @@ class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
     serializer_class = ResourceRelationshipAPISerializer
     lookup_field = "id"
 
+class NamespaceAPIViewSet(viewsets.ModelViewSet):
+    queryset = Namespace.objects.all()
+    serializer_class = NamespaceAPISerializer
+    lookup_field = "id"
 
 class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ContentType.objects.all()

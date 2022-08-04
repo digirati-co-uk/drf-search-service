@@ -17,8 +17,8 @@ from ..models import (
 )
 
 from .fields import (
-        NamespacesField, 
-        )
+    NamespacesField,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,6 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
             "modified",
             "urn",
         ]
-
 
 
 class JSONResourceAPISerializer(serializers.ModelSerializer):
@@ -82,6 +81,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
     Serializer for the Indexable, i.e. the indexed objects that are used to
     drive search and which are associated with a IIIF resource
     """
+
     namespaces = NamespacesField(many=True, slug_field="urn")
 
     class Meta:
@@ -91,7 +91,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
-            "namespaces", 
+            "namespaces",
             "group_id",
             "indexable_text",
             "indexable_date_range_start",

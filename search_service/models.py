@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class Namespace(UUIDModel, TimeStampedModel):
-    """Provides namespaces for Indexables and Resources derived from the 
+    """Provides namespaces for Indexables and Resources derived from the
     BaseSearchResource through the `namespaces` M2M relationship.
-    
+
     Namespace is expected to be in the form of a urn e.g. urn:madoc:site:1
     """
 
     urn = models.CharField(max_length=512, unique=True)
 
-    def __str__(self): 
+    def __str__(self):
         return self.urn
 
     class Meta:

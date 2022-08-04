@@ -52,20 +52,24 @@ def calc_offsets(obj):
                             return
     return
 
-class RankSnippetSerializerMixin(metaclass=serializers.SerializerMetaclass): 
-    rank = serializers.FloatField(default=None, 
-        read_only=True
+
+class RankSnippetSerializerMixin(metaclass=serializers.SerializerMetaclass):
+    rank = serializers.FloatField(
+        default=None, read_only=True
     )  # Not this isn't ranking the highest (yet)
     snippet = serializers.CharField(default=None, read_only=True)
     fullsnip = serializers.CharField(default=None, read_only=True)
 
-class BaseRankSnippetSearchSerializer(RankSnippetSerializerMixin, serializers.HyperlinkedModelSerializer): 
+
+class BaseRankSnippetSearchSerializer(
+    RankSnippetSerializerMixin, serializers.HyperlinkedModelSerializer
+):
     """
     Provides a Model serializer with access to the additional fields `rank`, `snippet`
-    and `fullsnip` which are annotated to the queryset as part of search filtering. 
+    and `fullsnip` which are annotated to the queryset as part of search filtering.
     """
-    pass
 
+    pass
 
 
 class AutocompleteSerializer(serializers.ModelSerializer):
@@ -92,10 +96,11 @@ class JSONResourceRelationshipSerializer(serializers.Serializer):
         }
 
 
-class IndexableAPISearchSerializer(BaseRankSnippetSearchSerializer): 
+class IndexableAPISearchSerializer(BaseRankSnippetSearchSerializer):
     """
     Serializer for the Indexable with the snippets and ranks included
     """
+
     class Meta:
         model = Indexable
         fields = [
@@ -128,10 +133,12 @@ class IndexableAPISearchSerializer(BaseRankSnippetSearchSerializer):
             }
         }
 
-class IndexablePublicSearchSerializer(BaseRankSnippetSearchSerializer): 
+
+class IndexablePublicSearchSerializer(BaseRankSnippetSearchSerializer):
     """
     Serializer for the Indexable with the snippets and ranks included
     """
+
     language = serializers.CharField(
         default=None, read_only=None, source="language_iso639_1"
     )
@@ -175,7 +182,9 @@ class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
         }
 
 
-class JSONResourcePublicSearchSerializer(RankSnippetSerializerMixin, serializers.ModelSerializer):
+class JSONResourcePublicSearchSerializer(
+    RankSnippetSerializerMixin, serializers.ModelSerializer
+):
     class Meta:
         model = JSONResource
         fields = [

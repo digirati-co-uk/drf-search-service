@@ -6,7 +6,9 @@ from tests.utils import is_responsive_404
 app_endpoint = "api/search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
 
-pytest.skip("skipping because this won't work on generic search", allow_module_level=True)
+pytest.skip(
+    "skipping because this won't work on generic search", allow_module_level=True
+)
 
 
 def test_iiif_instance(http_service, floco_manifest):
@@ -421,9 +423,7 @@ def test_indexing_tags(http_service, tags):
 
 
 def test_find_by_vocab_id(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"group_id": "10055"}
@@ -434,13 +434,13 @@ def test_find_by_vocab_id(http_service):
     )
     resp_json = result.json()
     assert result.status_code == 200
-    assert resp_json["pagination"]["totalResults"] == 2  # 4 genuine tags, but all on same image/canvas + 1 faked one
+    assert (
+        resp_json["pagination"]["totalResults"] == 2
+    )  # 4 genuine tags, but all on same image/canvas + 1 faked one
 
 
 def test_find_by_vocab_id_lang(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"group_id": "10055", "language_iso639_2": "spa"}
@@ -455,9 +455,7 @@ def test_find_by_vocab_id_lang(http_service):
 
 
 def test_find_by_term(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "acatl"}
@@ -472,13 +470,10 @@ def test_find_by_term(http_service):
 
 
 def test_find_by_term_exact(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    post_json = {"raw": {
-        "indexables__indexable__exact": "Acatl"}}
+    post_json = {"raw": {"indexables__indexable__exact": "Acatl"}}
     result = requests.post(
         url=f"{http_service}/{app_endpoint}/{test_endpoint}",
         json=post_json,
@@ -486,13 +481,13 @@ def test_find_by_term_exact(http_service):
     )
     resp_json = result.json()
     assert result.status_code == 200
-    assert resp_json["pagination"]["totalResults"] == 1  # Case sensitive search, so only matches 1
+    assert (
+        resp_json["pagination"]["totalResults"] == 1
+    )  # Case sensitive search, so only matches 1
 
 
 def test_find_by_vocab_language(http_service):
-    """
-
-    """
+    """ """
     test_endpoint = "search"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     post_json = {"fulltext": "sail", "language_iso639_2": "eng", "type": "tag"}
@@ -503,9 +498,14 @@ def test_find_by_vocab_language(http_service):
     )
     resp_json = result.json()
     assert result.status_code == 200
-    assert resp_json["pagination"]["totalResults"] == 2  # Should be 2 because of stemming
+    assert (
+        resp_json["pagination"]["totalResults"] == 2
+    )  # Should be 2 because of stemming
     ids = [x["resource_id"] for x in resp_json["results"]]
-    assert "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823" in ids
+    assert (
+        "urn:florentinecodex:manifest:d8a35385-d097-4306-89c0-1a15aa74e6da:canvas:823"
+        in ids
+    )
 
 
 def test_iiif_delete_manifest_and_all_canvases(http_service, floco_manifest):

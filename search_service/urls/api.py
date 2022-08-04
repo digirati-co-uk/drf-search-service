@@ -10,8 +10,8 @@ from ..views import (
     IndexableAPIViewSet,
     ResourceRelationshipAPIViewSet,
     ContentTypeAPIViewSet,
-    IndexableAPISearchViewSet, 
-    JSONResourceAPISearchViewSet, 
+    IndexableAPISearchViewSet,
+    JSONResourceAPISearchViewSet,
 )
 
 app_name = "search_service"

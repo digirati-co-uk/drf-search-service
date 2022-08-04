@@ -57,4 +57,6 @@ def na_ad(tests_dir):
 
 @pytest.fixture
 def tags(tests_dir):
-    return json.load((tests_dir / "fixtures/tags/tags_truncated.json").open(encoding="utf-8"))
+    return json.load(
+        (tests_dir / "fixtures/tags/tags_truncated.json").open(encoding="utf-8")
+    )

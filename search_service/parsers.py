@@ -308,7 +308,7 @@ class SearchParser(JSONParser):
                         )
                     }
             else:
-                # Should be an independent `get_non_vector_search` method. 
+                # Should be an independent `get_non_vector_search` method.
                 non_vector_search = [
                     reduce(
                         and_,
@@ -396,7 +396,7 @@ class SearchParser(JSONParser):
             ]
         return resource_filter_queries
 
-    def parse_data(self, request_data): 
+    def parse_data(self, request_data):
         logger.debug(f"Parsing filter data from: ({request_data})")
         filter_data = {
             "filter_query": self.get_filter_query(
@@ -408,7 +408,7 @@ class SearchParser(JSONParser):
             "facet_on": self.get_facet_on_query(
                 request_data
             ),  # query that identifies the queryset to facet over
-            "facet_types": request_data.get("facet_types", self.default_facet_types), 
+            "facet_types": request_data.get("facet_types", self.default_facet_types),
             "query_prefix": self.q_prefix,
         }
 
@@ -419,16 +419,20 @@ class SearchParser(JSONParser):
         request_data = super().parse(stream, media_type, parser_context)
         return self.parse_data(request_data)
 
+
 class IndexableSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
+
     q_prefix = ""
+
 
 class ResourceSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
+
     q_prefix = "indexables__"

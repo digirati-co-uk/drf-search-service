@@ -12,7 +12,7 @@ from ..language.indexable import (
     format_indexable_language_fields,
 )
 from ..models import (
-    Namespace, 
+    Context, 
     Indexable,
 )
 
@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class IndexableCreateUpdateSerializer(serializers.ModelSerializer):
-    namespaces = serializers.PrimaryKeyRelatedField(
-        queryset=Namespace.objects.all(), many=True, allow_empty=True
+    contexts = serializers.PrimaryKeyRelatedField(
+        queryset=Context.objects.all(), many=True, allow_empty=True
     )
 
     class Meta:
@@ -48,7 +48,7 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         resource_fields = {
             "resource_id": instance.id,
             "resource_content_type": ContentType.objects.get_for_model(instance).pk,
-            "namespaces": [ns.id for ns in instance.namespaces.all()],
+            "contexts": [ns.id for ns in instance.contexts.all()],
         }
         indexables_data = []
         for indexable in self.to_indexables(instance):

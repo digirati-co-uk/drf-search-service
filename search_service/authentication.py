@@ -7,17 +7,17 @@ from rest_framework import exceptions
 
 logger = logging.getLogger(__name__)
 
-class NamespacesHeaderAuthentication(authentication.BaseAuthentication):
+class ContextsHeaderAuthentication(authentication.BaseAuthentication):
 
     def authenticate(self, request):
-        """ Authenticates if the x-namespace header is present, 
-            and sets this as the auth namespaces for 
+        """ Authenticates if the x-context header is present, 
+            and sets this as the auth contexts for 
         """
         auth_data = {}
-        if namespace:=request.headers.get("x-namespace"): 
-            auth_data["namespaces"] = [namespace] 
+        if context:=request.headers.get("x-context"): 
+            auth_data["contexts"] = [context] 
             return (True, auth_data)
         else:
-            msg = "x-namespace header not present on request."
+            msg = "x-context header not present on request."
             logger.debug(msg)
             raise exceptions.AuthenticationFailed(msg)

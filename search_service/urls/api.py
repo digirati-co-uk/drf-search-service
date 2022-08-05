@@ -6,24 +6,24 @@ from rest_framework import routers
 
 from ..views import (
     JSONResourceAPIViewSet,
-    NamespaceAPIViewSet,
+    ContextAPIViewSet,
     IndexableAPIViewSet,
     ResourceRelationshipAPIViewSet,
     ContentTypeAPIViewSet,
     IndexableAPISearchViewSet,
     JSONResourceAPISearchViewSet,
-    # Namespaced viewsets
-    NamespacedJSONResourceAPIViewSet,
-    NamespacedIndexableAPIViewSet,
-    NamespacedIndexableAPISearchViewSet,
-    NamespacedJSONResourceAPISearchViewSet,
+    # Sandboxed viewsets
+    SandboxedJSONResourceAPIViewSet,
+    SandboxedIndexableAPIViewSet,
+    SandboxedIndexableAPISearchViewSet,
+    SandboxedJSONResourceAPISearchViewSet,
 )
 
 app_name = "search_service"
 
 router = routers.DefaultRouter()
 router.register("indexable", IndexableAPIViewSet)
-router.register("namespace", NamespaceAPIViewSet)
+router.register("context", ContextAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)
 router.register("content_type", ContentTypeAPIViewSet)
 router.register("json_resource", JSONResourceAPIViewSet)
@@ -33,24 +33,24 @@ router.register("json_resource_search", JSONResourceAPISearchViewSet)
 # Only included in the example_project for testing
 # Authentication classes should be set globally, 
 # or directly on inheriting ViewSets (as below) if namespacing is required
-namespaced_router = routers.DefaultRouter()
-namespaced_router.register(
-    "indexable", NamespacedIndexableAPIViewSet, basename="namespaced_indexable"
+sandboxed_router = routers.DefaultRouter()
+sandboxed_router.register(
+    "indexable", SandboxedIndexableAPIViewSet, basename="sandboxed_indexable"
 )
-namespaced_router.register(
+sandboxed_router.register(
     "json_resource",
-    NamespacedJSONResourceAPIViewSet,
-    basename="namespaced_jsonresource",
+    SandboxedJSONResourceAPIViewSet,
+    basename="sandboxed_jsonresource",
 )
-namespaced_router.register(
+sandboxed_router.register(
     "indexable_search",
-    NamespacedIndexableAPISearchViewSet,
-    basename="namespaced_indexable_search",
+    SandboxedIndexableAPISearchViewSet,
+    basename="sandboxed_indexable_search",
 )
-namespaced_router.register(
+sandboxed_router.register(
     "json_resource_search",
-    NamespacedJSONResourceAPISearchViewSet,
-    basename="namespaced_indexable_search",
+    SandboxedJSONResourceAPISearchViewSet,
+    basename="sandboxed_indexable_search",
 )
 
 urlpatterns = router.urls

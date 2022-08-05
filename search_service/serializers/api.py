@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from ..models import (
-    Namespace,
+    Context,
     Indexable,
     ResourceRelationship,
     BaseSearchResource,
@@ -20,7 +20,7 @@ from ..signals import (
 )
 
 from .fields import (
-    NamespacesField,
+    ContextsField,
 )
 
 
@@ -37,9 +37,9 @@ class ContentTypeAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class NamespaceAPISerializer(serializers.ModelSerializer):
+class ContextAPISerializer(serializers.ModelSerializer):
     class Meta:
-        model = Namespace
+        model = Context
         fields = [
             "id",
             "created",
@@ -48,25 +48,25 @@ class NamespaceAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class AuthNamespacesValidationMixin: 
+class AuthContextsValidationMixin: 
 
     def validate(self, data):
-        """Used to ensure the presence of any required namespaces
+        """Used to ensure the presence of any required contexts
         set by an authentication_class on the serializer context.
         """
-        namespaces = []
-        current_namespaces = data.get("namespaces", [])
+        contexts = []
+        current_contexts = data.get("contexts", [])
         if request := self.context.get("request"):
-            if request.auth and (auth_namespaces := request.auth.get("namespaces")):
-                namespaces += auth_namespaces
-        additional_namespaces = NamespacesField(many=True, slug_field="urn").to_internal_value(namespaces)
-        data["namespaces"] = current_namespaces + additional_namespaces
+            if request.auth and (auth_contexts := request.auth.get("contexts")):
+                contexts += auth_contexts
+        additional_contexts = ContextsField(many=True, slug_field="urn").to_internal_value(contexts)
+        data["contexts"] = current_contexts + additional_contexts
         return data
 
 
 
-class BaseResourceAPISerializer(AuthNamespacesValidationMixin, serializers.ModelSerializer):
-    namespaces = NamespacesField(many=True, slug_field="urn", required=False)
+class BaseResourceAPISerializer(AuthContextsValidationMixin, serializers.ModelSerializer):
+    contexts = ContextsField(many=True, slug_field="urn", required=False)
 
     def signal_completed(self, instance):
         logger.debug(instance.__class__)
@@ -90,7 +90,7 @@ class JSONResourceAPISerializer(BaseResourceAPISerializer):
             "id",
             "created",
             "modified",
-            "namespaces",
+            "contexts",
             "label",
             "data",
         ]
@@ -117,7 +117,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
     drive search and which are associated with a IIIF resource
     """
 
-    namespaces = NamespacesField(many=True, slug_field="urn", required=False)
+    contexts = ContextsField(many=True, slug_field="urn", required=False)
 
     class Meta:
         model = Indexable
@@ -126,7 +126,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
-            "namespaces",
+            "contexts",
             "group_id",
             "indexable_text",
             "indexable_date_range_start",

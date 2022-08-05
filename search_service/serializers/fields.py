@@ -9,19 +9,19 @@ from rest_framework import (
 )
 
 from ..models import (
-    Namespace,
+    Context,
 )
 
 logger = logging.getLogger(__name__)
 
-class NamespacesField(serializers.SlugRelatedField):
-    """Namespaces on an Indexable or Resource are serialized
-    out to a list of urns, and in to a list of Namespace objects.
+class ContextsField(serializers.SlugRelatedField):
+    """Contexts on an Indexable or Resource are serialized
+    out to a list of urns, and in to a list of Context objects.
     When used as a writable serializer will carry out a get_or_create
     using the urns provided.
     """
 
-    queryset = Namespace.objects.all()
+    queryset = Context.objects.all()
 
     def to_internal_value(self, data):
         queryset = self.get_queryset()

@@ -15,11 +15,11 @@ from model_utils.models import TimeStampedModel, UUIDModel
 logger = logging.getLogger(__name__)
 
 
-class Namespace(UUIDModel, TimeStampedModel):
-    """Provides namespaces for Indexables and Resources derived from the
-    BaseSearchResource through the `namespaces` M2M relationship.
+class Context(UUIDModel, TimeStampedModel):
+    """Provides contexts for Indexables and Resources derived from the
+    BaseSearchResource through the `contexts` M2M relationship.
 
-    Namespace is expected to be in the form of a urn e.g. urn:madoc:site:1
+    Context is expected to be in the form of a urn e.g. urn:madoc:site:1
     """
 
     urn = models.CharField(max_length=512, unique=True)
@@ -38,7 +38,7 @@ class Indexable(UUIDModel, TimeStampedModel):
     resource_id = models.UUIDField()
     resource = GenericForeignKey("resource_content_type", "resource_id")
 
-    namespaces = models.ManyToManyField(Namespace)
+    contexts = models.ManyToManyField(Context)
 
     type = models.CharField(max_length=64)
     subtype = models.CharField(max_length=256)
@@ -146,7 +146,7 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         object_id_field="target_id",
         related_query_name="%(class)s_targets",
     )
-    namespaces = models.ManyToManyField(Namespace)
+    contexts = models.ManyToManyField(Context)
 
     class Meta:
         abstract = True

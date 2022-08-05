@@ -91,8 +91,8 @@ class Indexable(UUIDModel, TimeStampedModel):
 
 
 class ResourceRelationship(UUIDModel, TimeStampedModel):
-    """ Model-agnostic relationship between resources. 
-        """
+    """Model-agnostic relationship between resources."""
+
     source_content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources"
     )

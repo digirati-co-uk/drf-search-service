@@ -50,7 +50,7 @@ class ResourceRelationshipAPISerializer(serializers.ModelSerializer):
             "modified",
             "source_id",
             "source_content_type",
-            "type", 
+            "type",
             "target_id",
             "target_content_type",
         ]

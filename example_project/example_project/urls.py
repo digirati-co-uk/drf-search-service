@@ -20,5 +20,5 @@ from django.conf import settings
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
-    path("search_service/", include("search_service.urls.public"))
+    path("search_service/", include("search_service.urls.public")),
 ]

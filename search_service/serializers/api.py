@@ -9,10 +9,18 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from ..models import (
+    Context,
     Indexable,
     ResourceRelationship,
     BaseSearchResource,
     JSONResource,
+)
+from ..signals import (
+    ready_for_indexing,
+)
+
+from .fields import (
+    ContextsField,
 )
 
 
@@ -29,13 +37,60 @@ class ContentTypeAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class JSONResourceAPISerializer(serializers.ModelSerializer):
+class ContextAPISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Context
+        fields = [
+            "id",
+            "created",
+            "modified",
+            "urn",
+        ]
+
+
+class AuthContextsValidationMixin: 
+
+    def validate(self, data):
+        """Used to ensure the presence of any required contexts
+        set by an authentication_class on the serializer context.
+        """
+        contexts = []
+        current_contexts = data.get("contexts", [])
+        if request := self.context.get("request"):
+            if request.auth and (auth_contexts := request.auth.get("contexts")):
+                contexts += auth_contexts
+        additional_contexts = ContextsField(many=True, slug_field="urn").to_internal_value(contexts)
+        data["contexts"] = current_contexts + additional_contexts
+        return data
+
+
+
+class BaseResourceAPISerializer(AuthContextsValidationMixin, serializers.ModelSerializer):
+    contexts = ContextsField(many=True, slug_field="urn", required=False)
+
+    def signal_completed(self, instance):
+        logger.debug(instance.__class__)
+        ready_for_indexing.send(sender=instance.__class__, instance=instance)
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self.signal_completed(instance)
+        return instance
+
+    def update(self, validated_data):
+        instance = super().update(validated_data)
+        self.signal_completed(instance)
+        return instance
+
+
+class JSONResourceAPISerializer(BaseResourceAPISerializer):
     class Meta:
         model = JSONResource
         fields = [
             "id",
             "created",
             "modified",
+            "contexts",
             "label",
             "data",
         ]
@@ -62,6 +117,8 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
     drive search and which are associated with a IIIF resource
     """
 
+    contexts = ContextsField(many=True, slug_field="urn", required=False)
+
     class Meta:
         model = Indexable
         fields = [
@@ -69,6 +126,7 @@ class IndexableAPISerializer(serializers.HyperlinkedModelSerializer):
             "resource_id",
             "content_id",
             "original_content",
+            "contexts",
             "group_id",
             "indexable_text",
             "indexable_date_range_start",

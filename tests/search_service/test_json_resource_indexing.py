@@ -610,7 +610,6 @@ def test_resource_relationship_delete_resources_for_relationship(http_service):
     response_json = response.json()
     assert response.status_code == status
     for resource_id in [res.get("id") for res in response_json.get("results")]:
-        print(resource_id)
         test_endpoint = f"json_resource/{resource_id}"
         status = 204
         response = requests.delete(

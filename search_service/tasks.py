@@ -25,7 +25,7 @@ class BaseSearchServiceIndexingTask(object):
                 f"Fetching object for indexing: ({self.model=}, {self.object_id=})"
             )
             return self.model.objects.get(id=self.object_id)
-        except model.DoesNotExist as e:
+        except self.model.DoesNotExist as e:
             logger.error(
                 f"Object not present for indexing: ({self.model=}, {self.object_id=})"
             )

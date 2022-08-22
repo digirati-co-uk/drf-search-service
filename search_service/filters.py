@@ -29,6 +29,17 @@ class GenericFacetListFilter(BaseFilterBackend):
         return queryset
 
 
+class AuthContextsFilter(BaseFilterBackend):
+    """Filters a queryset by the contexts set in the `auth` of the request
+    by an authenticator.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        if request.auth and (contexts := request.auth.get("contexts")):
+            queryset = queryset.filter(contexts__urn__in=contexts)
+        return queryset
+
+
 class GenericFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """

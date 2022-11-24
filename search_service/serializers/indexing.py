@@ -12,7 +12,7 @@ from ..language.indexable import (
     format_indexable_language_fields,
 )
 from ..models import (
-    Context, 
+    Context,
     Indexable,
 )
 
@@ -71,14 +71,18 @@ class JSONResourceToIndexableSerializer(BaseModelToIndexableSerializer):
                 "indexable_text": instance.label,
             }
         ]
+
         for k, v in instance.data.items():
-            indexables.append(
-                {
-                    "type": "descriptive",
-                    "subtype": k,
-                    "original_content": v,
-                    "indexable_text": v,
-                }
-            )
+            if k == "indexables":
+                indexables.extend(v)
+            else:
+                indexables.append(
+                    {
+                        "type": "descriptive",
+                        "subtype": k,
+                        "original_content": v,
+                        "indexable_text": v,
+                    }
+                )
 
         return indexables

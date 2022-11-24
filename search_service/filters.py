@@ -1,14 +1,19 @@
 import logging
 
 from django.contrib.postgres.search import SearchRank
-from django.db.models import F
-from django.db.models import Max
-from django.db.models import OuterRef, Subquery
-from django.db.models import Q, Value, FloatField
+from django.db.models import (
+    F,
+    Max,
+    OuterRef,
+    Subquery,
+    Q,
+    Value,
+    FloatField,
+    CharField,
+)
 from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
-from django.db.models import F, Value, CharField
 from .models import Indexable, BaseSearchResource, JSONResource, ResourceRelationship
 
 logger = logging.getLogger(__name__)

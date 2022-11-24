@@ -1,9 +1,14 @@
-# Django Imports
+# Django Django Imports
 
 import logging
 from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
+
+from django.db.models import (
+    Count,
+    Q,
+)
 
 # DRF Imports
 from rest_framework import (
@@ -195,6 +200,112 @@ class BaseSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     lookup_field = "id"
     parser_classes = [SearchParser]
     filter_backends = [AuthContextsFilter, GenericFilter]
+
+    default_facets = ["metadata", "entity"]
+
+    def get_facets_orig(self, request):
+        facet_summary = defaultdict(dict)
+        facet_filter_args = [
+            models.Q(
+                indexables__type__in=request.data.get("facet_types", ["metadata"])
+            ),
+        ]
+        if facet_fields := request.data.get("facet_fields"):
+            facet_filter_args.append(models.Q(indexables__subtype__in=facet_fields))
+        if facet_languages := request.data.get("facet_languages"):
+            facet_language_codes = set(map(lambda x: x.split("-")[0], facet_languages))
+            iso639_1_codes = list(filter(lambda x: len(x) == 2, facet_language_codes))
+            iso639_2_codes = list(filter(lambda x: len(x) == 3, facet_language_codes))
+            # Always include indexables where no language is specified.
+            # This will be cases where there it has neither iso639 field set.
+            facet_language_filter = models.Q(
+                indexables__language_iso639_1__isnull=True
+            ) & models.Q(indexables__language_iso639_2__isnull=True)
+            if iso639_1_codes:
+                facet_language_filter |= models.Q(
+                    indexables__language_iso639_1__in=iso639_1_codes
+                )
+            if iso639_2_codes:
+                facet_language_filter |= models.Q(
+                    indexables__language_iso639_2__in=iso639_2_codes
+                )
+            facet_filter_args.append(facet_language_filter)
+        facet_summary = (
+            facetable_q.filter(*facet_filter_args)
+            .values("indexables__type", "indexables__subtype", "indexables__indexable")
+            .annotate(n=models.Count("pk", distinct=True))
+            .order_by(
+                "indexables__type", "indexables__subtype", "-n", "indexables__indexable"
+            )
+        )
+        grouped_facets = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+        truncate_to = request.data.get("num_facets", 10)
+        truncated_facets = defaultdict(lambda: defaultdict(dict))
+        # Turn annotated list of results into a deeply nested dict
+        for facet in facet_summary:
+            grouped_facets[facet["indexables__type"]][facet["indexables__subtype"]][
+                facet["indexables__indexable"]
+            ] = facet["n"]
+        # Take the deeply nested dict and truncate the leaves of the tree to just N keys.
+        for facet_type, facet_subtypes in grouped_facets.items():
+            for k, v in facet_subtypes.items():
+                truncated_facets[facet_type][k] = dict(
+                    itertools.islice(v.items(), truncate_to)
+                )
+        return truncated_facets
+
+    def get_facet_indexables(self, request, queryset):
+        facet_filters = [
+            Q(resource_id__in=queryset),
+            Q(type__in=request.data.get("facet_types", self.default_facets)),
+        ]
+        if facet_fields := request.data.get("facet_fields"):
+            facet_filter.append(Q(subtype__in=facet_fields))
+
+        if facet_languages := request.data.get("facet_languages"):
+            facet_language_codes = set(map(lambda x: x.split("-")[0], facet_languages))
+            iso639_1_codes = list(filter(lambda x: len(x) == 2, facet_language_codes))
+            iso639_2_codes = list(filter(lambda x: len(x) == 3, facet_language_codes))
+            # Always include indexables where no language is specified.
+            # This will be cases where there it has neither iso639 field set.
+            facet_language_filter = Q(language_iso639_1__isnull=True) & Q(
+                language_iso639_2__isnull=True
+            )
+            if iso639_1_codes:
+                facet_language_filter |= Q(language_iso639_1__in=iso639_1_codes)
+            if iso639_2_codes:
+                facet_language_filter |= Q(language_iso639_2__in=iso639_2_codes)
+            facet_filter.append(facet_language_filter)
+
+        indexables = (
+            Indexable.objects.filter(*facet_filters)
+            .values("type", "subtype", "indexable_text")
+            .annotate(n=Count("id", distinct=True))
+        )
+
+        return indexables
+
+    def serialize_facets(self, indexables):
+        return indexables
+
+    def get_facets(self, request, queryset):
+        indexables = self.get_facet_indexables(request, queryset)
+        return self.serialize_facets(indexables)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        search_data = {"facets": self.get_facets(request, queryset)}
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            page_resp = self.get_paginated_response(serializer.data)
+            page_resp.data.update(search_data)
+            return page_resp
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"results": serializer.data, **search_data})
 
     def create(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)

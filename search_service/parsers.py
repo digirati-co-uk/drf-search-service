@@ -409,6 +409,9 @@ class SearchParser(JSONParser):
                 request_data
             ),  # query that identifies the queryset to facet over
             "facet_types": request_data.get("facet_types", self.default_facet_types),
+            "facet_fields": request_data.get("facet_fields"),
+            "facet_languages": request_data.get("facet_languages"),
+            "num_facets": request_data.get("num_facets", 10),
             "query_prefix": self.q_prefix,
         }
 

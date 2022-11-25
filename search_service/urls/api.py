@@ -27,11 +27,17 @@ router.register("context", ContextAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)
 router.register("content_type", ContentTypeAPIViewSet)
 router.register("json_resource", JSONResourceAPIViewSet)
-router.register("indexable_search", IndexableAPISearchViewSet)
-router.register("json_resource_search", JSONResourceAPISearchViewSet)
+router.register(
+    "indexable_search", IndexableAPISearchViewSet, basename="indexable_search"
+)
+router.register(
+    "json_resource_search",
+    JSONResourceAPISearchViewSet,
+    basename="jsonresource_search",
+)
 
 # Only included in the example_project for testing
-# Authentication classes should be set globally, 
+# Authentication classes should be set globally,
 # or directly on inheriting ViewSets (as below) if namespacing is required
 sandboxed_router = routers.DefaultRouter()
 sandboxed_router.register(
@@ -50,7 +56,7 @@ sandboxed_router.register(
 sandboxed_router.register(
     "json_resource_search",
     SandboxedJSONResourceAPISearchViewSet,
-    basename="sandboxed_indexable_search",
+    basename="sandboxed_jsonresource_search",
 )
 
 urlpatterns = router.urls

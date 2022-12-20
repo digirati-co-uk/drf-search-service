@@ -21,7 +21,20 @@ from ..views import (
 
 app_name = "search_service"
 
-router = routers.DefaultRouter()
+
+class SearchServiceAPIRootView(routers.APIRootView):
+    """
+    REST APIs for the Search Service API app.
+    """
+
+    pass
+
+
+class SearchServiceAPIRouter(routers.DefaultRouter):
+    APIRootView = SearchServiceAPIRootView
+
+
+router = SearchServiceAPIRouter()
 router.register("indexable", IndexableAPIViewSet)
 router.register("context", ContextAPIViewSet)
 router.register("resource_relationship", ResourceRelationshipAPIViewSet)

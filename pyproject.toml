@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-search-service"
-version = "0.1.0"
+version = "0.2.0"
 description = "Django REST Framework Search Service"
 authors = ["Finlay McCourt <finlaymccourt@gmail.com>"]
 readme = "README.md"
@@ -9,21 +9,28 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-beautifulsoup4 = "^4.11.1"
+python = "^3.11"
 Django = "^4.1.4"
 djangorestframework = "^3.14.0"
-requests = "^2.28.1"
-bleach = "^4.1.0"
-django-extensions = "^3.2.1"
 django-model-utils = "^4.3.1"
-ordered-set = "^4.1.0"
-psycopg2-binary = "^2.9.5"
 django-filter = "^21.1"
 python-dateutil = "^2.8.2"
-django-environ = "^0.9.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+django-environ = "^0.9.0"
+django-extensions = "^3.2.1"
+psycopg2-binary = "^2.9.5"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+requests = "^2.28.1"
+pytest = "^6.2.5"
+pytest-docker = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

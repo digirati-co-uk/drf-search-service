@@ -6,10 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.indexes import GinIndex, HashIndex
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.db.models.functions import Upper
-
-# from .langbase import INTERNET_LANGUAGES
 from django.utils.translation import gettext_lazy as _
-from django_extensions.db.fields import AutoSlugField
 from model_utils.models import TimeStampedModel, UUIDModel
 
 logger = logging.getLogger(__name__)

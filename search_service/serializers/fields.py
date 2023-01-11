@@ -14,6 +14,7 @@ from ..models import (
 
 logger = logging.getLogger(__name__)
 
+
 class ContextsField(serializers.SlugRelatedField):
     """Contexts on an Indexable or Resource are serialized
     out to a list of urns, and in to a list of Context objects.

@@ -5,6 +5,7 @@ search_service/serializers/search.py - Serializer classes for Indexables and Res
 import logging
 
 from django.utils.module_loading import import_string
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
@@ -162,6 +163,74 @@ class IndexablePublicSearchSerializer(BaseRankSnippetSearchSerializer):
         ]
 
 
+class ResourceSearchHitsSerializer(serializers.Serializer):
+    """ """
+
+    default_serializer_class = IndexablePublicSearchSerializer
+
+    def __init__(self, *args, **kwargs):
+        self.serializer_class = kwargs.pop(
+            "serializer_class", self.default_serializer_class
+        )
+        return super().__init__(*args, **kwargs)
+
+    def get_indexable_queryset(self, resource, search_query):
+        return (
+            Indexable.objects.filter(
+                resource_id=resource.id,
+                resource_content_type=ContentType.objects.get_for_model(resource).id,
+            )
+            .annotate(
+                rank=SearchRank(F("search_vector"), search_query, cover_density=True),
+                snippet=Concat(
+                    Value("'"),
+                    SearchHeadline(
+                        "original_content",
+                        search_query,
+                        max_words=50,
+                        min_words=25,
+                        max_fragments=3,
+                    ),
+                    output_field=CharField(),
+                ),
+                fullsnip=SearchHeadline(
+                    "indexable",
+                    search_query,
+                    start_sel="<start_sel>",
+                    stop_sel="<end_sel>",
+                    highlight_all=True,
+                ),
+            )
+            .filter(search_vector=search_query, **filter_kwargs)
+            .order_by("-rank")
+        )
+
+    def to_representation(self, resource):
+        if search_query:
+            qs = self.get_indexable_queryset(resource, search_query)
+            serializer = self.serializer_class(qs, many=True)
+            return serializer.data
+        else:
+            return []
+
+
+class HitsSerializerMixin(metaclass=serializers.SerializerMetaclass):
+    hits = ResourceSearchHitsSerializer(source="*")
+
+
+class BasePublicSearchSerializer(
+    HitsSerializerMixin,
+    RankSnippetSerializerMixin,
+    serializers.HyperlinkedModelSerializer,
+):
+    """
+    Provides a Model serializer with access to the additional fields `rank`, `snippet`
+    and `fullsnip` which are annotated to the queryset as part of search filtering.
+    """
+
+    pass
+
+
 class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
     class Meta:
         model = JSONResource
@@ -183,7 +252,7 @@ class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
 
 
 class JSONResourcePublicSearchSerializer(
-    RankSnippetSerializerMixin, serializers.ModelSerializer
+    HitsSerializerMixin, RankSnippetSerializerMixin, serializers.ModelSerializer
 ):
     class Meta:
         model = JSONResource

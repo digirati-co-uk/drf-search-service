@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-search-service"
-version = "0.2.0"
+version = "0.1.0"
 description = "Django REST Framework Search Service"
 authors = ["Finlay McCourt <finlaymccourt@gmail.com>"]
 readme = "README.md"

@@ -20,6 +20,7 @@ class Context(UUIDModel, TimeStampedModel):
     """
 
     urn = models.CharField(max_length=512, unique=True)
+    type = models.CharField(max_length=64, default="")
 
     def __str__(self):
         return self.urn
@@ -154,4 +155,5 @@ class JSONResource(BaseSearchResource):
     """An example resource for indexing."""
 
     label = models.CharField(max_length=50)
+    type = models.CharField(max_length=64, default="")
     data = models.JSONField(blank=True)

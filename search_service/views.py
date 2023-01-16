@@ -62,6 +62,7 @@ from .filters import (
     GenericFilter,
     ResourceFilter,
     AuthContextsFilter,
+    ContextsFilter,
     FacetFilter,
     GenericFacetListFilter,
     RankSnippetFilter,
@@ -352,6 +353,7 @@ class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
     lookup_field = "id"
     filter_backends = [
         AuthContextsFilter,
+        ContextsFilter,
         ResourceFilter,
         FacetFilter,
         RankSnippetFilter,

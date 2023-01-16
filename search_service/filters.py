@@ -92,6 +92,19 @@ class GenericFilter(BaseFilterBackend):
         return queryset
 
 
+class ContextsFilter(BaseFilterBackend):
+    """Filters a queryset by the context queries set by the parser
+    from the `contexts` and `contexts_all` provided in the search query.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        if contexts_queries := request.data.get("contexts_query"):
+            if all([type(k) == Q for k in contexts_queries]):
+                for f in contexts_queries:
+                    queryset = queryset.filter(*(f,))
+        return queryset
+
+
 class ResourceFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         """
@@ -142,7 +155,7 @@ class FacetFilter(BaseFilterBackend):
                 .__class__.objects.all()
                 .filter(
                     filter_facetable_resources,
-                    pk__in=queryset.values("relationship_sources__target_id"),
+                    id__in=queryset.values("relationship_sources__target_id"),
                 )
             )
         if (
@@ -152,7 +165,7 @@ class FacetFilter(BaseFilterBackend):
                 facetable = facetable.filter(*(f,))
         if filter_facetable_resources:
             return queryset.filter(
-                pk__in=facetable.values("relationship_targets__source_id")
+                id__in=facetable.values("relationship_targets__source_id")
             )
         else:
             return facetable

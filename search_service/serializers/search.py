@@ -5,8 +5,21 @@ search_service/serializers/search.py - Serializer classes for Indexables and Res
 import logging
 
 from django.utils.module_loading import import_string
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import (
+    SearchQuery,
+    SearchRank,
+    SearchHeadline,
+)
+from django.db.models import (
+    F,
+    Value,
+    CharField,
+)
+
+from django.db.models.functions import (
+    Concat,
+)
 
 from rest_framework import serializers
 
@@ -175,6 +188,7 @@ class ResourceSearchHitsSerializer(serializers.Serializer):
         return super().__init__(*args, **kwargs)
 
     def get_indexable_queryset(self, resource, search_query):
+        filter_kwargs = {"rank__gt": 0.0}
         return (
             Indexable.objects.filter(
                 resource_id=resource.id,
@@ -194,7 +208,7 @@ class ResourceSearchHitsSerializer(serializers.Serializer):
                     output_field=CharField(),
                 ),
                 fullsnip=SearchHeadline(
-                    "indexable",
+                    "indexable_text",
                     search_query,
                     start_sel="<start_sel>",
                     stop_sel="<end_sel>",
@@ -206,6 +220,7 @@ class ResourceSearchHitsSerializer(serializers.Serializer):
         )
 
     def to_representation(self, resource):
+        search_query = self.context.get("request").data.get("headline_query", None)
         if search_query:
             qs = self.get_indexable_queryset(resource, search_query)
             serializer = self.serializer_class(qs, many=True)
@@ -239,6 +254,7 @@ class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
             "created",
             "modified",
             "label",
+            "type",
             "data",
             "rank",
             "snippet",
@@ -252,7 +268,7 @@ class JSONResourceAPISearchSerializer(BaseRankSnippetSearchSerializer):
 
 
 class JSONResourcePublicSearchSerializer(
-    HitsSerializerMixin, RankSnippetSerializerMixin, serializers.ModelSerializer
+    BasePublicSearchSerializer,
 ):
     class Meta:
         model = JSONResource
@@ -261,7 +277,9 @@ class JSONResourcePublicSearchSerializer(
             "created",
             "modified",
             "label",
+            "type",
             "data",
             "rank",
             "snippet",
+            "hits",
         ]

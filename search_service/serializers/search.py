@@ -187,14 +187,16 @@ class ResourceSearchHitsSerializer(serializers.Serializer):
         )
         return super().__init__(*args, **kwargs)
 
-    def get_indexable_queryset(self, resource, search_query):
+    def get_indexable_queryset(self, resource):
+        return Indexable.objects.filter(
+            resource_id=resource.id,
+            resource_content_type=ContentType.objects.get_for_model(resource).id,
+        )
+
+    def annotate_indexable_queryset(self, queryset, search_query):
         filter_kwargs = {"rank__gt": 0.0}
         return (
-            Indexable.objects.filter(
-                resource_id=resource.id,
-                resource_content_type=ContentType.objects.get_for_model(resource).id,
-            )
-            .annotate(
+            queryset.annotate(
                 rank=SearchRank(F("search_vector"), search_query, cover_density=True),
                 snippet=Concat(
                     Value("'"),
@@ -222,7 +224,8 @@ class ResourceSearchHitsSerializer(serializers.Serializer):
     def to_representation(self, resource):
         search_query = self.context.get("request").data.get("headline_query", None)
         if search_query:
-            qs = self.get_indexable_queryset(resource, search_query)
+            qs = self.get_indexable_queryset(resource)
+            qs = self.annotate_indexable_queryset(qs, search_query)
             serializer = self.serializer_class(qs, many=True)
             return serializer.data
         else:

@@ -6,10 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.indexes import GinIndex, HashIndex
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.db.models.functions import Upper
-
-# from .langbase import INTERNET_LANGUAGES
 from django.utils.translation import gettext_lazy as _
-from django_extensions.db.fields import AutoSlugField
 from model_utils.models import TimeStampedModel, UUIDModel
 
 logger = logging.getLogger(__name__)
@@ -23,6 +20,7 @@ class Context(UUIDModel, TimeStampedModel):
     """
 
     urn = models.CharField(max_length=512, unique=True)
+    type = models.CharField(max_length=64, default="")
 
     def __str__(self):
         return self.urn
@@ -157,4 +155,5 @@ class JSONResource(BaseSearchResource):
     """An example resource for indexing."""
 
     label = models.CharField(max_length=50)
+    type = models.CharField(max_length=64, default="")
     data = models.JSONField(blank=True)

@@ -45,11 +45,11 @@ class ContextAPISerializer(serializers.ModelSerializer):
             "created",
             "modified",
             "urn",
+            "type",
         ]
 
 
-class AuthContextsValidationMixin: 
-
+class AuthContextsValidationMixin:
     def validate(self, data):
         """Used to ensure the presence of any required contexts
         set by an authentication_class on the serializer context.
@@ -59,13 +59,16 @@ class AuthContextsValidationMixin:
         if request := self.context.get("request"):
             if request.auth and (auth_contexts := request.auth.get("contexts")):
                 contexts += auth_contexts
-        additional_contexts = ContextsField(many=True, slug_field="urn").to_internal_value(contexts)
+        additional_contexts = ContextsField(
+            many=True, slug_field="urn"
+        ).to_internal_value(contexts)
         data["contexts"] = current_contexts + additional_contexts
         return data
 
 
-
-class BaseResourceAPISerializer(AuthContextsValidationMixin, serializers.ModelSerializer):
+class BaseResourceAPISerializer(
+    AuthContextsValidationMixin, serializers.ModelSerializer
+):
     contexts = ContextsField(many=True, slug_field="urn", required=False)
 
     def signal_completed(self, instance):
@@ -92,6 +95,7 @@ class JSONResourceAPISerializer(BaseResourceAPISerializer):
             "modified",
             "contexts",
             "label",
+            "type",
             "data",
         ]
 

@@ -523,7 +523,6 @@ def test_json_resource_fulltext_nested_canvas(http_service):
     assert response_json["results"][0]["data"]["iiif_type"] == "canvas"
 
 
-# @pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
 def test_json_resource_fulltext_nested_canvas_facets(http_service):
     """ """
     test_endpoint = "json_resource_search"

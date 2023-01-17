@@ -4,7 +4,7 @@ import pytest
 app_endpoint = "api/search_service"
 public_endpoint = "search_service"
 test_headers = {"Content-Type": "application/json", "Accept": "application/json"}
-test_data_store = {}
+test_data_store = {"json_resource": []}
 
 
 def get_content_type(http_service, app_label, model):
@@ -136,6 +136,7 @@ def test_create_related_resources(http_service, parent_resource, child_resources
     assert response_json.get("modified") is not None
     assert response_json.get("id") is not None
     parent_id = response_json.get("id")
+    test_data_store["json_resource"].append(parent_id)
     for child in child_resources:
         response = requests.post(
             f"{http_service}/{app_endpoint}/{resource_endpoint}/",
@@ -150,6 +151,7 @@ def test_create_related_resources(http_service, parent_resource, child_resources
         assert response_json.get("modified") is not None
         assert response_json.get("id") is not None
         child_id = response_json.get("id")
+        test_data_store["json_resource"].append(child_id)
         relationship_post = {
             "source_id": parent_id,
             "source_content_type": rel_content_type,
@@ -247,3 +249,13 @@ def test_json_resource_search_by_context_urn(http_service, context_urn, count):
     )
     response_json = response.json()
     assert len(response_json.get("results")) == count
+
+
+def test_cleanup_resource(http_service):
+    status = 204
+    for resource_id in test_data_store.get("json_resource"):
+        response = requests.delete(
+            f"{http_service}/{app_endpoint}/json_resource/{resource_id}",
+            headers=test_headers,
+        )
+        assert response.status_code == status

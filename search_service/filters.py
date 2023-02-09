@@ -1,14 +1,19 @@
 import logging
 
 from django.contrib.postgres.search import SearchRank
-from django.db.models import F
-from django.db.models import Max
-from django.db.models import OuterRef, Subquery
-from django.db.models import Q, Value, FloatField
+from django.db.models import (
+    F,
+    Max,
+    OuterRef,
+    Subquery,
+    Q,
+    Value,
+    FloatField,
+    CharField,
+)
 from rest_framework.filters import BaseFilterBackend
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchHeadline
 from django.db.models.functions import Concat
-from django.db.models import F, Value, CharField
 from .models import Indexable, BaseSearchResource, JSONResource, ResourceRelationship
 
 logger = logging.getLogger(__name__)
@@ -26,6 +31,17 @@ class GenericFacetListFilter(BaseFilterBackend):
                 # This is a chaining operation
                 for f in request.data["facet_list_filters"]:
                     queryset = queryset.filter(*(f,))
+        return queryset
+
+
+class AuthContextsFilter(BaseFilterBackend):
+    """Filters a queryset by the contexts set in the `auth` of the request
+    by an authenticator.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        if request.auth and (contexts := request.auth.get("contexts")):
+            queryset = queryset.filter(contexts__urn__in=contexts)
         return queryset
 
 
@@ -73,6 +89,19 @@ class GenericFilter(BaseFilterBackend):
                         .filter(_filter, rank__gt=0.0)
                         .order_by("-rank")
                     )
+        return queryset
+
+
+class ContextsFilter(BaseFilterBackend):
+    """Filters a queryset by the context queries set by the parser
+    from the `contexts` and `contexts_all` provided in the search query.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        if contexts_queries := request.data.get("contexts_query"):
+            if all([type(k) == Q for k in contexts_queries]):
+                for f in contexts_queries:
+                    queryset = queryset.filter(*(f,))
         return queryset
 
 
@@ -126,7 +155,7 @@ class FacetFilter(BaseFilterBackend):
                 .__class__.objects.all()
                 .filter(
                     filter_facetable_resources,
-                    pk__in=queryset.values("relationship_sources__target_id"),
+                    id__in=queryset.values("relationship_sources__target_id"),
                 )
             )
         if (
@@ -136,7 +165,7 @@ class FacetFilter(BaseFilterBackend):
                 facetable = facetable.filter(*(f,))
         if filter_facetable_resources:
             return queryset.filter(
-                pk__in=facetable.values("relationship_targets__source_id")
+                id__in=facetable.values("relationship_targets__source_id")
             )
         else:
             return facetable

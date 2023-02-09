@@ -12,6 +12,7 @@ from ..language.indexable import (
     format_indexable_language_fields,
 )
 from ..models import (
+    Context,
     Indexable,
 )
 
@@ -19,6 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 class IndexableCreateUpdateSerializer(serializers.ModelSerializer):
+    contexts = serializers.PrimaryKeyRelatedField(
+        queryset=Context.objects.all(), many=True, allow_empty=True
+    )
+
     class Meta:
         model = Indexable
         fields = "__all__"
@@ -43,6 +48,7 @@ class BaseModelToIndexableSerializer(serializers.Serializer):
         resource_fields = {
             "resource_id": instance.id,
             "resource_content_type": ContentType.objects.get_for_model(instance).pk,
+            "contexts": [ns.id for ns in instance.contexts.all()],
         }
         indexables_data = []
         for indexable in self.to_indexables(instance):
@@ -65,14 +71,18 @@ class JSONResourceToIndexableSerializer(BaseModelToIndexableSerializer):
                 "indexable_text": instance.label,
             }
         ]
+
         for k, v in instance.data.items():
-            indexables.append(
-                {
-                    "type": "descriptive",
-                    "subtype": k,
-                    "original_content": v,
-                    "indexable_text": v,
-                }
-            )
+            if k == "indexables":
+                indexables.extend(v)
+            else:
+                indexables.append(
+                    {
+                        "type": "descriptive",
+                        "subtype": k,
+                        "original_content": v,
+                        "indexable_text": v,
+                    }
+                )
 
         return indexables

@@ -205,7 +205,9 @@ def test_json_resource_simple_query_data_key_broader(http_service):
         headers=test_headers,
     )
     response_json = response.json()
-    assert len(response_json.get("results")) == 2  # No longer one per hit, but one per resource
+    assert (
+        len(response_json.get("results")) == 2
+    )  # No longer one per hit, but one per resource
     assert "<b>Value</b>" in response_json["results"][0].get("snippet", None)
 
 
@@ -454,9 +456,7 @@ def test_json_resource_fulltext_search_multiple_indexables(http_service):
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 1
-    )
+    assert len(response_json.get("results")) == 1
     assert "<b>Moctezuma</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
 
@@ -494,108 +494,109 @@ def test_nested_json_resource_create(http_service):
     assert response.status_code == status
     assert isinstance(response_json, list)
     assert response_json[0]["data"]["iiif_type"] == "manifest"
-    assert sorted(list(set([x["data"]["iiif_type"] for x in response_json if x.get("data")]))) == ["canvas", "manifest"]
-    assert all([x.get("target_id") is not None for x in response_json if not x.get("data")])
-    assert all([x.get("source_id") is not None for x in response_json if not x.get("data")])
+    assert sorted(
+        list(set([x["data"]["iiif_type"] for x in response_json if x.get("data")]))
+    ) == ["canvas", "manifest"]
+    assert all(
+        [x.get("target_id") is not None for x in response_json if not x.get("data")]
+    )
+    assert all(
+        [x.get("source_id") is not None for x in response_json if not x.get("data")]
+    )
 
 
 def test_json_resource_fulltext_nested_canvas(http_service):
-    """
-    """
+    """ """
     test_endpoint = "json_resource_search"
-    post_json = {"fulltext": "rugged",
-                 }
+    post_json = {
+        "fulltext": "rugged",
+    }
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 1
-    )
+    assert len(response_json.get("results")) == 1
     assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
     assert response_json["results"][0]["data"]["iiif_type"] == "canvas"
 
 
-# @pytest.mark.skip("This won't work until the facet and fulltext search is fixed")
 def test_json_resource_fulltext_nested_canvas_facets(http_service):
-    """
-    """
+    """ """
     test_endpoint = "json_resource_search"
-    post_json = {"fulltext": "rugged",
-                 "facets": [{"type": "descriptive", "subtype": "iiif_type", "value": "canvas"}]
-                 }
+    post_json = {
+        "fulltext": "rugged",
+        "facets": [{"type": "descriptive", "subtype": "iiif_type", "value": "canvas"}],
+    }
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 1
-    )
+    assert len(response_json.get("results")) == 1
     assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
 
 
 def test_json_resource_fulltext_nested_canvas_facet_on_without_query(http_service):
-    """
-    """
+    """ """
     test_endpoint = "json_resource_search"
-    post_json = {"fulltext": "rugged",
-                 "facets": [{"type": "descriptive", "subtype": "label", "value": "Volume 3"}]
-                 }
+    post_json = {
+        "fulltext": "rugged",
+        "facets": [{"type": "descriptive", "subtype": "label", "value": "Volume 3"}],
+    }
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 0
-    )
+    assert len(response_json.get("results")) == 0
 
 
 def test_json_resource_fulltext_nested_canvas_facet_on_with_query(http_service):
-    """
-    """
+    """ """
     test_endpoint = "json_resource_search"
-    post_json = {"fulltext": "rugged",
-                 "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 3"}],
-                 "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
-                 }
+    post_json = {
+        "fulltext": "rugged",
+        "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 3"}],
+        "facet_on": {
+            "data__iiif_type": "manifest",
+            "relationship_targets__type": "part_of",
+        },
+    }
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 1
-    )
+    assert len(response_json.get("results")) == 1
     assert "<b>rugged</b>" in response_json["results"][0].get("snippet", None)
     assert response_json["results"][0]["rank"] == 1.0
 
 
 def test_json_resource_fulltext_nested_canvas_facet_on_no_match(http_service):
-    """
-    """
+    """ """
     test_endpoint = "json_resource_search"
-    post_json = {"fulltext": "rugged",
-                 "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 11"}],
-                 "facet_on": {"data__iiif_type": "manifest", "relationship_targets__type": "part_of"},
-                 }
+    post_json = {
+        "fulltext": "rugged",
+        "facets": [{"type": "descriptive", "subtype": "volume", "value": "Volume 11"}],
+        "facet_on": {
+            "data__iiif_type": "manifest",
+            "relationship_targets__type": "part_of",
+        },
+    }
     response = requests.post(
         f"{http_service}/{public_endpoint}/{test_endpoint}/",
         json=post_json,
         headers=test_headers,
     )
     response_json = response.json()
-    assert (
-        len(response_json.get("results")) == 0
-    )
+    assert len(response_json.get("results")) == 0
 
 
 def test_resource_relationship_delete_resources_for_relationship(http_service):
@@ -607,8 +608,7 @@ def test_resource_relationship_delete_resources_for_relationship(http_service):
     )
     response_json = response.json()
     assert response.status_code == status
-    for resource_id in [res.get("id") for res in response_json.get('results')]: 
-        print(resource_id)
+    for resource_id in [res.get("id") for res in response_json.get("results")]:
         test_endpoint = f"json_resource/{resource_id}"
         status = 204
         response = requests.delete(

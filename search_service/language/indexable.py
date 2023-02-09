@@ -1,6 +1,7 @@
 from .langbase import LANGBASE
 from .pg_languages import PG_LANGUAGES
 
+
 def format_indexable_language_fields(lang_code=None, langbase=LANGBASE):
     if lang_code:
         if "-" in lang_code:
@@ -37,5 +38,3 @@ def format_indexable_language_fields(lang_code=None, langbase=LANGBASE):
         "language_display": None,
         "language_pg": None,
     }
-
-

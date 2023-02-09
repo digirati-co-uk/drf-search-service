@@ -1,4 +1,5 @@
 import logging
+
 # from django.conf import settings
 
 from rest_framework.pagination import PageNumberPagination
@@ -19,6 +20,7 @@ class MadocPagination(PageNumberPagination):
         "totalResults": 830
       }
     """
+
     page_size_query_param = "page_size"
     max_page_size = search_service_settings.MAX_PAGE_SIZE
 

@@ -15,120 +15,271 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='JSONResource',
+            name="JSONResource",
             fields=[
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('label', models.CharField(max_length=50)),
-                ('data', models.JSONField(blank=True)),
+                (
+                    "created",
+                    model_utils.fields.AutoCreatedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
+                    ),
+                ),
+                (
+                    "modified",
+                    model_utils.fields.AutoLastModifiedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
+                    ),
+                ),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("label", models.CharField(max_length=50)),
+                ("data", models.JSONField(blank=True)),
             ],
             options={
-                'ordering': ['-modified'],
-                'abstract': False,
+                "ordering": ["-modified"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ResourceRelationship',
+            name="ResourceRelationship",
             fields=[
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('source_id', models.UUIDField()),
-                ('target_id', models.UUIDField()),
-                ('type', models.CharField(max_length=100)),
-                ('source_content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_sources', to='contenttypes.contenttype')),
-                ('target_content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_targets', to='contenttypes.contenttype')),
+                (
+                    "created",
+                    model_utils.fields.AutoCreatedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
+                    ),
+                ),
+                (
+                    "modified",
+                    model_utils.fields.AutoLastModifiedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
+                    ),
+                ),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("source_id", models.UUIDField()),
+                ("target_id", models.UUIDField()),
+                ("type", models.CharField(max_length=100)),
+                (
+                    "source_content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_sources",
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "target_content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_targets",
+                        to="contenttypes.contenttype",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-modified'],
+                "ordering": ["-modified"],
             },
         ),
         migrations.CreateModel(
-            name='Indexable',
+            name="Indexable",
             fields=[
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('resource_id', models.UUIDField()),
-                ('type', models.CharField(max_length=64)),
-                ('subtype', models.CharField(max_length=256)),
-                ('group_id', models.CharField(blank=True, max_length=512, null=True, verbose_name='Identifier for grouping indexables, e.g. by vocab identifier')),
-                ('content_id', models.CharField(blank=True, max_length=512, null=True, verbose_name='Identifier (URL/URI/URN) for the content, if it has one')),
-                ('indexable_text', models.TextField()),
-                ('indexable_date_range_start', models.DateTimeField(blank=True, null=True)),
-                ('indexable_date_range_end', models.DateTimeField(blank=True, null=True)),
-                ('indexable_int', models.IntegerField(blank=True, null=True)),
-                ('indexable_json', models.JSONField(blank=True, null=True)),
-                ('indexable_float', models.FloatField(blank=True, null=True)),
-                ('original_content', models.TextField()),
-                ('search_vector', django.contrib.postgres.search.SearchVectorField(blank=True, null=True)),
-                ('language_iso639_2', models.CharField(blank=True, max_length=3, null=True)),
-                ('language_iso639_1', models.CharField(blank=True, max_length=2, null=True)),
-                ('language_display', models.CharField(blank=True, max_length=64, null=True)),
-                ('language_pg', models.CharField(blank=True, max_length=64, null=True)),
-                ('selector', models.JSONField(blank=True, null=True)),
-                ('resource_content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                (
+                    "created",
+                    model_utils.fields.AutoCreatedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="created",
+                    ),
+                ),
+                (
+                    "modified",
+                    model_utils.fields.AutoLastModifiedField(
+                        default=django.utils.timezone.now,
+                        editable=False,
+                        verbose_name="modified",
+                    ),
+                ),
+                (
+                    "id",
+                    model_utils.fields.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("resource_id", models.UUIDField()),
+                ("type", models.CharField(max_length=64)),
+                ("subtype", models.CharField(max_length=256)),
+                (
+                    "group_id",
+                    models.CharField(
+                        blank=True,
+                        max_length=512,
+                        null=True,
+                        verbose_name="Identifier for grouping indexables, e.g. by vocab identifier",
+                    ),
+                ),
+                (
+                    "content_id",
+                    models.CharField(
+                        blank=True,
+                        max_length=512,
+                        null=True,
+                        verbose_name="Identifier (URL/URI/URN) for the content, if it has one",
+                    ),
+                ),
+                ("indexable_text", models.TextField()),
+                (
+                    "indexable_date_range_start",
+                    models.DateTimeField(blank=True, null=True),
+                ),
+                (
+                    "indexable_date_range_end",
+                    models.DateTimeField(blank=True, null=True),
+                ),
+                ("indexable_int", models.IntegerField(blank=True, null=True)),
+                ("indexable_json", models.JSONField(blank=True, null=True)),
+                ("indexable_float", models.FloatField(blank=True, null=True)),
+                ("original_content", models.TextField()),
+                (
+                    "search_vector",
+                    django.contrib.postgres.search.SearchVectorField(
+                        blank=True, null=True
+                    ),
+                ),
+                (
+                    "language_iso639_2",
+                    models.CharField(blank=True, max_length=3, null=True),
+                ),
+                (
+                    "language_iso639_1",
+                    models.CharField(blank=True, max_length=2, null=True),
+                ),
+                (
+                    "language_display",
+                    models.CharField(blank=True, max_length=64, null=True),
+                ),
+                ("language_pg", models.CharField(blank=True, max_length=64, null=True)),
+                ("selector", models.JSONField(blank=True, null=True)),
+                (
+                    "resource_content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-modified'],
+                "ordering": ["-modified"],
             },
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=django.contrib.postgres.indexes.GinIndex(fields=['search_vector'], name='search_serv_search__4595b6_gin'),
+            model_name="indexable",
+            index=django.contrib.postgres.indexes.GinIndex(
+                fields=["search_vector"], name="search_serv_search__4595b6_gin"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['content_id'], name='search_serv_content_49b0c4_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["content_id"], name="search_serv_content_49b0c4_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['resource_id'], name='search_serv_resourc_13e693_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["resource_id"], name="search_serv_resourc_13e693_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['language_iso639_2', 'language_iso639_1', 'language_display'], name='search_serv_languag_fd1dee_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["language_iso639_2", "language_iso639_1", "language_display"],
+                name="search_serv_languag_fd1dee_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['type'], name='search_serv_type_ba85ca_idx'),
+            model_name="indexable",
+            index=models.Index(fields=["type"], name="search_serv_type_ba85ca_idx"),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['subtype'], name='search_serv_subtype_1eefbb_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["subtype"], name="search_serv_subtype_1eefbb_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['group_id'], name='search_serv_group_i_c57f43_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["group_id"], name="search_serv_group_i_c57f43_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['type', 'subtype'], name='search_serv_type_d5c11d_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["type", "subtype"], name="search_serv_type_d5c11d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(fields=['type', 'subtype', 'group_id'], name='search_serv_type_e9f462_idx'),
+            model_name="indexable",
+            index=models.Index(
+                fields=["type", "subtype", "group_id"],
+                name="search_serv_type_e9f462_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(django.db.models.functions.text.Upper('type'), name='uppercase_type'),
+            model_name="indexable",
+            index=models.Index(
+                django.db.models.functions.text.Upper("type"), name="uppercase_type"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(django.db.models.functions.text.Upper('subtype'), name='uppercase_subtype'),
+            model_name="indexable",
+            index=models.Index(
+                django.db.models.functions.text.Upper("subtype"),
+                name="uppercase_subtype",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=models.Index(django.db.models.functions.text.Upper('type'), django.db.models.functions.text.Upper('subtype'), name='uppercase_type_subtype'),
+            model_name="indexable",
+            index=models.Index(
+                django.db.models.functions.text.Upper("type"),
+                django.db.models.functions.text.Upper("subtype"),
+                name="uppercase_type_subtype",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indexable',
-            index=django.contrib.postgres.indexes.HashIndex(fields=['indexable_text'], name='search_serv_indexab_1e44d5_hash'),
+            model_name="indexable",
+            index=django.contrib.postgres.indexes.HashIndex(
+                fields=["indexable_text"], name="search_serv_indexab_1e44d5_hash"
+            ),
         ),
     ]

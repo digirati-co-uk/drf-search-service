@@ -1,9 +1,15 @@
-# Django Imports
+# Django Django Imports
 
 import logging
+import itertools
 from collections import defaultdict
 
 from django.contrib.contenttypes.models import ContentType
+
+from django.db.models import (
+    Count,
+    Q,
+)
 
 # DRF Imports
 from rest_framework import (
@@ -19,6 +25,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 # Local imports
 from .models import (
+    Context,
     Indexable,
     ResourceRelationship,
     JSONResource,
@@ -33,6 +40,7 @@ from .pagination import MadocPagination
 
 from .serializers.api import (
     ContentTypeAPISerializer,
+    ContextAPISerializer,
     JSONResourceAPISerializer,
     ResourceRelationshipAPISerializer,
     IndexableAPISerializer,
@@ -53,9 +61,14 @@ from .utils import ActionBasedSerializerMixin
 from .filters import (
     GenericFilter,
     ResourceFilter,
+    AuthContextsFilter,
+    ContextsFilter,
     FacetFilter,
     GenericFacetListFilter,
     RankSnippetFilter,
+)
+from .authentication import (
+    ContextsHeaderAuthentication,
 )
 from .settings import search_service_settings
 
@@ -65,6 +78,10 @@ logger = logging.getLogger(__name__)
 class JSONResourceAPIViewSet(viewsets.ModelViewSet):
     queryset = JSONResource.objects.all()
     serializer_class = JSONResourceAPISerializer
+    filter_backends = [AuthContextsFilter]
+    filterset_fields = [
+        "resource_id",
+    ]
     lookup_field = "id"
 
     @action(detail=False, methods=["post"])
@@ -104,11 +121,15 @@ class JSONResourceAPIViewSet(viewsets.ModelViewSet):
         )
 
 
+class SandboxedJSONResourceAPIViewSet(JSONResourceAPIViewSet):
+    authentication_classes = [ContextsHeaderAuthentication]
+
+
 class IndexableAPIViewSet(viewsets.ModelViewSet):
     queryset = Indexable.objects.all()
     serializer_class = IndexableAPISerializer
     lookup_field = "id"
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [AuthContextsFilter, DjangoFilterBackend]
     filterset_fields = [
         "resource_id",
         "content_id",
@@ -117,10 +138,20 @@ class IndexableAPIViewSet(viewsets.ModelViewSet):
     ]
 
 
+class SandboxedIndexableAPIViewSet(IndexableAPIViewSet):
+    authentication_classes = [ContextsHeaderAuthentication]
+
+
 class ResourceRelationshipAPIViewSet(viewsets.ModelViewSet):
     queryset = ResourceRelationship.objects.all()
     serializer_class = ResourceRelationshipAPISerializer
     lookup_field = "id"
+
+
+class ContextAPIViewSet(viewsets.ModelViewSet):
+    queryset = Context.objects.all()
+    serializer_class = ContextAPISerializer
+    lookup_field = "urn"
 
 
 class ContentTypeAPIViewSet(viewsets.ReadOnlyModelViewSet):
@@ -170,7 +201,88 @@ class BaseSearchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     lookup_field = "id"
     parser_classes = [SearchParser]
-    filter_backends = [GenericFilter]
+    filter_backends = [AuthContextsFilter, GenericFilter]
+
+    default_facets = ["metadata", "entity"]
+
+    def get_facet_indexable_data(self, request, queryset):
+        """Get"""
+        facet_filters = [
+            Q(resource_id__in=queryset),
+            Q(type__in=request.data.get("facet_types", self.default_facets)),
+        ]
+        if facet_fields := request.data.get("facet_fields"):
+            facet_filters.append(Q(subtype__in=facet_fields))
+
+        if facet_languages := request.data.get("facet_languages"):
+            facet_language_codes = set(map(lambda x: x.split("-")[0], facet_languages))
+            iso639_1_codes = list(filter(lambda x: len(x) == 2, facet_language_codes))
+            iso639_2_codes = list(filter(lambda x: len(x) == 3, facet_language_codes))
+            # Always include indexables where no language is specified.
+            # This will be cases where there it has neither iso639 field set.
+            facet_language_filter = Q(language_iso639_1__isnull=True) & Q(
+                language_iso639_2__isnull=True
+            )
+            if iso639_1_codes:
+                facet_language_filter |= Q(language_iso639_1__in=iso639_1_codes)
+            if iso639_2_codes:
+                facet_language_filter |= Q(language_iso639_2__in=iso639_2_codes)
+            facet_filters.append(facet_language_filter)
+
+        indexables = (
+            Indexable.objects.filter(*facet_filters)
+            .values("type", "subtype", "group_id", "indexable_text")
+            .annotate(n=Count("id", distinct=True))
+            .order_by("type", "subtype", "group_id", "-n", "indexable_text")
+        )
+
+        return indexables
+
+    def format_facet_data(self, request, indexables):
+        grouped_facets = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+        truncate_to = request.data.get("num_facets", 10)
+        truncated_facets = defaultdict(lambda: defaultdict(dict))
+        # Turn annotated list of results into a deeply nested dict
+        for indexable in indexables:
+            grouped_facets[indexable["type"]][indexable["subtype"]][
+                indexable["indexable_text"]
+            ] = indexable["n"]
+        # Take the deeply nested dict and truncate the leaves of the tree to just N keys.
+        for facet_type, facet_subtypes in grouped_facets.items():
+            for k, v in facet_subtypes.items():
+                truncated_facets[facet_type][k] = dict(
+                    itertools.islice(v.items(), truncate_to)
+                )
+        return truncated_facets
+
+    def get_facets(self, request, queryset):
+        """ """
+        indexable_data = self.get_facet_indexable_data(request, queryset)
+        return self.format_facet_data(request, indexable_data)
+
+    def get_search_data(self, request, queryset):
+        """Create a dictionary of search related fields to include in the response."""
+        return {"facets": self.get_facets(request, queryset)}
+
+    def list(self, request, *args, **kwargs):
+        """Duplicates the functionality of the list method
+        from the `ListMethodMixin`, but includes fields
+        created by the get_search_data in the response alongside
+        results.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        search_data = self.get_search_data(request, queryset)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            page_resp = self.get_paginated_response(serializer.data)
+            page_resp.data.update(search_data)
+            return page_resp
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"results": serializer.data, **search_data})
 
     def create(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -199,14 +311,18 @@ class BasePublicSearchViewSet(QueryParamDataMixin, BaseSearchViewSet):
 class IndexableAPISearchViewSet(BaseAPISearchViewSet):
     queryset = Indexable.objects.all().distinct()
     parser_classes = [IndexableSearchParser]
-    filter_backends = [GenericFilter]
+    filter_backends = [AuthContextsFilter, GenericFilter]
     serializer_class = IndexableAPISearchSerializer
+
+
+class SandboxedIndexableAPISearchViewSet(IndexableAPISearchViewSet):
+    authentication_classes = [ContextsHeaderAuthentication]
 
 
 class IndexablePublicSearchViewSet(BaseAPISearchViewSet):
     queryset = Indexable.objects.all().distinct()
     parser_classes = [IndexableSearchParser]
-    filter_backends = [GenericFilter]
+    filter_backends = [AuthContextsFilter, GenericFilter]
     serializer_class = IndexablePublicSearchSerializer
 
 
@@ -217,11 +333,16 @@ class JSONResourceAPISearchViewSet(BaseAPISearchViewSet):
     parser_classes = [ResourceSearchParser]
     lookup_field = "id"
     filter_backends = [
+        AuthContextsFilter,
         ResourceFilter,
         FacetFilter,
         RankSnippetFilter,
     ]
     serializer_class = JSONResourceAPISearchSerializer
+
+
+class SandboxedJSONResourceAPISearchViewSet(JSONResourceAPISearchViewSet):
+    authentication_classes = [ContextsHeaderAuthentication]
 
 
 class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
@@ -231,6 +352,8 @@ class JSONResourcePublicSearchViewSet(BasePublicSearchViewSet):
     parser_classes = [ResourceSearchParser]
     lookup_field = "id"
     filter_backends = [
+        AuthContextsFilter,
+        ContextsFilter,
         ResourceFilter,
         FacetFilter,
         RankSnippetFilter,
@@ -244,7 +367,7 @@ class GenericFacetsViewSet(BasePublicSearchViewSet):
     """
 
     parser_classes = [SearchParser]
-    filter_backends = [GenericFacetListFilter]
+    filter_backends = [AuthContextsFilter, GenericFacetListFilter]
     serializer_class = IndexableAPISerializer
 
     def get_facet_list(self, request):

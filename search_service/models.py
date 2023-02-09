@@ -6,13 +6,27 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.indexes import GinIndex, HashIndex
 from django.contrib.postgres.search import SearchVectorField, SearchVector
 from django.db.models.functions import Upper
-
-# from .langbase import INTERNET_LANGUAGES
 from django.utils.translation import gettext_lazy as _
-from django_extensions.db.fields import AutoSlugField
 from model_utils.models import TimeStampedModel, UUIDModel
 
 logger = logging.getLogger(__name__)
+
+
+class Context(UUIDModel, TimeStampedModel):
+    """Provides contexts for Indexables and Resources derived from the
+    BaseSearchResource through the `contexts` M2M relationship.
+
+    Context is expected to be in the form of a urn e.g. urn:madoc:site:1
+    """
+
+    urn = models.CharField(max_length=512, unique=True)
+    type = models.CharField(max_length=64, default="")
+
+    def __str__(self):
+        return self.urn
+
+    class Meta:
+        ordering = ["-modified"]
 
 
 class Indexable(UUIDModel, TimeStampedModel):
@@ -21,6 +35,8 @@ class Indexable(UUIDModel, TimeStampedModel):
     resource_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     resource_id = models.UUIDField()
     resource = GenericForeignKey("resource_content_type", "resource_id")
+
+    contexts = models.ManyToManyField(Context)
 
     type = models.CharField(max_length=64)
     subtype = models.CharField(max_length=256)
@@ -67,8 +83,8 @@ class Indexable(UUIDModel, TimeStampedModel):
             self.save(update_fields=["search_vector"])
 
     class Meta:
-        # Add a postgres index for the search_vector
         ordering = ["-modified"]
+        # Add a postgres index for the search_vector
         indexes = [
             GinIndex(fields=["search_vector"]),
             models.Index(fields=["content_id"]),
@@ -91,8 +107,8 @@ class Indexable(UUIDModel, TimeStampedModel):
 
 
 class ResourceRelationship(UUIDModel, TimeStampedModel):
-    """ Model-agnostic relationship between resources. 
-        """
+    """Model-agnostic relationship between resources."""
+
     source_content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, related_name="%(class)s_sources"
     )
@@ -128,6 +144,7 @@ class BaseSearchResource(UUIDModel, TimeStampedModel):
         object_id_field="target_id",
         related_query_name="%(class)s_targets",
     )
+    contexts = models.ManyToManyField(Context)
 
     class Meta:
         abstract = True
@@ -138,4 +155,5 @@ class JSONResource(BaseSearchResource):
     """An example resource for indexing."""
 
     label = models.CharField(max_length=50)
+    type = models.CharField(max_length=64, default="")
     data = models.JSONField(blank=True)

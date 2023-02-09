@@ -151,7 +151,7 @@ def parse_facets(facet_queries, prefix_q=""):
                                     "indexable_text",
                                     "value",
                                     "indexable_int",
-                                    "ndexable_float",
+                                    "indexable_float",
                                     "indexable_date_range_start",
                                     "indexable_date_range_end",
                                 ]  # These are the fields to query
@@ -201,6 +201,7 @@ class SearchParser(JSONParser):
     default_search_language = None
     default_search_type = search_service_settings.DEFAULT_SEARCH_TYPE
     default_facet_types = search_service_settings.DEFAULT_FACET_TYPES
+    raw_query_prefixes = ("indexables__", "type__", "id__")
     q_prefix = ""
 
     def float_filter_kwargs(self, request_data, key="float", default_value=None):
@@ -248,6 +249,15 @@ class SearchParser(JSONParser):
                     pass
         return f_kwargs
 
+    def raw_filter_kwargs(self, request_data, key="raw", default_value=None):
+        f_kwargs = {}
+        if query := request_data.get(key, default_value):
+            if isinstance(query, dict):
+                for raw_k, raw_v in query.items():
+                    if raw_k.startswith(self.raw_query_prefixes):
+                        f_kwargs[raw_k] = raw_v
+        return f_kwargs
+
     def indexable_field_filter_kwargs(self, request_data):
         indexable_fields = [
             "type",
@@ -271,7 +281,7 @@ class SearchParser(JSONParser):
             **self.date_filter_kwargs(request_data, key="date_start"),
             **self.date_filter_kwargs(request_data, key="date_end"),
             **self.date_filter_kwargs(request_data, key="date_exact"),
-            **self.integer_filter_kwargs(request_data),
+            **self.raw_filter_kwargs(request_data),
         }
 
     def parse_search_query(self, request_data):
@@ -308,7 +318,7 @@ class SearchParser(JSONParser):
                         )
                     }
             else:
-                # Should be an independent `get_non_vector_search` method. 
+                # Should be an independent `get_non_vector_search` method.
                 non_vector_search = [
                     reduce(
                         and_,
@@ -396,7 +406,16 @@ class SearchParser(JSONParser):
             ]
         return resource_filter_queries
 
-    def parse_data(self, request_data): 
+    def get_contexts_query(self, request_data):
+        contexts_queries = []
+        if contexts := request_data.get("contexts"):
+            contexts_queries.append(Q(**{f"contexts__urn__in": contexts}))
+        if contexts_all := request_data.get("contexts_all"):
+            for c in contexts_all:
+                contexts_queries.append(Q(**{"contexts__urn__iexact": c}))
+        return contexts_queries
+
+    def parse_data(self, request_data):
         logger.debug(f"Parsing filter data from: ({request_data})")
         filter_data = {
             "filter_query": self.get_filter_query(
@@ -405,10 +424,14 @@ class SearchParser(JSONParser):
             "resource_filters": self.get_resource_filters(request_data),
             "headline_query": self.get_headline_query(request_data),  # fulltext
             "facet_filters": self.get_facet_filters(request_data),  # facets
+            "contexts_query": self.get_contexts_query(request_data),  # contexts
             "facet_on": self.get_facet_on_query(
                 request_data
             ),  # query that identifies the queryset to facet over
-            "facet_types": request_data.get("facet_types", self.default_facet_types), 
+            "facet_types": request_data.get("facet_types", self.default_facet_types),
+            "facet_fields": request_data.get("facet_fields"),
+            "facet_languages": request_data.get("facet_languages"),
+            "num_facets": request_data.get("num_facets", 10),
             "query_prefix": self.q_prefix,
         }
 
@@ -419,16 +442,20 @@ class SearchParser(JSONParser):
         request_data = super().parse(stream, media_type, parser_context)
         return self.parse_data(request_data)
 
+
 class IndexableSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
+
     q_prefix = ""
+
 
 class ResourceSearchParser(SearchParser):
     """
     Generic search parser that makes no assumptions about the shape of the resource
     that is linked to the Indexable.
     """
+
     q_prefix = "indexables__"

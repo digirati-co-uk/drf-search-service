@@ -137,6 +137,7 @@ def test_resource_relationship_update_resource_relationship(http_service):
     assert response_json.get("target_id") == test_data_store.get("child_id")
     assert response_json.get("type") == "contains"
 
+
 def test_resource_relationship_partial_update_resource_relationship(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 200
@@ -155,6 +156,7 @@ def test_resource_relationship_partial_update_resource_relationship(http_service
     assert response_json.get("target_id") == test_data_store.get("child_id")
     assert response_json.get("type") == "parentOf"
 
+
 def test_resource_relationship_get_updated(http_service):
     test_endpoint = f"resource_relationship/{test_data_store.get('relationship_id')}"
     status = 200
@@ -167,7 +169,6 @@ def test_resource_relationship_get_updated(http_service):
     assert response_json.get("source_id") == test_data_store.get("parent_id")
     assert response_json.get("target_id") == test_data_store.get("child_id")
     assert response_json.get("type") == "parentOf"
-
 
 
 def test_resource_relationship_delete_resources_for_relationship(http_service):

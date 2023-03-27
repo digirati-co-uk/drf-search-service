@@ -60,12 +60,16 @@ def calc_offsets(obj):
                     elif isinstance(obj.selector, list):
                         selectors += obj.selector
                     for selector in selectors:
-                        if (boxes := selector.get("box-selector")) is not None:
-                            for x in offsets:
-                                try:
-                                    box_list.append(boxes[x])
-                                except (IndexError, ValueError):
-                                    pass
+                        try:
+                            if (boxes := selector.get("box-selector")) is not None:
+                                for x in offsets:
+                                    try:
+                                        box_list.append(boxes[x])
+                                    except (IndexError, ValueError):
+                                        pass
+                        except (IndexError, ValueError, AttributeError):
+                            logger.error(f"Error serializing selectors: {selectors}")
+                            logger.error(f"Selector being processed: {selector}")
                     if box_list:
                         return box_list  # [boxes[x] for x in offsets if boxes[x]]
                     else:
